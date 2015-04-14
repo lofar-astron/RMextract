@@ -1,0 +1,3 @@
+#swig -python -c++ EMM_Model.i
+gcc -c -fpic GeomagnetismLibrary.c EMM_Model.cc EMM_Model_wrap.cxx -I/usr/include/python2.7/
+g++ -shared GeomagnetismLibrary.o EMM_Model.o EMM_Model_wrap.o -o _EMM_Model.so

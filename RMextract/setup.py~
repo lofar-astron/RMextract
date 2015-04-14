@@ -1,6 +1,0 @@
-from distutils.core import setup,Extension
-
-setup(name='RMextract',
-ext_modules=[Extension('EMM', ['EMM/EMM_Model.cc','EMM/GeomagnetismLibrary.c','EMM/EMM_Model_wrap.cc']),
-package_data={'EMM':'EMM/*COF'}
-])

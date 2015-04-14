@@ -1,5 +1,0 @@
-
-
-[LOFAR_TOOLS]
-pyrap
-lofar.parmdb
