@@ -234,7 +234,7 @@ retval    O  The return code of the command.  Note that if the process times out
 
     """
     pid = os.fork()
-    print "my pid",pid
+    #print "my pid",pid
     if(pid == 0):
         # We are the child, execute the command
 	print "executing",command,args
@@ -282,11 +282,23 @@ def gunzip_some_file(compressed_file,
     return
 
 		
-def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/CODE/",prefix="CODG",outpath='',overwrite=False):
-	yy=time[2:4];
-	year=int(time[:4])
-	month=int(time[5:7])
-	day=int(time[8:10])
+def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/CODE/",prefix="CODG",outpath='./',overwrite=False):
+	if not os.path.isdir(outpath):
+		try:
+			os.mkdir(outpath)
+		except:
+			print "cannot create output directory for IONEXdata",outpath
+			return -1
+        try:
+          yy=time[2:4];
+          year=int(time[:4])
+          month=int(time[5:7])
+          day=int(time[8:10])
+        except:
+          year = time[0]
+          yy = year - 2000
+          month = time[1]
+          day = time[2]
 	dayofyear = date(year,month,day).timetuple().tm_yday;
 	if prefix!='ROBR':
 		filename=str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy);
