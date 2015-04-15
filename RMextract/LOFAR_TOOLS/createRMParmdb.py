@@ -4,7 +4,13 @@ import pyrap.tables as tab
 import numpy as np
 
 
-def createRMParmdb(MS,parmdbname,create=True,patchnames=['phase_center']):
+def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
+                   server="ftp://ftp.unibe.ch/aiub/CODE/",
+                   prefix='CODG',
+                   ionexPath="IONEXdata/",
+                   earth_rot=0,
+                   timestep=900.,
+                   stat_names=None):
     myParmdb=parmdb.parmdb(parmdbname,create=create)
     if create:
         myParmdb.addDefValues("Gain:0:0:Ampl",1.e-4)
@@ -17,7 +23,13 @@ def createRMParmdb(MS,parmdbname,create=True,patchnames=['phase_center']):
     myMS=tab.table(MS)
     stations=tab.table(myMS.getkeyword('ANTENNA')).getcol('NAME')
     stat_pos=tab.table(myMS.getkeyword('ANTENNA')).getcol('POSITION')
-    result=gt.getRM(MS=MS,earth_rot=1,ionexPath='IONEXdata/',useWMM=True,WMMpath='EMM/',timestep=900.,stat_names=stations[2:3],stat_positions=stat_pos[2:3])
+    if not stat_names==None:
+        if not(stat_names=='all'):
+            stat_pos=[stat_pos[stations.index(name)] for name in stat_names] 
+    else:
+        stat_names=stations[2:3]
+        stat_pos=stat_pos[2:3]
+    result=gt.getRM(MS=MS,server=server,ionexPath=ionexPath,prefix=prefix,earth_rot=earth_rot,timestep=timestep,stat_names=stat_names,stat_positions=stat_pos)
     RM=result['RM']    
     for st in stations:
         print "storing station",st,(st in RM.keys())
@@ -25,7 +37,6 @@ def createRMParmdb(MS,parmdbname,create=True,patchnames=['phase_center']):
             stname=RM.keys()[0]
         RM[stname]=RM[stname].reshape(RM[stname].shape[:1]+(1,))
         myValue=myParmdb.makeValue(values=RM[stname], sfreq=1e10, efreq=2e10, stime=result['times'], etime=np.ones(result['times'].shape,dtype=float)*result['timestep'], asStartEnd=False)
-        for patchname in patchnames:
-            valuename = "RotationMeasure:%s:%s"%(st,patchname)
-            myParmdb.deleteValues(valuename)            
-            myParmdb.addValues(valuename,myValue)
+        valuename = "RotationMeasure:%s:%s"%(st,patchname)
+        myParmdb.deleteValues(valuename)            
+        myParmdb.addValues(valuename,myValue)
