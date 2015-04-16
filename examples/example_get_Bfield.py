@@ -11,7 +11,10 @@ flags=np.logical_not(bigdict['flags']['st1'])
 times=bigdict['times'][np.logical_not(flags)]
 timess=[tm/(3600*24.) for tm in times]
 dates=tab.taql('calc ctod($timess)')
-dates=dates[dates.keys()[0]]
+if 'array' in dates.keys():
+    dates=dates['array']
+else:
+    dates=dates[dates.keys()[0]] #backward compatibility with older casacore vresions
 format="%Y/%m/%d/%H:%M:%S.%f"
 mydatetimes=[datetime.datetime.strptime(mydate,format) for mydate in dates]
 
