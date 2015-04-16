@@ -1,0 +1,15 @@
+Strategy.InputColumn = CORRECTED_DATA
+Strategy.ChunkSize = 1200
+Strategy.Baselines = [CR]S*&
+Strategy.UseSolver = F
+Strategy.Correlations = []
+Strategy.Steps = [correct]
+
+Step.correct.Operation = CORRECT
+Step.correct.Model.Sources = [phase_center] # you need to have a source with
+this name in your skymodel
+Step.correct.Model.Cache.Enable = T
+Step.correct.Model.Gain.Enable = F
+Step.correct.Model.Beam.Enable = F
+Step.correct.Model.FaradayRotation.Enable = T
+Step.correct.Output.Column = CORRECTED_DATA

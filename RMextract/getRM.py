@@ -9,12 +9,6 @@ import EMM.EMM as EMM
 
 import math
 
-# the following parameter is used to extend the observation range by 120 sec
-# before and after the actual specified time. If we want to correct an
-# actual data set, this is required for the scipy 1d interpolation routine to
-# ensure that the calculated range of data exceeds the time range actually
-# observed - I have used the same value in ALBUS - Tony
-TIME_OFFSET = 120.0
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
@@ -24,15 +18,17 @@ def getRM(MS=None,
            ionexPath="IONEXdata/",
            earth_rot=0,
            timerange=0,
-           use_azel = False,
+           use_azel = False,ha_limit=-1000,
            **kwargs):
     '''optional arguments are:
     radec or pointing : [ra,dec] in radians, or if use_azel =True, za + el in radians,
-    timestep in s, timerange = [start, end]in MJD seconds, otherwise use start_time/end_time (casa timestring,eg. 2012/11/21/12:00:00  or 56252.5d  NEEDS PYRAP) ,    
+    timestep in s, timerange = [start, end]in MJD seconds, 
+    otherwise use start_time/end_time (casa timestring,eg. 2012/11/21/12:00:00  or 56252.5d  NEEDS PYRAP) ,
     stat_names = list of strings per station, 
     stat_positions = list of length 3 numpy arrays, containing station_position in ITRF meters.
     useEMM = boolean, use EMM for Earth magnetic field, otherwise WMM cooefficients will be used.
     out_file = string, if given the data points will be written to a text file.
+    TIME_OFFSET = float, offset time at start and end to ensure all needed values are calculated,
     Returns the (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN '''
 
@@ -46,7 +42,13 @@ def getRM(MS=None,
     pointing=[0.,0.5*np.pi]
     out_file=''
     stat_pos=[PosTools.posCS002]
-    stat_names=['LOFAR_CS002']
+    #stat_names=['LOFAR_CS002']
+    # the following parameter is used to extend the observation range by 120 sec
+    # before and after the actual specified time. If we want to correct an
+    # actual data set, this is required for the scipy 1d interpolation routine to
+    # ensure that the calculated range of data exceeds the time range actually
+    # observed - I have used the same value in ALBUS - Tony
+    TIME_OFFSET = 0
     if not (MS is None):
 
       (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS);
@@ -69,6 +71,8 @@ def getRM(MS=None,
             stat_names=kwargs[key]
         if key=='out_file':
             out_file=kwargs[key]
+        if key=='TIME_OFFSET':
+           TIME_OFFSET=kwargs[key]
         if key=='stat_positions':
             stat_pos=kwargs[key]
             if not stat_names:
@@ -77,11 +81,13 @@ def getRM(MS=None,
             useEMM=kwargs[key]
     
     if timerange != 0:
-      start_time = timerange[0]
-      end_time = timerange[1]
+      start_time = timerange[0]- TIME_OFFSET
+      end_time = timerange[1]+ TIME_OFFSET
       time_in_sec = True
-
-    timerange,str_start_time=PosTools.get_time_range(timerange,start_time,end_time,timestep,time_in_sec)
+      reference_time = start_time
+      str_start_time=PosTools.obtain_observation_year_month_day_hms(reference_time)
+    else:
+        timerange,str_start_time,reference_time=PosTools.get_time_range(start_time,end_time,timestep,time_in_sec,TIME_OFFSET)
     if str_start_time==-1:
        return
         
@@ -95,11 +101,13 @@ def getRM(MS=None,
     times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
     timegrid=np.array([])
     TECs={};
-    Bs={};
+    Bs={}
+    Bpars={}
     air_mass={};
     RMs={};
     azimuth={};
     elevation={};
+    flags={}
 # print header section of report
     if len(out_file):
        if os.path.exists(out_file):
@@ -109,7 +117,7 @@ def getRM(MS=None,
        log.write ('station_positions %s \n' % stat_pos)
        if use_azel:
          log.write ('observing at a fixed azimuth and elevation \n')
-       log.write ('start and end times %s %s \n' % (st, et))
+       log.write ('start and end times %s %s \n' % (timerange[0], timerange[1]))
        log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
        log.write ('\n')
 
@@ -118,9 +126,11 @@ def getRM(MS=None,
         elevation[st] = []
         air_mass[st] = []
         Bs[st]=[]
+        Bpars[st]=[]
         RMs[st]=[]
         TECs[st]=[]
         air_mass[st]=[]
+        flags[st]=[]
     for time_array in times:
         #get RM per timeslot
         starttime=time_array[0]
@@ -142,10 +152,23 @@ def getRM(MS=None,
             if use_azel:
               az = pointing[0]
               el = pointing[1]
+              flags[station].append(1)   
             else:
-               az,el = PosTools.getAzEl(pointing,time,position)
+               az,el = PosTools.getAzEl(pointing,time,position,ha_limit)
                if az==-1 and el==-1:
                   return
+               if az==999 and el==999:
+                    #outsite hadec range
+                  air_mass[station].append(-999)
+                  azimuth[station].append(-999)
+                  elevation[station].append(-999)
+                  Bs[station].append([-999,-999,-999])
+                  Bpars[station].append(-999)
+                  RMs[station].append(-999)
+                  TECs[station].append(-999)  #sTEC value
+                  flags[station].append(0)
+                  continue
+            flags[station].append(1)   
             latpp,lonpp,height,lon,lat,am1=PosTools.getlonlatheight(az,el,position)
             if latpp==-1 and lonpp==-1 and height==-1:
                return
@@ -157,10 +180,13 @@ def getRM(MS=None,
             emm.lat = latpp
             emm.h= ION_HEIGHT / 1.0e3
             Bpar=-1*emm.getProjectedField(lon,lat)# minus sign since the radiation is towards the Earth
+            BField=emm.getXYZ()
+            Bs[station].append(BField)
+
             air_mass[station].append(am1)
             azimuth[station].append(az)
             elevation[station].append(el)
-            Bs[station].append(Bpar)
+            Bpars[station].append(Bpar)
             #calculate RM constant comes from VtEC in TECU,B in nT, RM = 2.62
             RMs[station].append((Bpar*vTEC*am1)*2.62e-6)
 
@@ -173,12 +199,14 @@ def getRM(MS=None,
       elevation[station] = np.array(elevation[st])
       TECs[st]=np.array(TECs[st])
       Bs[st]=np.array(Bs[st])
+      Bpars[st]=np.array(Bpars[st])
       RMs[st]=np.array(RMs[st]) 
-
+      flags[st]=np.array(flags[st])
         
     big_dict={}
     big_dict['STEC']=TECs
-    big_dict['Bpar']=Bs
+    big_dict['Bpar']=Bpars
+    big_dict['BField']=Bs
     big_dict['AirMass']=air_mass
     big_dict['elev']=elevation
     big_dict['azimuth']=azimuth
@@ -186,6 +214,7 @@ def getRM(MS=None,
     big_dict['times']=timegrid
     big_dict['timestep']=timestep
     big_dict['station_names'] = stat_names
+    big_dict['flags'] = flags
 
     # finish writing computed data to report
     if len(out_file):

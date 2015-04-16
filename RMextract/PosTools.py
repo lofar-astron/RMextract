@@ -472,13 +472,32 @@ def getlonlatheight(az,el,position):
 
 
 
-def getAzEl(pointing,time,position):
+def getAzEl(pointing,time,position,ha_limit=-1000):
 
     if HAS_PYRAP:
-        azel=radec2azel(pointing[0],pointing[1],time=str(time)+'s',pos=position);
-        az=azel['m0']['value'];
-        el=azel['m1']['value'];
+        if ha_limit==-1000:
+            azel=radec2azel(pointing[0],pointing[1],time=str(time)+'s',pos=position);
+            az=azel['m0']['value']
+            el=azel['m1']['value']
+        else:
+            me=measures()
+            p=me.position("ITRF",str(position[0])+'m',str(position[1])+'m',str(position[2])+'m')
+            t=me.epoch("UTC",qu.quantity(str(time)+'s'))
+            phasedir=me.direction('J2000',str(pointing[0])+'rad',str(pointing[1])+'rad')
+            me.doframe(p)
+            me.doframe(t)
+            hadec=me.measure(phasedir,"HADEC")
+            if abs(hadec['m0']['value'])>ha_limit:
+                print "below horizon",tab.taql('calc ctod($time s)')[0],degrees(hadec['m0']['value']),degrees(hadec['m1']['value'])
+                return 999,999
+            else:
+                azel=me.measure(phasedir,"AZEL")
+  
+                az=azel['m0']['value'];
+                el=azel['m1']['value'];
     elif HAS_EPHEM:
+        if ha_limit!=-1000:
+            print "limiting on HA/DEC not implemented for PyEphem yet, ignoring"
         location_lat, location_lon, location_height = ITRFToWGS84(position[0], position[1], position[2])
         location = ephem.Observer()
         # convert geodetic latitude to geocentric
@@ -507,8 +526,8 @@ def getAzEl(pointing,time,position):
     return az,el
 
 
-def get_time_range(timerange,start_time,end_time,time_in_sec,timestep,TIME_OFFSET=0):
-    if timerange ==0 and HAS_PYRAP:
+def get_time_range(start_time,end_time,time_in_sec,timestep,TIME_OFFSET=0):
+    if HAS_PYRAP:
       try:
         start_time = qu.quantity(start_time).get_value()
         end_time = qu.quantity(end_time).get_value()
@@ -522,7 +541,7 @@ def get_time_range(timerange,start_time,end_time,time_in_sec,timestep,TIME_OFFSE
       except:
         print ('no time range given')
         print ('exiting')
-        return -1,-1
+        return -1,-1,-1
     elif HAS_EPHEM:
       if time_in_sec:
         dublin_start = start_time / 86400.0 -15019.5
@@ -540,5 +559,5 @@ def get_time_range(timerange,start_time,end_time,time_in_sec,timestep,TIME_OFFSE
       timerange= [st, et]
     else:
       print ('unable to get time range so exiting!')
-      return -1,-1
-    return timerange,str_start_time 
+      return -1,-1,-1
+    return timerange,str_start_time,reference_time
