@@ -21,7 +21,11 @@ def main(argv):
     if len(argv)<1:
         print "usage: createRMParmdb <MS> <options>, createRMParmdb -h tosee list of options"
         return
-    (options, args) =parser.parse_args(argv[1:]);
+    if argv[0]=="-h":
+        (options, args) =parser.parse_args(argv[:])
+    else:
+        (options, args) =parser.parse_args(argv[1:])
+        
     MS=argv[0]
     stat_names=None
     if options.allStations:
