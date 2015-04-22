@@ -32,7 +32,7 @@ def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
     result=gt.getRM(MS=MS,server=server,ionexPath=ionexPath,prefix=prefix,earth_rot=earth_rot,timestep=timestep,stat_names=stat_names,stat_positions=stat_pos)
     RM=result['RM']    
     for st in stations:
-        print "storing station",st,(st in RM.keys())
+        #print "storing station",st,(st in RM.keys())
         if not (st in RM.keys()):
             stname=RM.keys()[0]
         RM[stname]=RM[stname].reshape(RM[stname].shape[:1]+(1,))
