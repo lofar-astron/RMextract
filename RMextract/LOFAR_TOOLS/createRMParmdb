@@ -30,6 +30,9 @@ def main(argv):
     stat_names=None
     if options.allStations:
         stat_names='all'
+    if not options.overwrite and not os.path.isdir(options.parmdbName):
+        options.overwrite=True
+        
     createRMParmdb(MS,parmdbname=options.parmdbName,
                    create=options.overwrite,
                    patchname=options.patch,
