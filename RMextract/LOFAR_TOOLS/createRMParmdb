@@ -9,7 +9,7 @@ parser.add_option('-p','--patch', help='name of the patch or source for which to
 #parser.add_option('-f','--use_phase_center', help='force using of phase center of MS, even if skymodel is supplied',action='store_true',dest="usePhaseCenter");
 parser.add_option('--IONprefix', help='prefix of IONEX files, either CODG or ROBR',dest="prefix",default='CODG');
 parser.add_option('--IONserver', help='server of IONEX files',dest="server",default='ftp://ftp.unibe.ch/aiub/CODE/')
-parser.add_option('--IONpath', help='location of IONEX files',dest="IONpath",default='./')
+parser.add_option('--IONpath', help='location of IONEX files',dest="ionexPath",default='./')
 parser.add_option('--all','-a', help='calculate RM per station (default calculates only for CS002LBA)',action='store_true',dest="allStations")
 parser.add_option('-t','--timestep', help='timestep in seconds. for values <=0 (default) the timegrid of the MS is used ',dest="timestep",type="float",default=900.)
 parser.add_option('-e','--smart_interpol', help='float parameter describing how much of earth rotation is taken in to account in interpolation of the IONEX files. 1.0 means time interpolation assumes ionosphere rotates in opposite direction of the Earth. 0.0 (default) means no rotation applied',dest="earth_rot",type="float",default=0)
