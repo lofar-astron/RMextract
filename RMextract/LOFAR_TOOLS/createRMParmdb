@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 from  RMextract.LOFAR_TOOLS.createRMParmdb import createRMParmdb
 from optparse import OptionParser;
+import sys
 parser = OptionParser();
 
 parser.add_option('-o','--out', help='name of the parmdb',dest="parmdbName",default='RMParmdb');
