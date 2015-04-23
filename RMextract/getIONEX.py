@@ -9,7 +9,7 @@ import math
 from datetime import date
 import os
 import time as systime
-
+import string
 
 
 
@@ -92,7 +92,7 @@ def readTEC(filename):
 				start_fill=False;
 				continue;
 			if splitted[-1] == 'MAP' and splitted[-4] == 'EPOCH':
-				
+				#print "checking epoch",line,splitted
 				times[mapnr]=float(splitted[3])+float(splitted[4])/60.+float(splitted[5])/3600.;
 				if (float(splitted[0])*366+float(splitted[1])*31+float(splitted[2]))>date: #next day
 					times[mapnr]+=24.;
@@ -217,6 +217,49 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	return tecvalue;
 
 
+def combine_ionex(outpath,filenames,newfilename):
+    """Combine separate IONEXfiles into 1 single file (needed for 15min ROBR data)"""
+    newf=open(outpath+newfilename,'w')
+    filenames=sorted(filenames)
+    firstfile=open(outpath+filenames[0])
+    lastfile=open(outpath+filenames[-1])
+    for line in lastfile:
+        if "EPOCH OF LAST MAP" in line:
+            lastepoch=line
+            lastfile.close()
+            break
+    #write header + tec map
+    for line in firstfile:
+        if "END OF TEC MAP" in line:
+            break
+        if not "EPOCH OF LAST MAP" in line:
+            if "OF MAPS IN FILE" in line:
+                newf.write(line.replace('1',str(len(filenames))))
+            else:
+                newf.write(line)
+        else:
+            newf.write(lastepoch)
+    tecmapnr=2
+    for myfname in filenames[1:]:
+        myf=open(outpath+myfname)
+        end_of_header=False
+        for line in myf:
+            if not end_of_header and "END OF HEADER" in line:
+                end_of_header=True
+            else:
+                if end_of_header:
+                    if "END OF TEC MAP" in line:
+                        newf.write(line.replace('1',str(tecmapnr)))
+                        break
+                    if "START OF TEC MAP" in line:
+                        newf.write(line.replace('1',str(tecmapnr)))
+                    else:
+                        newf.write(line)
+        tecmapnr+=1
+    newf.write("END OF FILE\n")
+    return outpath+newfilename
+    #ignore RMS map for now, since it is filled with zeros anyway
+
 def run_command_timeout(command, args, timeout):
     """run some command with a timeout limit
 
@@ -301,42 +344,63 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
           day = time[2]
 	dayofyear = date(year,month,day).timetuple().tm_yday;
 	if prefix!='ROBR':
-		filename=str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy);
-		backupfilename = str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)
+		filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
+		backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+		S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
 	else:
-		filename=str(year)+"/"+prefix+"%03d.%sI.Z"%(dayofyear,yy);
-	#print 'file needed:', filename;
-	#print "checking",outpath+filename[5:-2],os.path.isfile(outpath+filename[5:-2])
-	if not overwrite and os.path.isfile(outpath+filename[5:-2]):
-		print "file exists",outpath+filename[5:-2];
-		return outpath+filename[5:-2];
-	systime.sleep(2)
-	print "retreiving",run_command_timeout("URL_download.py",
-					       ["URL_download.py", server+filename, outpath+filename[5:],
-						"%d"%DEFAULT_TIMEOUT],
-					       DEFAULT_TIMEOUT)
-	if not os.path.isfile(outpath+filename[5:]):
-		print "trying",server+backupfilename
-		#try backup name
+		filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[26:26+24] for minutes in range(0,60,15)]
+		# IONEX format needs data of first file of next day
+		#check if next day is next year (take into account lepa years....)"
+		if month==12 and day==31:
+			nextday=0
+			nextyear=year+1
+			nextyy=yy+1
+		else:
+			nextday=dayofyear+1
+			nextyear=year
+			nextyy=yy
+		filenames.append(str(nextyear)+"/%03d/"%(nextday)+prefix+"%03d"%(nextday)+"A00"+".%sI.Z"%nextyy)
+		
+		
+		backupfilenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[26:26+24] for minutes in range(0,60,15)]
+		backupfilenames.append(str(year)+"/%03d/"%(dayofyear+1)+prefix+"%03d"%(dayofyear+1)+"A00"+".%sI.Z"%yy)
+		
+		S=len(filenames[0])-len(str(year)+"/%03d/"%(dayofyear))
+	print 'file needed:', filenames[0],S
+	print "checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2])
+	for filename,backupfilename in zip(filenames,backupfilenames):
+		if not overwrite and os.path.isfile(outpath+filename[-S:-2]):
+			print "file exists",outpath+filename[-S:-2];
+			continue
 		systime.sleep(2)
-		run_command_timeout("URL_download.py",
-				    ["URL_download.py", server+backupfilename, outpath+filename[5:],
-				     "%d"%DEFAULT_TIMEOUT],
-				    DEFAULT_TIMEOUT)
-	count=0
-	while count<10 and (not os.path.isfile(outpath+filename[5:]) and not os.path.isfile(outpath+filename[5:-2])):
-		print "waiting..."
-		systime.sleep(1)
-		count+=1
-		
-	if os.path.isfile(outpath+filename[5:]):
+		print "retreiving",run_command_timeout("URL_download.py",
+						       ["URL_download.py", server+filename, outpath+filename[-S:],
+							"%d"%DEFAULT_TIMEOUT],
+						       DEFAULT_TIMEOUT)
+		if not os.path.isfile(outpath+filename[-S:]):
+			print "trying",server+backupfilename
+			#try backup name
+			systime.sleep(2)
+			run_command_timeout("URL_download.py",
+					    ["URL_download.py", server+backupfilename, outpath+filename[-S:],
+					     "%d"%DEFAULT_TIMEOUT],
+					    DEFAULT_TIMEOUT)
+		count=0
+		while count<10 and (not os.path.isfile(outpath+filename[-S:]) and not os.path.isfile(outpath+filename[-S:-2])):
+			print "waiting..."
+			systime.sleep(1)
+			count+=1
 
-		gunzip_some_file(outpath+filename[5:],outpath+filename[5:-2]);
-		
-		return outpath+filename[5:-2];
-	elif os.path.isfile(outpath+filename[5:-2]):
-		#no need to unzip
-		return outpath+filename[5:-2]
-	else:
-		print "file",filename,"not found on server",server;
-		return -1;
+		if os.path.isfile(outpath+filename[-S:]):
+
+			gunzip_some_file(outpath+filename[-S:],outpath+filename[-S:-2]);
+
+			#return outpath+filename[-S:-2];
+		elif not os.path.isfile(outpath+filename[-S:-2]):
+			print "file",filename,"not found on server",server;
+			return -1;
+	if len(filenames)>1:
+		filenames=[i[-S:-2] for i in filenames]
+		newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
+		return combine_ionex(outpath,filenames,newfilename)
+	return outpath+filename[-S:-2]

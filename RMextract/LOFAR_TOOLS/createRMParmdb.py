@@ -26,6 +26,8 @@ def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
     if not stat_names==None:
         if not(stat_names=='all'):
             stat_pos=[stat_pos[stations.index(name)] for name in stat_names] 
+        else:
+            stat_names=stations[:]
     else:
         stat_names=stations[2:3]
         stat_pos=stat_pos[2:3]
@@ -35,6 +37,8 @@ def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
         #print "storing station",st,(st in RM.keys())
         if not (st in RM.keys()):
             stname=RM.keys()[0]
+        else:
+            stname=st
         RM[stname]=RM[stname].reshape(RM[stname].shape[:1]+(1,))
         myValue=myParmdb.makeValue(values=RM[stname], sfreq=1e10, efreq=2e10, stime=result['times'], etime=np.ones(result['times'].shape,dtype=float)*result['timestep'], asStartEnd=False)
         valuename = "RotationMeasure:%s:%s"%(st,patchname)
