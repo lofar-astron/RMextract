@@ -1,6 +1,7 @@
 from RMextract.getRM import getRM
 import RMextract.PosTools as PosTools
 import numpy as np
+import os
 
 OBJECT="EoR0"
 START_TIME="2013/11/28 00:00:00"
@@ -8,7 +9,6 @@ END_TIME="2013/11/28 01:59:59"
 TIME_STEP = 300.0
 TIME_OFFSET=120.
 out_file='RMextract_report_' + OBJECT
-
 
 MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
    [-2559293.10717106,5095498.79164383,-2848974.05801863],
@@ -43,11 +43,13 @@ MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
    [-2558850.45931999,5095586.71918979,-2849209.71070222],
    [-2558890.31919482,5095521.92810583,-2849288.42518348]])
 
-result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=300.0,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
+result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=TIME_STEP,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
 
 timerange=[result['times'][0],result['times'][-1]]
 reference_time=result['reference_time'] 
-str_start_time=PosTools.obtain_observation_year_month_day_hms(timerange[0])
+str_start_time=PosTools.obtain_observation_year_month_day_hms(reference_time)
+if os.path.exists(out_file):
+  os.remove(out_file)
 log = open(out_file, 'a')
 log.write ('Observing %s\n' % OBJECT)
 log.write ('station_positions %s \n' % MWA_antennas)
