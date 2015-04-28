@@ -215,7 +215,7 @@ def getRM(MS=None,
     big_dict['timestep']=timestep
     big_dict['station_names'] = stat_names
     big_dict['flags'] = flags
-
+    big_dict['reference_time'] = reference_time 
     # finish writing computed data to report
     if len(out_file):
        k = 0

@@ -526,7 +526,7 @@ def getAzEl(pointing,time,position,ha_limit=-1000):
     return az,el
 
 
-def get_time_range(start_time,end_time,time_in_sec,timestep,TIME_OFFSET=0):
+def get_time_range(start_time,end_time,timestep,time_in_sec,TIME_OFFSET=0):
     if HAS_PYRAP:
       try:
         start_time = qu.quantity(start_time).get_value()

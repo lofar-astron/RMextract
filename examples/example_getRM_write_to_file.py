@@ -46,7 +46,7 @@ MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
 result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=300.0,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
 
 timerange=[result['times'][0],result['times'][-1]]
-
+reference_time=result['reference_time'] 
 str_start_time=PosTools.obtain_observation_year_month_day_hms(timerange[0])
 log = open(out_file, 'a')
 log.write ('Observing %s\n' % OBJECT)
@@ -58,7 +58,7 @@ log.write ('\n')
 
 stat_pos=MWA_antennas
 timegrid=result['times']
-reference_time=timerange[0]
+#reference_time=timerange[0]
 k = 0
 for key in result['station_names']:
     seq_no = 0
