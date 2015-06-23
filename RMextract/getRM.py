@@ -98,7 +98,9 @@ def getRM(MS=None,
         emm=EMM.WMM()
     
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
-    times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
+    timestmp=list(times[-1])
+    timestmp.append(timerange[1]+timestep) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
+    times[-1]=np.array(timestmp)
     timegrid=np.array([])
     TECs={};
     Bs={}

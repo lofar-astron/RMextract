@@ -53,6 +53,13 @@ class WMM:
         x,y,z=self.getXYZ();
         return sin(lat)*z+cos(lat)*cos(lon)*x +cos(lat)*sin(lon)*y;
 
+    def getProjectedFieldVector(self,lon,lat):
+        '''get field  with one axis projected in direction lon,lat'''
+        x,y,z=self.getXYZ();
+        return [sin(lat)*z+cos(lat)*cos(lon)*x +cos(lat)*sin(lon)*y,
+                -1*sin(lon)*x +cos(lon)*y,
+                cos(lat)*z-sin(lat)*cos(lon)*x -sin(lat)*sin(lon)*y]
+
     def getProjectedFieldArray(self,lon_array,lat_array,h_array,los_dir):
         '''returns numpy array with projected BField along LOS (given in lon,lat) for ray tracing'''
         result=np.zeros((len(lon_array),))

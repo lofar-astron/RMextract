@@ -420,17 +420,22 @@ def getuvw(ra,dec,time, pos1,pos2):
 def getIONEXtimerange(timerange,timestep):
     #IONEX files go per day, check if more than one file is  needed.
     times=[];
-    
-    while timerange[0] + 86400.0 <= timerange[1]:
-        result =  obtain_observation_year_month_day_fraction(timerange[0])
-        part_of_day = result[3] * 24.0 * 60 * 60
-        nr_remaining_seconds=(24.*60.*60.-part_of_day);
-        times.append(np.arange(timerange[0],timerange[0]+nr_remaining_seconds,timestep));
-        timerange[0]+=len(times[-1])*timestep;
-    print('final timerange ', timerange)
+    while timerange[0]< timerange[1]:
+      #print timerange
+      result =  obtain_observation_year_month_day_fraction(timerange[0])
+      part_of_day = result[3] * 24.0 * 60 * 60
+      result2 =  obtain_observation_year_month_day_fraction(timerange[1])
+      if result2[2]==result[2]:  #sameday
+        nr_remaining_seconds=(result2[3] * 24.0 * 60 * 60-part_of_day)
+        #print "sameday",nr_remaining_seconds
+      else:
+        nr_remaining_seconds=(24.*60.*60.-part_of_day-1);
+        #print "new day",nr_remaining_seconds
+      times.append(np.arange(timerange[0],timerange[0]+nr_remaining_seconds,timestep));
+      timerange[0]+=len(times[-1])*timestep;
     return times,timerange
 
-def getlonlatheight(az,el,position):
+def getlonlatheight(az,el,position,h=ION_HEIGHT):
     if HAS_PYRAP:
       lonlat=getLonLatStation(az,el,pos=position);
 
@@ -440,7 +445,7 @@ def getlonlatheight(az,el,position):
       diritrf=[cos(lat)*cos(lon),cos(lat)*sin(lon),sin(lat)]
       # calculate piercepoint in xyz(code from Bas vd Tol)
 
-      pos_pp = (ppx1,ppy1,ppz1,am1)=getPP(h=ION_HEIGHT,mPosition=position,direction=diritrf)
+      pos_pp = (ppx1,ppy1,ppz1,am1)=getPP(h=h,mPosition=position,direction=diritrf)
 
       #get pp in lon,lat h
       me=measures();

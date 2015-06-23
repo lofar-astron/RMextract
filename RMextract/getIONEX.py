@@ -219,6 +219,9 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 
 def combine_ionex(outpath,filenames,newfilename):
     """Combine separate IONEXfiles into 1 single file (needed for 15min ROBR data)"""
+    if os.path.isfile(outpath+newfilename):
+	    print "FILE exists: ",outpath+newfilename
+	    return outpath+newfilename
     newf=open(outpath+newfilename,'w')
     filenames=sorted(filenames)
     firstfile=open(outpath+filenames[0])
