@@ -5,10 +5,17 @@ import os
 
 OBJECT="EoR0"
 START_TIME="2013/11/28 00:00:00"
+END_TIME="2013/11/28 23:59:59"
 END_TIME="2013/11/28 01:59:59"
+OBJECT="MWA_test"
+START_TIME="2014/12/01 00:00:00"
+END_TIME="2014/12/01 23:59:59"
+
 TIME_STEP = 300.0
 TIME_OFFSET=120.
-out_file='RMextract_report_' + OBJECT
+out_file='test_RMextract_report_' + OBJECT
+use_mean=True
+use_azel = True
 
 MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
    [-2559293.10717106,5095498.79164383,-2848974.05801863],
@@ -43,39 +50,49 @@ MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
    [-2558850.45931999,5095586.71918979,-2849209.71070222],
    [-2558890.31919482,5095521.92810583,-2849288.42518348]])
 
-result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=TIME_STEP,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
+
+result = getRM(use_azel=use_azel,use_mean=use_mean,object=OBJECT,start_time=START_TIME,end_time=END_TIME, timestep=TIME_STEP,stat_positions=MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
 
 timerange=[result['times'][0],result['times'][-1]]
+timegrid=result['times']
+stat_pos=result['stat_pos']
 reference_time=result['reference_time'] 
 str_start_time=PosTools.obtain_observation_year_month_day_hms(reference_time)
 if os.path.exists(out_file):
   os.remove(out_file)
 log = open(out_file, 'a')
 log.write ('Observing %s\n' % OBJECT)
-log.write ('station_positions %s \n' % MWA_antennas)
+if use_azel: 
+  log.write('observing at a fixed azimuth and elevation\n')
+if use_mean:
+  log.write ('station_positions %s \n' % MWA_antennas)
+  log.write ('mean of station positions %s \n' % stat_pos)
+else:
+  log.write ('station_positions %s \n' % MWA_antennas)
 log.write ('start and end times %s %s \n' % (timerange[0], timerange[1]))
 log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
 log.write ('\n')
-
-
-stat_pos=MWA_antennas
-timegrid=result['times']
-#reference_time=timerange[0]
 k = 0
 for key in result['station_names']:
     seq_no = 0
-    log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
+    if use_mean:
+      log.write ('data for station mean position at %s\n' % (stat_pos[k]))
+    else:
+      log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
     log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
     for i in range (timegrid.shape[0]):
        el = result['elev'][key][i]
        if el < 0 :
          ok = 1
+         stec = 0.0
+         rm = 0.0
+         vtec_factor = 1.0
        else:
          ok = 0
+         stec =result['STEC'][key][i]
+         rm = result['RM'][key][i]
+         vtec_factor = 1.0 / result['AirMass'][key][i]
        az = result['azimuth'][key][i]
-       stec =result['STEC'][key][i]
-       rm = result['RM'][key][i]
-       vtec_factor = 1.0 / result['AirMass'][key][i]
        rel_time = timegrid[i] - reference_time
        if i  == 0:
          time_width = reference_time - timegrid[i] 
@@ -84,5 +101,10 @@ for key in result['station_names']:
        log.write("%s : %s %s %s %s %s %s %s %s\n" % (seq_no, ok, rel_time, time_width, el, az, stec, rm, vtec_factor))
        seq_no = seq_no + 1
     k = k + 1
+    try:
+     if use_mean:
+       break
+    except: 
+      pass
     log.write (' \n')
 log.close()

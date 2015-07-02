@@ -21,13 +21,14 @@ def getRM(MS=None,
            use_azel = False,ha_limit=-1000,
            **kwargs):
     '''optional arguments are:
-    radec or pointing : [ra,dec] in radians, or if use_azel =True, za + el in radians,
+    radec or pointing : [ra,dec] in radians, or if use_azel =True, az + el in radians,
     timestep in s, timerange = [start, end]in MJD seconds, 
     otherwise use start_time/end_time (casa timestring,eg. 2012/11/21/12:00:00  or 56252.5d  NEEDS PYRAP) ,
     stat_names = list of strings per station, 
     stat_positions = list of length 3 numpy arrays, containing station_position in ITRF meters.
     useEMM = boolean, use EMM for Earth magnetic field, otherwise WMM cooefficients will be used.
     out_file = string, if given the data points will be written to a text file.
+    use_mean = True if you only want report for mean of station positions
     TIME_OFFSET = float, offset time at start and end to ensure all needed values are calculated,
     Returns the (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN '''
@@ -37,28 +38,26 @@ def getRM(MS=None,
     print ('use_azel ', use_azel)
     stat_names=[]
     useEMM=False
+    use_mean = False
     object = ''
     timestep=60
     pointing=[0.,0.5*np.pi]
     out_file=''
     stat_pos=[PosTools.posCS002]
     #stat_names=['LOFAR_CS002']
-    # the following parameter is used to extend the observation range by 120 sec
-    # before and after the actual specified time. If we want to correct an
-    # actual data set, this is required for the scipy 1d interpolation routine to
-    # ensure that the calculated range of data exceeds the time range actually
-    # observed - I have used the same value in ALBUS - Tony
-    TIME_OFFSET = 0
     if not (MS is None):
 
       (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS);
     
     for key in kwargs.keys():
+        if key=='use_mean':
+            use_mean = kwargs[key]
+            stat_pos_mean = False
         if key=='radec' or key=='pointing':
             pointing = kwargs[key]
         if key=='object':
-            object = kwargs[key]
-            out_file = 'RMextract_report_' + object
+            myobject = kwargs[key]
+            #out_file = 'RMextract_report_' + myobject
         if key=='start_time':
             start_time=kwargs[key]
             time_in_sec = False
@@ -79,15 +78,17 @@ def getRM(MS=None,
                 stat_names =['st%d'%(i+1) for i in range(len(stat_pos))]
         if key=='useEMM':
             useEMM=kwargs[key]
-    
+#      
     if timerange != 0:
-      start_time = timerange[0]- TIME_OFFSET
-      end_time = timerange[1]+ TIME_OFFSET
+      start_time = timerange[0]
+      end_time = timerange[1]
       time_in_sec = True
       reference_time = start_time
+      timerange[0] = start_time - timestep
+      timerange[1] = end_time + timestep
       str_start_time=PosTools.obtain_observation_year_month_day_hms(reference_time)
     else:
-        timerange,str_start_time,reference_time=PosTools.get_time_range(start_time,end_time,timestep,time_in_sec,TIME_OFFSET)
+        timerange,str_start_time,reference_time=PosTools.get_time_range(start_time,end_time,timestep,time_in_sec,0)
     if str_start_time==-1:
        return
         
@@ -110,17 +111,22 @@ def getRM(MS=None,
     azimuth={};
     elevation={};
     flags={}
+    if len(out_file) and len(myobject):
+        out_file = out_file + '_' + myobject
+    else:
+      if len(myobject):
+        out_file = 'RMextract_report_' + myobject
 # print header section of report
     if len(out_file):
        if os.path.exists(out_file):
          os.remove(out_file)
        log = open(out_file, 'a')
-       log.write ('Observing %s\n' % object)
-       log.write ('station_positions %s \n' % stat_pos)
+       log.write ('Observing %s\n' % myobject)
+       if not (MS is None):
+           log.write ('Using measurement set %s\n' % MS)
        if use_azel:
          log.write ('observing at a fixed azimuth and elevation \n')
-       log.write ('start and end times %s %s \n' % (timerange[0], timerange[1]))
-       log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
+       log.write ('station_positions %s \n' % stat_pos)
        log.write ('\n')
 
     for st in stat_names:
@@ -144,6 +150,13 @@ def getRM(MS=None,
            print "error opening ionex data"
            return
         tecinfo=ionex.readTEC(ionexf)
+        if use_mean:
+          if not stat_pos_mean:
+            stn_mean = stat_pos.mean(0)
+            stat_pos = []
+            stat_pos.append(stn_mean)
+            stat_pos_mean = True
+            print 'stat_pos.mean', stn_mean
         for station,position in  zip(stat_names,stat_pos):
           print ('generating data for station ', station)
  
@@ -191,6 +204,8 @@ def getRM(MS=None,
             Bpars[station].append(Bpar)
             #calculate RM constant comes from VtEC in TECU,B in nT, RM = 2.62
             RMs[station].append((Bpar*vTEC*am1)*2.62e-6)
+          if use_mean:
+            break
 
             
         timegrid=np.concatenate((timegrid,time_array));
@@ -204,7 +219,9 @@ def getRM(MS=None,
       Bpars[st]=np.array(Bpars[st])
       RMs[st]=np.array(RMs[st]) 
       flags[st]=np.array(flags[st])
-        
+      if use_mean:
+        break
+       
     big_dict={}
     big_dict['STEC']=TECs
     big_dict['Bpar']=Bpars
@@ -220,21 +237,35 @@ def getRM(MS=None,
     big_dict['reference_time'] = reference_time 
     # finish writing computed data to report
     if len(out_file):
+       time_range=[big_dict['times'][0],big_dict['times'][-1]]
+       log.write ('start and end times %s %s \n' % (time_range[0], time_range[1]))
+       log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
+       if use_azel:
+         log.write ('observing at azimuth and elevation %s %s \n' % (pointing[0], pointing[1]))
+       else:
+         log.write ('observation direction %s %s \n' % (pointing[0], pointing[1]))
+       log.write ('\n')
        k = 0
        for key in big_dict['station_names']:
          seq_no = 0
-         log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
+         if use_mean:
+           log.write ('data for station mean position at %s\n' % (stat_pos[k]))
+         else:
+           log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
          log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
          for i in range (timegrid.shape[0]):
            el = big_dict['elev'][key][i]
            if el < 0 :
              ok = 1
+             stec = 0.0
+             rm = 0.0
+             vtec_factor = 1.0
            else:
              ok = 0
+             stec =big_dict['STEC'][key][i]
+             rm = big_dict['RM'][key][i]
+             vtec_factor = 1.0 / big_dict['AirMass'][key][i]
            az = big_dict['azimuth'][key][i]
-           stec =big_dict['STEC'][key][i]
-           rm = big_dict['RM'][key][i]
-           vtec_factor = 1.0 / big_dict['AirMass'][key][i]
            rel_time = timegrid[i] - reference_time
            if i  == 0:
              time_width = reference_time - timegrid[i] 
@@ -243,9 +274,13 @@ def getRM(MS=None,
            log.write("%s : %s %s %s %s %s %s %s %s\n" % (seq_no, ok, rel_time, time_width, el, az, stec, rm, vtec_factor))
            seq_no = seq_no + 1
          k = k + 1
+         if use_mean:
+           break
          log.write (' \n')
        log.close()
-    print ('*********** finished ionosphere predictions ***************')
+       print ('****** finished ionosphere predictions report: ', out_file)
+    else:
+      print ('*********** finished ionosphere predictions ***************')
 
 
     return big_dict

@@ -420,7 +420,9 @@ def getuvw(ra,dec,time, pos1,pos2):
 def getIONEXtimerange(timerange,timestep):
     #IONEX files go per day, check if more than one file is  needed.
     times=[];
-    while timerange[0]< timerange[1]:
+    oldtimerange=-100
+    while timerange[0]< timerange[1] and timerange[0]>oldtimerange:
+      oldtimerange=timerange[0]
       #print timerange
       result =  obtain_observation_year_month_day_fraction(timerange[0])
       part_of_day = result[3] * 24.0 * 60 * 60
