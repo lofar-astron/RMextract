@@ -100,7 +100,7 @@ def getRM(MS=None,
     
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
     timestmp=list(times[-1])
-    timestmp.append(timerange[1]+timestep) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
+    timestmp.append(timerange[1]) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
     times[-1]=np.array(timestmp)
     timegrid=np.array([])
     TECs={};
@@ -233,6 +233,7 @@ def getRM(MS=None,
     big_dict['times']=timegrid
     big_dict['timestep']=timestep
     big_dict['station_names'] = stat_names
+    big_dict['stat_pos'] = stat_pos
     big_dict['flags'] = flags
     big_dict['reference_time'] = reference_time 
     # finish writing computed data to report

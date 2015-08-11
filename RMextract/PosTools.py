@@ -206,7 +206,7 @@ def getMSinfo(MS=None):
     return (timerange,timestep,pointing.flatten(),stations,station_pos)
 
 
-def getPPsimple(height=[450.e3,],mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
+def getPPsimple(height=[ION_HEIGHT,],mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
     '''get piercepoints for antenna position mPosition in m, direction ITRF in m on unit sphere and for array of heights, assuming a spherical Earth'''
     height=np.array(height)
     stX=mPosition[0]
@@ -236,7 +236,7 @@ def getPPsimple(height=[450.e3,],mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
     am=np.divide(1.,pp[:,0]*dx+pp[:,1]*dy+pp[:,2]*dz)
     return pp,am
 
-def getPPsimpleAngle(height=[450.e3,],mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
+def getPPsimpleAngle(height=[ION_HEIGHT,],mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
     '''get (lon,lat,h values) of piercepoints for antenna position mPosition in m, direction ITRF in m on unit sphere and for array of heights, assuming a spherical Earth'''
     height=np.array(height)
     stX=mPosition[0]
@@ -273,7 +273,7 @@ def getPPsimpleAngle(height=[450.e3,],mPosition=[0.,0.,0.],direction=[0.,0.,0.])
     return ppl,am
     
 
-def getPP(h=450e3,mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
+def getPP(h=ION_HEIGHT,mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
     stationX = mPosition[0];
     stationY = mPosition[1];
     stationZ = mPosition[2];
