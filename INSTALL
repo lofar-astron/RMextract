@@ -8,3 +8,12 @@ To also install the optional LOFAR features (requires lofar.parmdb + pyrap):
 python setup.py build --add-lofar-utils
 python setup.py install --add-lofar-utils
 
+
+
+For installation without root access use --prefix <local directory>, eg.
+
+python setup.py build --add-lofar-utils --prefix $HOME
+
+make sure $HOME/bin is in your PATH and
+$HOME/lib/<pythonversion>/site-packages
+in PYTHONPATH
