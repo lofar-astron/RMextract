@@ -286,7 +286,7 @@ retval    O  The return code of the command.  Note that if the process times out
     """
     #first check if command is exectuable:
     if not cmd_exists(command):
-	    raise RuntimeError, "Could not run '%s'."%command,"Please check your PATH"
+	    raise RuntimeError, "Could not run '%s'.Please check your PATH"%command,
     pid = os.fork()
     #print "my pid",pid
     if(pid == 0):
