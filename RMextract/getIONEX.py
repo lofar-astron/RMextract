@@ -10,7 +10,7 @@ from datetime import date
 import os
 import time as systime
 import string
-
+import subprocess
 
 
 DEFAULT_TIMEOUT=100;
@@ -263,6 +263,11 @@ def combine_ionex(outpath,filenames,newfilename):
     return outpath+newfilename
     #ignore RMS map for now, since it is filled with zeros anyway
 
+def cmd_exists(cmd):
+    return subprocess.call("type " + cmd, shell=True, 
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
+
 def run_command_timeout(command, args, timeout):
     """run some command with a timeout limit
 
@@ -279,6 +284,9 @@ retval    O  The return code of the command.  Note that if the process times out
 
 
     """
+    #first check if command is exectuable:
+    if not cmd_exists(command):
+	    raise RuntimeError, "Could not run '%s'."%command,"Please check your PATH"
     pid = os.fork()
     #print "my pid",pid
     if(pid == 0):
