@@ -11,7 +11,7 @@ if "--add-lofar-utils" in sys.argv:
 
 setup(name='RMextract',
 version='0.1',
-ext_modules=[Extension('_EMM_Model', ['EMM/EMM_Model.cc','EMM/GeomagnetismLibrary.c','EMM/EMM_Model_wrap.cc'])],
+      ext_modules=[Extension('_EMM_Model', ['EMM/EMM_Model.cc','EMM/GeomagnetismLibrary.c','EMM/EMM_Model_wrap.cc'],extra_compile_args=['-Wno-format-security'])],
 packages= packages,
 package_data={'EMM':['*COF']},
  scripts = scripts
