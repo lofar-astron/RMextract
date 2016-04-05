@@ -10,10 +10,13 @@ python setup.py install --add-lofar-utils
 
 
 
-For installation without root access use --prefix <local directory>, eg.
+For installation without root access use --prefix=<local directory> for the install step, eg.
 
-python setup.py build --add-lofar-utils --prefix $HOME
+python setup.py install --add-lofar-utils --prefix=$HOME
 
 make sure $HOME/bin is in your PATH and
-$HOME/lib/<pythonversion>/site-packages
-in PYTHONPATH
+$HOME/lib/<pythonversion>/site-packages in PYTHONPATH. Also note that this directory should be created if it does not exist before running setup.py, eg.
+
+mkdir -p $HOME/lib/<pythonversion>/site-packages
+
+Also note that some systems will use lib64 in stead of lib.
