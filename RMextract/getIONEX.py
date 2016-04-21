@@ -383,33 +383,33 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
 		if not overwrite and os.path.isfile(outpath+filename[-S:-2]):
 			print "file exists",outpath+filename[-S:-2];
 			continue
-		systime.sleep(2)
-		print "retreiving",run_command_timeout("URL_download.py",
-						       ["URL_download.py", server+filename, outpath+filename[-S:],
-							"%d"%DEFAULT_TIMEOUT],
-						       DEFAULT_TIMEOUT)
-		if not os.path.isfile(outpath+filename[-S:]):
-			print "trying",server+backupfilename
-			#try backup name
+		if server == None:
+			print "File:",filename,"not found on disk and download is disabled."
+			return -1
+		else:
 			systime.sleep(2)
-			run_command_timeout("URL_download.py",
-					    ["URL_download.py", server+backupfilename, outpath+filename[-S:],
-					     "%d"%DEFAULT_TIMEOUT],
-					    DEFAULT_TIMEOUT)
-		count=0
-		while count<10 and (not os.path.isfile(outpath+filename[-S:]) and not os.path.isfile(outpath+filename[-S:-2])):
-			print "waiting..."
-			systime.sleep(1)
-			count+=1
-
-		if os.path.isfile(outpath+filename[-S:]):
-
-			gunzip_some_file(outpath+filename[-S:],outpath+filename[-S:-2]);
-
-			#return outpath+filename[-S:-2];
-		elif not os.path.isfile(outpath+filename[-S:-2]):
-			print "file",filename,"not found on server",server;
-			return -1;
+			print "retreiving",run_command_timeout("URL_download.py",
+							       ["URL_download.py", server+filename, outpath+filename[-S:],
+								"%d"%DEFAULT_TIMEOUT],
+							       DEFAULT_TIMEOUT)
+			if not os.path.isfile(outpath+filename[-S:]):
+				print "trying",server+backupfilename
+	                        #try backup name
+				systime.sleep(2)
+				run_command_timeout("URL_download.py",
+						    ["URL_download.py", server+backupfilename, outpath+filename[-S:],
+						     "%d"%DEFAULT_TIMEOUT],
+						    DEFAULT_TIMEOUT)
+			count=0
+			while count<10 and (not os.path.isfile(outpath+filename[-S:]) and not os.path.isfile(outpath+filename[-S:-2])):
+				print "waiting..."
+				systime.sleep(1)
+				count+=1
+			if os.path.isfile(outpath+filename[-S:]):
+				gunzip_some_file(outpath+filename[-S:],outpath+filename[-S:-2]);
+			elif not os.path.isfile(outpath+filename[-S:-2]):
+				print "file",filename,"not found on server",server;
+				return -1;
 	if len(filenames)>1:
 		filenames=[i[-S:-2] for i in filenames]
 		newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
