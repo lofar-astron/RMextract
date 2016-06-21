@@ -1,0 +1,100 @@
+\documentclass{article}
+
+\begin{document}
+\section{Usage}
+After installation the RMextract package can be imported in a python
+environment. There are five main packages: 
+\begin{enumerate} 
+\item EMM: This is a tiny python wrapper around some of the functionalities of
+  the GeoMagnetism Library that is provided by the WMM \cite{wmm}. Can be used
+  both with the WMM coefficients or the higher resolution EMM.
+\item PosTools: a set of tools to read metadata from a MS, calculate line of
+  sights and piercepoints through an ionospheric screen.
+\item getIONEX: For downloading and combining and reading relevant IONEX
+  files. Also does the interpolation of TEC values at a given piercepoint.
+\item getTEC: Uses getIONEX and PosTools to get vTEC, airmass and timegrid,
+  either for a given MS or for a user defined timerange, station and source
+  position.
+\item getRM: combines EMM, PosTools and getIONEX to extract RM values for a
+  given MS or a user defined timerange, station and source
+  position.
+\end{enumerate}
+
+Examples of how to use the tools can be found in the \emph{examples} directory.
+
+
+
+\subsection{LOFAR Tools}
+For usage within the LOFAR sofware environment, a script was
+developed: \emph{createRMParmdb}. This script automatically creates  the
+parmdb for a given Measurement Set (MS) with RotationMeasures to be used in
+BBS (or NDPPP) to correct the data. The correction is calculated for the phase
+center of the MS and can be  applied as a direction independent effect. Since
+the main distortion to polarised data is in fact the \emph{time} variation of
+the Faraday rotation as opposed to a field of view variation, this results in
+a good first order correction of your polarised data. However, at the time of
+writing, a direction independent rotation measure has not been implemented in
+BBS or DPPP yet. Therefore, one needs to specify the name of a source (any
+source) in the skymodel. And make sure that in the BBS parset the correction
+is applied in the direction of the source with the same name. For long
+baselines it can be useful to calculate the RM per station, this is optional
+in the \emph{createRMParmdb} script. The parameter names in the parmdb are
+\emph{RotationMeasure:$\langle$ stationname$\rangle$ :$\langle$ sourcename$\rangle$ }.
+
+
+\subsubsection{Options}
+
+The following list of otions is availble for the createRMParmdb script:
+\begin{itemize}
+\item -o,--out : Name of the output parmdb. If it exists the RM paramters will
+  be added to the parmdb, unless the -r or --overwrite options is
+  used. default: \emph{RMParmdb}
+\item -r,--overwrite: overwrite existing parmdb.
+\item -p,--patch : name of the patch or source for which to create the
+  values. This will end up in the parameter name and is important for BBS when
+  it looks up the parameter for correction. It needs to be the same as
+  specified in the BBS parset and it should be existing in the sky
+  model. Otherwise, since the correction are calculated for the phase center
+  only, it really does not matter which source name is used. default:
+  \emph{phase\_center}.
+\item --IONprefix: this is the name of the IONEX server, e.g. CODG, ROBR,JPLG,
+  etc. The IONEX files are usually named:$\langle$ IONprefix$\rangle$$\langle$
+  doy$\rangle$ 0.$\langle$ year\%2000$\rangle$ I.Z. doy
+  is number of the day in the year. Note
+  that the data should be available on the selected ftp-server, given with
+  --IONserver. Default: \emph{CODG}
+\item --IONserver: name of the ftp-server for IONEX files. for CODG it is the
+  default: \emph{ftp://ftp.unibe.ch/aiub/CODE/}. For ROBR use:
+  \emph{ftp://gnss.oma.be/gnss/products/IONEX/}. There are other servers
+  available, but the directory structure is hardcoded at the moment and should
+  be the same as that of the CODE server $\langle$ year$\rangle$ . If needed, ask the developer to
+  implement another directory structure for you prefered server.
+\item --IONpath: location where the IONEX files are stored locally. Default: ./
+\item -a,--all: Create an RM value per station. Since the RM variation over
+  the array is usual minimal, the default is to only calculate for the center
+  of LOFAR (postion of CS002LBA). However, when using long baselines, this option can be useful.
+\item -t,--timestep: timestep in seconds. The IONEX maps have a time resolution of
+  15 mintues to 2 hours. Although interpolation is applied, it is usually not
+  necessary to use a time resolution smaller than 15 minutes. Caclulating the
+  corrections at full resolution can be time consuming.  Default: 900 seconds
+\item -e,--smart\_interpol': Float parameter describing how much of the Earth
+  rotation is taken in to account in interpolation of the IONEX files. 1.0
+  means time interpolation assumes ionosphere rotates in opposite direction of
+  the Earth. 0.0 (default) means no rotation applied. See \cite{ionex} for
+  description of this interpolation method.
+
+\end{itemize}
+ 
+
+
+\begin{thebibliography}{}
+
+\bibitem[{\textit{Chulliat}(2014)}]{wmm} Chulliat A., Macmillan S., Alken P.,
+  Beggan C., Nair M., Hamilton B., Woods A., Ridley V., Maus S., Thomson A. (2014), \textit{The US/UK World Magnetic Model for 2015-2020, NOAA
+  National Geophysical Data Center, Boulder, CO}, doi: 10.7289/V5TH8JNW.
+\bibitem[{\textit{Chulliat}(2014)}]{ionex} Schaer, S., W. Gurtner, and J. Feltens (1997), \textit{IONEX: The IONosphere Map
+        EXchange Format Version 1}, February 25, 1998, in \textit{Proceedings of
+        the 1998 IGS Analysis Centers Workshop, ESOC, Darmstadt, Germany,
+        February 9-11, 1998}.
+\end{thebibliography}
+\end{document}
