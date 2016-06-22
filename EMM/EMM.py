@@ -65,7 +65,7 @@ class WMM:
         result=np.zeros((len(lon_array),))
         
         for idx,self.lon,self.lat,self.h in zip(range(len(lon_array)),lon_array,lat_array,h_array):
-            result[idx]=getProjectedField(los_dir[0],los_dir[1])
+            result[idx]=getProjectedFieldVector(los_dir[0],los_dir[1])
         return result
 
 
