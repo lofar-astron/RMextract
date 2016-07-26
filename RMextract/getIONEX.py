@@ -375,7 +375,7 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
 		S=len(filenames[0])-len(str(year)+"/%03d/"%(dayofyear))
 
 	else:
-                if server="ftp://igs-final.man.olsztyn.pl/pub/gps_data/GPS_IONO/cmpcmb/":
+                if server == "ftp://igs-final.man.olsztyn.pl/pub/gps_data/GPS_IONO/cmpcmb/":
                         filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]      
                         backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                 else:
