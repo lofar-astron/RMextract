@@ -4,6 +4,8 @@ import getIONEX as ionex;
 import os
 import numpy as np
 from math import *
+from datetime import date
+
 
 import EMM.EMM as EMM
 
@@ -144,6 +146,8 @@ def getRM(MS=None,
         starttime=time_array[0]
         print "getting ionexfile for",starttime
         date_parms =  PosTools.obtain_observation_year_month_day_fraction(starttime)
+        dayofyear = date(date_parms[0],date_parms[1],date_parms[2]).timetuple().tm_yday  
+        emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
         ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
         if ionexf==-1:

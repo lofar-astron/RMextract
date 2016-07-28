@@ -62,10 +62,10 @@ class WMM:
 
     def getProjectedFieldArray(self,lon_array,lat_array,h_array,los_dir):
         '''returns numpy array with projected BField along LOS (given in lon,lat) for ray tracing'''
-        result=np.zeros((len(lon_array),))
+        result=np.zeros((len(lon_array),3))
         
         for idx,self.lon,self.lat,self.h in zip(range(len(lon_array)),lon_array,lat_array,h_array):
-            result[idx]=getProjectedFieldVector(los_dir[0],los_dir[1])
+            result[idx]=self.getProjectedFieldVector(los_dir[0],los_dir[1])
         return result
 
 

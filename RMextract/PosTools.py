@@ -266,8 +266,8 @@ def getPPsimpleAngle(height=[ION_HEIGHT,],mPosition=[0.,0.,0.],direction=[0.,0.,
     am=np.divide(1.,pp[:,0]*dx+pp[:,1]*dy+pp[:,2]*dz)
 
     ppl=np.zeros(height.shape+(3,))
-    ppl[:,0]=np.atan2(pp[:,1],pp[:0])
-    ppl[:,1]=np.atan2(pp[:,2],np.sqrt(pp[:0]*pp[:,0]+pp[:1]*pp[:,1]))
+    ppl[:,0]=np.arctan2(pp[:,1],pp[:,0])
+    ppl[:,1]=np.arctan2(pp[:,2],np.sqrt(pp[:,0]*pp[:,0]+pp[:,1]*pp[:,1]))
     ppl[:,2]=height
 
     return ppl,am

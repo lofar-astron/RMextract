@@ -355,7 +355,7 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
           day = time[2]
 	dayofyear = date(year,month,day).timetuple().tm_yday;
 	if prefix=='ROBR':
-		filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[26:26+24] for minutes in range(0,60,15)]
+		filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[:24] for minutes in range(0,60,15)]
 		# IONEX format needs data of first file of next day
 		#check if next day is next year (take into account lepa years....)"
 		if month==12 and day==31:
@@ -376,8 +376,8 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
 
 	else:
                 if server == "ftp://igs-final.man.olsztyn.pl/pub/gps_data/GPS_IONO/cmpcmb/":
-                        filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]      
-                        backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                        filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]      
+                        backupfilenames = ["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
                 else:
                         filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
                         backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
