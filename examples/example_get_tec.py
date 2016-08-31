@@ -7,7 +7,7 @@ b=tab.taql('calc MJD("2012/11/05/00:00:00")')[0]*3600*24
 statpos=gt.PosTools.posCS002
 ra=0.
 dec=0.5*np.pi
-tec=gt.getTEC(ionexPath='./IONEXdata/',radec=[ra,dec],timestep=1800, timerange = [a, b],stat_positions=[statpos,],ha_limit=0.5*np.pi)
+tec=gt.getTEC(ionexPath='./IONEXdata',radec=[ra,dec],timestep=1800, timerange = [a, b],stat_positions=[statpos,],ha_limit=0.5*np.pi)
 
 times=tec[0]
 timess=[tm/(3600*24.) for tm in times]

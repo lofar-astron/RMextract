@@ -18,6 +18,7 @@ except:
   HAS_EPHEM = False
 
 from math import *
+import math
 import os
 import numpy as np
 

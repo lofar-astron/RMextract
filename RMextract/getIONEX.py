@@ -135,6 +135,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	wt1=wt2=0.5;
 	lonstep = abs(lonarray[1]-lonarray[0]);
 	#assume lon is sorted from west to east BUG:: Should be checked! but ok for ODG and ROB files
+        #BUG: take into acount in between lon,lat grid if rotation larger than the lon/lat resolution
 	if not exactTime:
 		# rotation in degrees of the earlier map
 		rot1 = ((time-times[timeIdx1])*360./24.)*apply_earth_rotation;
@@ -214,6 +215,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 
 	tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
 	    timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
+        print lat1,lat2,lon11,lon12,lon21,lon22,timeIdx1,timeIdx2,tecvalue
 	return tecvalue;
 
 
@@ -337,6 +339,8 @@ def gunzip_some_file(compressed_file,
 
 		
 def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/CODE/",prefix="CODG",outpath='./',overwrite=False):
+        if outpath[-1]!="/":
+                outpath+="/"
 	if not os.path.isdir(outpath):
 		try:
 			os.mkdir(outpath)
