@@ -110,6 +110,21 @@ def aer2ecef(azimuthDeg, elevationDeg, slantRange, obs_lat, obs_lon, obs_alt):
     return lat, lon, h  # data are in units of degrees
 
 ################ from JMA_tools in ALBUS ########################
+def get_day_of_year(year, month, day):
+    """Get the day-of-year integer from the year/month/day
+
+    year   I  YYYY
+    month  I  MM starting from January == 1
+    day    I  DD starting from 1 == 1
+    """
+    day_of_year_list = [0,31,59,90,120,151,181,212,243,273,304,334]
+    doy = day_of_year_list[month-1] + day
+    if(month>2):
+        if((year&0x3)==0):
+            if((year % 100 != 0) or (year % 400 == 0)):
+                doy = doy+1
+    return doy
+################ from JMA_tools in ALBUS ########################
 def get_ymdf_from_JD(JD):
     """get the year, month, day, day_fraction from an MJD
 
