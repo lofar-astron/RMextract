@@ -211,16 +211,16 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		wtlat1=abs(lat-latarray[lat2])/latstep;
 		wtlat2=abs(latarray[lat1]-lat)/latstep;
 	#now get all needed maps
-        print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
+        #print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
 	timeinterpols=[wt1*tecdata[timeIdx1,lat1,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat1,lon21]*wtlon21,
 		       wt1*tecdata[timeIdx1,lat1,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat1,lon22]*wtlon22,
 		       wt1*tecdata[timeIdx1,lat2,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat2,lon21]*wtlon21,
 		       wt1*tecdata[timeIdx1,lat2,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat2,lon22]*wtlon22]#weighted points
 	
-        print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
+        #print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
 	tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
 	    timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
-        print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
+        #print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
 	return tecvalue;
 
 

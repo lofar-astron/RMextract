@@ -182,7 +182,7 @@ def obtain_observation_year_month_day_fraction(start_time):
 # Get the day of year from the Year, month, day for the start of observations
 def obtain_observation_year_month_day_hms(start_time):
     if HAS_PYRAP:
-      print "getting time", str(start_time)+'s'
+      #print "getting time", str(start_time)+'s'
       date_list = qu.quantity(str(start_time)+'s').formatted("YMD").split("/")
       year = int(date_list[0])
       month = int(date_list[1])
@@ -441,16 +441,17 @@ def getIONEXtimerange(timerange,timestep):
       oldtimerange=timerange[0]
       #print timerange
       result =  obtain_observation_year_month_day_fraction(timerange[0])
-      part_of_day = result[3] * 24.0 * 60 * 60
+      part_of_day = result[3]
       result2 =  obtain_observation_year_month_day_fraction(timerange[1])
       if result2[2]==result[2]:  #sameday
-        nr_remaining_seconds=(result2[3] * 24.0 * 60 * 60-part_of_day)
-        #print "sameday",nr_remaining_seconds
+        times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #make sure to include the last timestep
       else:
-        nr_remaining_seconds=(24.*60.*60.-part_of_day-1);
+        nr_remaining_seconds=(1.-part_of_day) * 24.0 * 60. * 60.;
         #print "new day",nr_remaining_seconds
-      times.append(np.arange(timerange[0],timerange[0]+nr_remaining_seconds,timestep));
-      timerange[0]+=len(times[-1])*timestep;
+        times.append(np.arange(timerange[0],timerange[0]+nr_remaining_seconds,timestep));
+      #print "in postools",len(times),times[-1],timerange,nr_remaining_seconds,result2,result,times[-1][-1],part_of_day
+      if len(times[-1]):
+        timerange[0]=times[-1][-1]+timestep
     return times,timerange
 
 def getlonlatheight(az,el,position,h=ION_HEIGHT):
@@ -558,7 +559,7 @@ def get_time_range(start_time,end_time,timestep,time_in_sec,TIME_OFFSET=0):
         reference_time = start_time * 86400.0 - TIME_OFFSET
         st = reference_time - timestep 
         et = end_time * 86400.0 +  timestep + TIME_OFFSET
-        print "getting string",reference_time
+        #print "getting string",reference_time
         str_start_time =  obtain_observation_year_month_day_hms(reference_time)
         timerange= [st, et]
       except:
