@@ -388,46 +388,59 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                         filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]      
                         backupfilenames = ["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
                 else:
-                        filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
-                        backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                        if "ftp://213.184.6.172/" in server:
+
+                                filenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si"%(dayofyear,yy)]
+                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                                
+                        else:
+
+                                filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
+                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                 S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
-
-
+                
 	print 'file needed:', filenames[0],S
 	print "checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2])
 	for filename,backupfilename in zip(filenames,backupfilenames):
-		if not overwrite and os.path.isfile(outpath+filename[-S:-2]):
-			print "file exists",outpath+filename[-S:-2];
+                fname=filename.split("/")[-1]
+		if not overwrite and os.path.isfile(outpath+fname.strip(".Z")):
+			print "file exists",outpath+fname;
 			continue
 		if server == None:
-			print "File:",filename,"not found on disk and download is disabled."
+			print "File:",fname.strip(".Z"),"not found on disk and download is disabled."
 			return -1
 		else:
+                        extra_options=[]
+                        if "ftp://213.184.6.172/" in server:
+                                print "adding user name and password for",server
+                                extra_options=["data-out","Qz8803#mhR4z"] #user:passwrd
+                                
 			systime.sleep(2)
 			print "retreiving",run_command_timeout("URL_download.py",
-							       ["URL_download.py", server+filename, outpath+filename[-S:],
-								"%d"%DEFAULT_TIMEOUT],
+							       ["URL_download.py", server+filename, outpath+fname,
+								"%d"%DEFAULT_TIMEOUT]+extra_options,
 							       DEFAULT_TIMEOUT)
-			if not os.path.isfile(outpath+filename[-S:]):
+			if not os.path.isfile(outpath+fname):
 				print "trying",server+backupfilename
+                                fname=backupfilename.split("/")[-1]
 	                        #try backup name
 				systime.sleep(2)
 				run_command_timeout("URL_download.py",
-						    ["URL_download.py", server+backupfilename, outpath+filename[-S:],
-						     "%d"%DEFAULT_TIMEOUT],
+						    ["URL_download.py", server+backupfilename, outpath+fname,
+						     "%d"%DEFAULT_TIMEOUT]+extra_options,
 						    DEFAULT_TIMEOUT)
 			count=0
-			while count<10 and (not os.path.isfile(outpath+filename[-S:]) and not os.path.isfile(outpath+filename[-S:-2])):
+			while count<10 and (not os.path.isfile(outpath+fname) and not os.path.isfile(outpath+fname.strip(".Z"))):
 				print "waiting..."
 				systime.sleep(1)
 				count+=1
-			if os.path.isfile(outpath+filename[-S:]):
-				gunzip_some_file(outpath+filename[-S:],outpath+filename[-S:-2]);
-			elif not os.path.isfile(outpath+filename[-S:-2]):
+			if os.path.isfile(outpath+fname) and fname[-2:]==".Z":
+				gunzip_some_file(outpath+fname,outpath+fname[:-2]);
+			elif not os.path.isfile(outpath+fname):
 				print "file",filename,"not found on server",server;
 				return -1;
 	if len(filenames)>1:
-		filenames=[i[-S:-2] for i in filenames]
+		filenames=[i.split("/")[-1].strip(".Z") for i in filenames]
 		newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
 		return combine_ionex(outpath,filenames,newfilename)
-	return outpath+filename[-S:-2]
+	return outpath+filename.split("/")[-1].strip(".Z")
