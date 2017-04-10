@@ -13,6 +13,7 @@ import string
 import subprocess
 import scipy.ndimage.filters as myfilter
 
+debugmode=False
 
 DEFAULT_TIMEOUT=100;
 
@@ -31,7 +32,7 @@ def readTEC(filename,use_filter=None):
 			continue;
 		if splitted[-1] == 'FILE':
 			if splitted[-2] == 'IN':
-				NumberOfMaps = float(splitted[0])
+				NumberOfMaps = int(splitted[0])
 				continue;
 		if splitted[-1] == 'DHGT':
 			IonH = float(splitted[0])
@@ -50,9 +51,9 @@ def readTEC(filename,use_filter=None):
 			stepLon = float(splitted[2])
 			continue;
 		if splitted[-1]=='MAP' and (splitted[-4]+splitted[-2] == 'EPOCHFIRST'):
-			startYear = float(splitted[0])
-			startMonth = float(splitted[1])
-			startDay = float(splitted[2])
+			startYear = int(splitted[0])
+			startMonth = int(splitted[1])
+			startDay = int(splitted[2])
 			date=startYear*366.+startMonth*31.+startDay;
 			continue;
 		if splitted[0] == 'END':
@@ -119,6 +120,9 @@ def readTEC(filename,use_filter=None):
 def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	'''Derive interpolated (in lon,lat,time) vTEC values. Lat should be angle in degrees between -90 and 90,Lon angle between -180,180. Time in hour of the day (eg. 23.5 for half past 11PM). With apply_earth_rotation you can specify (with a number between 0 and 1) how much of the earth rotaion is taken in to account in the interpolation step. This is assuming that the TEC maps move according to the rotation Earth (following method 3 of interpolation described in the IONEX document). Experiments with ROB data show that this is not really the case, resulting in strange wavelike structures when applying this smart interpolation. Negative values of this parameter would result in an ionosphere that moves with the roation of the earth''' 
 	
+        if debugmode:
+                print "lon,lat,time",lon,lat,time
+
 	tecdata=tecinfo[0];  #TEC in TECU
 	rmsdata=tecinfo[1];  # not used here
 	lonarray=tecinfo[2]; # longitude in degrees from West to East (- to +)
@@ -134,6 +138,11 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		timeIdx2=timeIdx1;
 	elif times[timeIdx1]==time:
 		exactTime=True;
+        if timeIdx1<0:
+                print "timeslot missing!"
+                timeIdx1=timeIdx2=0
+                exactTime=True
+
 	# get rotation  angle for method 3 (rotate maps before interpolating)
 	rot1=rot2=0;
 	wt1=wt2=0.5;
@@ -159,6 +168,8 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	lonIdx1=np.argmin(np.absolute(np.fmod(lonarray1-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
 	# index of longitude1 in later map
 	lonIdx2=np.argmin(np.absolute(np.fmod(lonarray2-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
+
+
 	if lonarray1[lonIdx1]>lon or (lonIdx1==0 and (lonarray1[lonIdx1]+lonstep)<lon) :
 		lonIdx1-=1;
 		if lonIdx1 <0:
@@ -171,8 +182,8 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		exactLon=True;
 
 	#indices used for method 3 interpol, remainder correctly treats negative indices, only works correctly if data has all longitudes between -180,180. Otherwise you get into trouble at the edges.
-	lon12=lon11=np.remainder(lonIdx1,lonarray.shape[0]); #coordinates of earlier map
-	lon22=lon21=np.remainder(lonIdx2,lonarray.shape[0]); #coordinates of later map
+	lon12=lon11=(np.remainder(lonIdx1,lonarray.shape[0])).astype(int); #coordinates of earlier map
+	lon22=lon21=(np.remainder(lonIdx2,lonarray.shape[0])).astype(int); #coordinates of later map
 	wtlon11=wtlon21=wtlon12=wtlon22=0.5;
 	if not exactLon: 
 		lon12=np.remainder(lonIdx1+1,lonarray.shape[0]);
@@ -210,6 +221,10 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		latstep = abs(latarray[lat1]-latarray[lat2]);
 		wtlat1=abs(lat-latarray[lat2])/latstep;
 		wtlat2=abs(latarray[lat1]-lat)/latstep;
+        if debugmode:
+                print "indices t1,t2,lon1,lon2,lat1,lat2",timeIdx1,timeIdx2,lonIdx1,lonIdx2,lat1,lat2,lon11,lon12,lon21,lon22
+                print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
+                print "weights",wt1,wt2,wtlon11,wtlon12,wtlat1,wtlat2
 	#now get all needed maps
         #print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
 	timeinterpols=[wt1*tecdata[timeIdx1,lat1,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat1,lon21]*wtlon21,
@@ -220,6 +235,8 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
         #print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
 	tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
 	    timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
+        if debugmode:
+                print "tecvalue",tecvalue
         #print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
 	return tecvalue;
 
