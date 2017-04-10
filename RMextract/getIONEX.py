@@ -405,7 +405,7 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                         filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]      
                         backupfilenames = ["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
                 else:
-                        if "ftp://213.184.6.172/" in server:
+                        if (not server==None) and "ftp://213.184.6.172/" in server:
 
                                 filenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si"%(dayofyear,yy)]
                                 backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
