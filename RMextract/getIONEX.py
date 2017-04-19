@@ -11,11 +11,13 @@ import os
 import time as systime
 import string
 import subprocess
+import scipy.ndimage.filters as myfilter
 
+debugmode=False
 
 DEFAULT_TIMEOUT=100;
 
-def readTEC(filename): 
+def readTEC(filename,use_filter=None): 
 
 	# Opening and reading the IONEX file into memory
 	linestring = open(filename, 'r').read()
@@ -30,7 +32,7 @@ def readTEC(filename):
 			continue;
 		if splitted[-1] == 'FILE':
 			if splitted[-2] == 'IN':
-				NumberOfMaps = float(splitted[0])
+				NumberOfMaps = int(splitted[0])
 				continue;
 		if splitted[-1] == 'DHGT':
 			IonH = float(splitted[0])
@@ -49,9 +51,9 @@ def readTEC(filename):
 			stepLon = float(splitted[2])
 			continue;
 		if splitted[-1]=='MAP' and (splitted[-4]+splitted[-2] == 'EPOCHFIRST'):
-			startYear = float(splitted[0])
-			startMonth = float(splitted[1])
-			startDay = float(splitted[2])
+			startYear = int(splitted[0])
+			startMonth = int(splitted[1])
+			startDay = int(splitted[2])
 			date=startYear*366.+startMonth*31.+startDay;
 			continue;
 		if splitted[0] == 'END':
@@ -107,6 +109,9 @@ def readTEC(filename):
 			    np.array([float(i)*exponent for i in splitted]);
 			lonidx+=datalength;
 
+        if not use_filter is None:
+                tecdata=myfilter.gaussian_filter(tecdata,use_filter,mode='nearest')
+
 	return (tecdata,rmsdata,lonarray,latarray,times);
 
 
@@ -115,6 +120,9 @@ def readTEC(filename):
 def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	'''Derive interpolated (in lon,lat,time) vTEC values. Lat should be angle in degrees between -90 and 90,Lon angle between -180,180. Time in hour of the day (eg. 23.5 for half past 11PM). With apply_earth_rotation you can specify (with a number between 0 and 1) how much of the earth rotaion is taken in to account in the interpolation step. This is assuming that the TEC maps move according to the rotation Earth (following method 3 of interpolation described in the IONEX document). Experiments with ROB data show that this is not really the case, resulting in strange wavelike structures when applying this smart interpolation. Negative values of this parameter would result in an ionosphere that moves with the roation of the earth''' 
 	
+        if debugmode:
+                print "lon,lat,time",lon,lat,time
+
 	tecdata=tecinfo[0];  #TEC in TECU
 	rmsdata=tecinfo[1];  # not used here
 	lonarray=tecinfo[2]; # longitude in degrees from West to East (- to +)
@@ -130,11 +138,17 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		timeIdx2=timeIdx1;
 	elif times[timeIdx1]==time:
 		exactTime=True;
+        if timeIdx1<0:
+                print "timeslot missing!"
+                timeIdx1=timeIdx2=0
+                exactTime=True
+
 	# get rotation  angle for method 3 (rotate maps before interpolating)
 	rot1=rot2=0;
 	wt1=wt2=0.5;
 	lonstep = abs(lonarray[1]-lonarray[0]);
 	#assume lon is sorted from west to east BUG:: Should be checked! but ok for ODG and ROB files
+        #BUG: take into acount in between lon,lat grid if rotation larger than the lon/lat resolution
 	if not exactTime:
 		# rotation in degrees of the earlier map
 		rot1 = ((time-times[timeIdx1])*360./24.)*apply_earth_rotation;
@@ -154,6 +168,8 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 	lonIdx1=np.argmin(np.absolute(np.fmod(lonarray1-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
 	# index of longitude1 in later map
 	lonIdx2=np.argmin(np.absolute(np.fmod(lonarray2-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
+
+
 	if lonarray1[lonIdx1]>lon or (lonIdx1==0 and (lonarray1[lonIdx1]+lonstep)<lon) :
 		lonIdx1-=1;
 		if lonIdx1 <0:
@@ -166,8 +182,8 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		exactLon=True;
 
 	#indices used for method 3 interpol, remainder correctly treats negative indices, only works correctly if data has all longitudes between -180,180. Otherwise you get into trouble at the edges.
-	lon12=lon11=np.remainder(lonIdx1,lonarray.shape[0]); #coordinates of earlier map
-	lon22=lon21=np.remainder(lonIdx2,lonarray.shape[0]); #coordinates of later map
+	lon12=lon11=(np.remainder(lonIdx1,lonarray.shape[0])).astype(int); #coordinates of earlier map
+	lon22=lon21=(np.remainder(lonIdx2,lonarray.shape[0])).astype(int); #coordinates of later map
 	wtlon11=wtlon21=wtlon12=wtlon22=0.5;
 	if not exactLon: 
 		lon12=np.remainder(lonIdx1+1,lonarray.shape[0]);
@@ -205,15 +221,23 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 		latstep = abs(latarray[lat1]-latarray[lat2]);
 		wtlat1=abs(lat-latarray[lat2])/latstep;
 		wtlat2=abs(latarray[lat1]-lat)/latstep;
+        if debugmode:
+                print "indices t1,t2,lon1,lon2,lat1,lat2",timeIdx1,timeIdx2,lonIdx1,lonIdx2,lat1,lat2,lon11,lon12,lon21,lon22
+                print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
+                print "weights",wt1,wt2,wtlon11,wtlon12,wtlat1,wtlat2
 	#now get all needed maps
+        #print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
 	timeinterpols=[wt1*tecdata[timeIdx1,lat1,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat1,lon21]*wtlon21,
 		       wt1*tecdata[timeIdx1,lat1,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat1,lon22]*wtlon22,
 		       wt1*tecdata[timeIdx1,lat2,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat2,lon21]*wtlon21,
 		       wt1*tecdata[timeIdx1,lat2,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat2,lon22]*wtlon22]#weighted points
 	
-
+        #print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
 	tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
 	    timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
+        if debugmode:
+                print "tecvalue",tecvalue
+        #print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
 	return tecvalue;
 
 
@@ -337,6 +361,8 @@ def gunzip_some_file(compressed_file,
 
 		
 def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/CODE/",prefix="CODG",outpath='./',overwrite=False):
+        if outpath[-1]!="/":
+                outpath+="/"
 	if not os.path.isdir(outpath):
 		try:
 			os.mkdir(outpath)
@@ -354,12 +380,8 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
           month = time[1]
           day = time[2]
 	dayofyear = date(year,month,day).timetuple().tm_yday;
-	if prefix!='ROBR':
-		filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
-		backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-		S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
-	else:
-		filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[26:26+24] for minutes in range(0,60,15)]
+	if prefix=='ROBR':
+		filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[:24] for minutes in range(0,60,15)]
 		# IONEX format needs data of first file of next day
 		#check if next day is next year (take into account lepa years....)"
 		if month==12 and day==31:
@@ -377,41 +399,65 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
 		backupfilenames.append(str(year)+"/%03d/"%(dayofyear+1)+prefix+"%03d"%(dayofyear+1)+"A00"+".%sI.Z"%yy)
 		
 		S=len(filenames[0])-len(str(year)+"/%03d/"%(dayofyear))
+
+	else:
+                if server == "ftp://igs-final.man.olsztyn.pl/pub/gps_data/GPS_IONO/cmpcmb/":
+                        filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]      
+                        backupfilenames = ["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
+                else:
+                        if (not server==None) and "ftp://213.184.6.172/" in server:
+
+                                filenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si"%(dayofyear,yy)]
+                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                                
+                        else:
+
+                                filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
+                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
+                
 	print 'file needed:', filenames[0],S
 	print "checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2])
 	for filename,backupfilename in zip(filenames,backupfilenames):
-		if not overwrite and os.path.isfile(outpath+filename[-S:-2]):
-			print "file exists",outpath+filename[-S:-2];
+                fname=filename.split("/")[-1]
+		if not overwrite and os.path.isfile(outpath+fname.strip(".Z")):
+			print "file exists",outpath+fname;
 			continue
 		if server == None:
-			print "File:",filename,"not found on disk and download is disabled."
+			print "File:",fname.strip(".Z"),"not found on disk and download is disabled."
 			return -1
 		else:
+                        extra_options=[]
+                        if "ftp://213.184.6.172/" in server:
+                                print "adding user name and password for",server
+                                extra_options=["data-out","Qz8803#mhR4z"] #user:passwrd
+                                
 			systime.sleep(2)
 			print "retreiving",run_command_timeout("URL_download.py",
-							       ["URL_download.py", server+filename, outpath+filename[-S:],
-								"%d"%DEFAULT_TIMEOUT],
+							       ["URL_download.py", server+filename, outpath+fname,
+								"%d"%DEFAULT_TIMEOUT]+extra_options,
 							       DEFAULT_TIMEOUT)
-			if not os.path.isfile(outpath+filename[-S:]):
+			if not os.path.isfile(outpath+fname):
 				print "trying",server+backupfilename
+                                fname=backupfilename.split("/")[-1]
 	                        #try backup name
 				systime.sleep(2)
 				run_command_timeout("URL_download.py",
-						    ["URL_download.py", server+backupfilename, outpath+filename[-S:],
-						     "%d"%DEFAULT_TIMEOUT],
+						    ["URL_download.py", server+backupfilename, outpath+fname,
+						     "%d"%DEFAULT_TIMEOUT]+extra_options,
 						    DEFAULT_TIMEOUT)
 			count=0
-			while count<10 and (not os.path.isfile(outpath+filename[-S:]) and not os.path.isfile(outpath+filename[-S:-2])):
+			while count<10 and (not os.path.isfile(outpath+fname) and not os.path.isfile(outpath+fname.strip(".Z"))):
 				print "waiting..."
 				systime.sleep(1)
 				count+=1
-			if os.path.isfile(outpath+filename[-S:]):
-				gunzip_some_file(outpath+filename[-S:],outpath+filename[-S:-2]);
-			elif not os.path.isfile(outpath+filename[-S:-2]):
+			if os.path.isfile(outpath+fname) and fname[-2:]==".Z":
+				gunzip_some_file(outpath+fname,outpath+fname[:-2]);
+			elif not os.path.isfile(outpath+fname):
 				print "file",filename,"not found on server",server;
 				return -1;
 	if len(filenames)>1:
-		filenames=[i[-S:-2] for i in filenames]
+		filenames=[i.split("/")[-1].strip(".Z") for i in filenames]
 		newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
 		return combine_ionex(outpath,filenames,newfilename)
-	return outpath+filename[-S:-2]
+	return outpath+filename.split("/")[-1].strip(".Z")

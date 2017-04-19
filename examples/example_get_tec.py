@@ -1,13 +1,16 @@
 import RMextract.getTEC as gt
 import pyrap.tables as tab
 from pylab import *
-a=tab.taql('calc MJD("2012/11/01/00:00:00")')[0]*3600*24
-b=tab.taql('calc MJD("2012/11/05/00:00:00")')[0]*3600*24
+a=tab.taql('calc MJD("2015/08/14/00:00:00")')[0]*3600*24
+b=tab.taql('calc MJD("2015/08/15/23:50:00")')[0]*3600*24
 
 statpos=gt.PosTools.posCS002
-ra=0.
-dec=0.5*np.pi
-tec=gt.getTEC(ionexPath='./IONEXdata/',radec=[ra,dec],timestep=1800, timerange = [a, b],stat_positions=[statpos,],ha_limit=0.5*np.pi)
+pointing=array([ 2.15374123,  0.8415521 ]) #3C196
+#ra=0.
+#dec=0.5*np.pi
+ra=pointing[0]
+dec=pointing[1]
+tec=gt.getTEC(ionexPath='./IONEXdata',radec=[ra,dec],timestep=300, timerange = [a, b],stat_positions=[statpos,],ha_limit=np.pi)
 
 times=tec[0]
 timess=[tm/(3600*24.) for tm in times]

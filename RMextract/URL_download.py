@@ -24,8 +24,8 @@ def urlreporthook(block_count, block_size, file_size):
 
 ################################################################################
 def main():
-    if(len(sys.argv) != 4):
-        print ("Error: correct usage is %s inURL, outfilename timeout"%sys.argv[0])
+    if(len(sys.argv) < 4):
+        print ("Error: correct usage is %s inURL, outfilename timeout <username> <passwd>"%sys.argv[0])
         sys.exit(-2)
     if HAS_PYCURL:
       print 'using PyCurl'
@@ -36,6 +36,10 @@ def main():
                c = pycurl.Curl()
                c.setopt(c.URL, sys.argv[1])
                c.setopt(c.WRITEDATA, f)
+               if len(sys.argv)==6:
+                 print "adding username,pwd",sys.argv[4],sys.argv[5]
+                 c.setopt(pycurl.USERPWD, '%s:%s'%(sys.argv[4],sys.argv[5]))
+
                print 'curl getting data at ',sys.argv[1]
                c.perform()
                print 'curl closing for ', sys.argv[1]
@@ -52,6 +56,8 @@ def main():
         timeout = float(sys.argv[3])
         socket.setdefaulttimeout(timeout)
         print("URL=",sys.argv[1]," File=",sys.argv[2])
+        if len(sys.argv)==6:
+          print "password manager with urllib stillneeds implementation"
         try:
           urllib.urlretrieve(sys.argv[1], sys.argv[2], urlreporthook)
         except:

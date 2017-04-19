@@ -4,6 +4,8 @@ import getIONEX as ionex;
 import os
 import numpy as np
 from math import *
+from datetime import date
+
 
 import EMM.EMM as EMM
 
@@ -18,7 +20,7 @@ def getRM(MS=None,
            ionexPath="IONEXdata/",
            earth_rot=0,
            timerange=0,
-           use_azel = False,ha_limit=-1000,
+           use_azel = False,ha_limit=-1000,use_filter=None,
            **kwargs):
     '''optional arguments are:
     radec or pointing : [ra,dec] in radians, or if use_azel =True, az + el in radians,
@@ -29,6 +31,7 @@ def getRM(MS=None,
     useEMM = boolean, use EMM for Earth magnetic field, otherwise WMM cooefficients will be used.
     out_file = string, if given the data points will be written to a text file.
     use_mean = True if you only want report for mean of station positions
+    use_filter =standard deviation,or list of standard deviations (time,long, lat) to gaussian filter TEC data 
     TIME_OFFSET = float, offset time at start and end to ensure all needed values are calculated,
     Returns the (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN '''
@@ -99,9 +102,10 @@ def getRM(MS=None,
         emm=EMM.WMM()
     
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
-    timestmp=list(times[-1])
-    timestmp.append(timerange[1]) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
-    times[-1]=np.array(timestmp)
+    if len(times[-1])==0 or times[-1][-1]<timerange[1]:
+        timestmp=list(times[-1])
+        timestmp.append(timerange[1]) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
+        times[-1]=np.array(timestmp)
     timegrid=np.array([])
     TECs={};
     Bs={}
@@ -144,12 +148,14 @@ def getRM(MS=None,
         starttime=time_array[0]
         print "getting ionexfile for",starttime
         date_parms =  PosTools.obtain_observation_year_month_day_fraction(starttime)
+        dayofyear = date(date_parms[0],date_parms[1],date_parms[2]).timetuple().tm_yday  
+        emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
         ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
         if ionexf==-1:
            print "error opening ionex data"
            return
-        tecinfo=ionex.readTEC(ionexf)
+        tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
           if not stat_pos_mean:
             stn_mean = stat_pos.mean(0)

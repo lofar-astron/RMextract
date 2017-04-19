@@ -1,0 +1,28 @@
+f2py seems to fall over arrays and real declared in the saem line, separate in
+iriflip.for, line 1226
+
+      REAL XN(3)
+      REAL OXN,O2N,N2N               !-- XN, O, O2, N2, neutral densities  (cm-3)
+
+
+create signature file, only for the functions needed (iri_sub)
+f2py -m iri -h iri.pyf only: iri_sub : iritest.for irisub.for irifun.for iritec.for iridreg.for igrf.for cira.for iriflip.for
+
+edit iri.pyf: add ,intent(out) for output paramters:
+line 17,18
+            real dimension(20,1000), intent(out):: outf
+            real dimension(100), intent(out) :: oarr
+
+There appears to be a bug in irifun.for:
+
+add:
+        call read_ig_rz()
+at line 885
+
+
+same for readapf107()...?
+
+
+Compile:
+f2py -c -m iri iri.pyf iritest.for irisub.for irifun.for iritec.for iridreg.for igrf.for cira.for iriflip.for
+
