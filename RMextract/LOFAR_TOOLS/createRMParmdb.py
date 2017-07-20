@@ -4,7 +4,7 @@ import pyrap.tables as tab
 import numpy as np
 
 
-def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
+def createRMParmdb(MS,parmdbname,create=True,patchname='',
                    server="ftp://ftp.unibe.ch/aiub/CODE/",
                    prefix='CODG',
                    ionexPath="IONEXdata/",
@@ -41,6 +41,9 @@ def createRMParmdb(MS,parmdbname,create=True,patchname='phase_center',
             stname=st
         RM[stname]=RM[stname].reshape(RM[stname].shape[:1]+(1,))
         myValue=myParmdb.makeValue(values=RM[stname], sfreq=1e10, efreq=2e10, stime=result['times'], etime=np.ones(result['times'].shape,dtype=float)*result['timestep'], asStartEnd=False)
-        valuename = "RotationMeasure:%s:%s"%(st,patchname)
+        if patchname:
+            valuename = "RotationMeasure:%s:%s"%(st,patchname)
+        else:
+            valuename = "RotationMeasure:%s"%(st)
         myParmdb.deleteValues(valuename)            
         myParmdb.addValues(valuename,myValue)
