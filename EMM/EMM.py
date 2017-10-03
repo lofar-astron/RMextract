@@ -9,11 +9,11 @@ class WMM:
         try:
             cof=cof.replace("WMM.COF","")
             if not os.path.isfile(cof+"WMM.COF"):
-                print "initializing model failed. Did you specify correct location for coefficient files"
+                print ("initializing model failed. Did you specify correct location for coefficient files")
                 return
             self.WMM_Model=emm.WMM_Model(cof+"WMM",date,lon,lat,h);
         except (RuntimeError, TypeError, NameError):
-            print "initializing mdoel failed. Did you specify correct location for coefficient files"
+            print ("initializing mdoel failed. Did you specify correct location for coefficient files")
         self.date=date;
         self.lon=lon;
         self.lat=lat;
@@ -74,12 +74,12 @@ class EMM(WMM):
         try:
             cof=cof.replace("EMM2000.COF","")
             if not os.path.isfile(cof+"EMM2000.COF"):
-                print "initializing model",cof+"EMM2000.COF","failed. Did you specify correct location for coefficient files"
+                print ("initializing model",cof+"EMM2000.COF","failed. Did you specify correct location for coefficient files")
                 return
             
             self.WMM_Model=emm.EMM_Model(cof+"EMM",date,lon,lat,h);
         except (RuntimeError, TypeError, NameError):
-            print "initializing mdoel failed. Did you specify correct location for coefficient files"
+            print ("initializing mdoel failed. Did you specify correct location for coefficient files")
         self.date=date;
         self.lon=lon;
         self.lat=lat;

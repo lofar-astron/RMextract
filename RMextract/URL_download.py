@@ -28,7 +28,7 @@ def main():
         print ("Error: correct usage is %s inURL, outfilename timeout <username> <passwd>"%sys.argv[0])
         sys.exit(-2)
     if HAS_PYCURL:
-      print 'using PyCurl'
+      print ('using PyCurl')
       try:
         print("URL=",sys.argv[1]," File=",sys.argv[2])
         try:
@@ -37,27 +37,27 @@ def main():
                c.setopt(c.URL, sys.argv[1])
                c.setopt(c.WRITEDATA, f)
                if len(sys.argv)==6:
-                 print "adding username,pwd",sys.argv[4],sys.argv[5]
+                 print ("adding username,pwd",sys.argv[4],sys.argv[5])
                  c.setopt(pycurl.USERPWD, '%s:%s'%(sys.argv[4],sys.argv[5]))
 
-               print 'curl getting data at ',sys.argv[1]
+               print ('curl getting data at ',sys.argv[1])
                c.perform()
-               print 'curl closing for ', sys.argv[1]
+               print ('curl closing for ', sys.argv[1])
                c.close()
         except:
-          print 'curl failure - ', sys.argv[1], ' probably not found'
+          print ('curl failure - ', sys.argv[1], ' probably not found')
 #         sys.exit(-3)
       except:
         pass
 
     if not HAS_PYCURL:
-      print 'using urllib'
+      print ('using urllib')
       try:
         timeout = float(sys.argv[3])
         socket.setdefaulttimeout(timeout)
         print("URL=",sys.argv[1]," File=",sys.argv[2])
         if len(sys.argv)==6:
-          print "password manager with urllib stillneeds implementation"
+          print ("password manager with urllib stillneeds implementation")
         try:
           urllib.urlretrieve(sys.argv[1], sys.argv[2], urlreporthook)
         except:

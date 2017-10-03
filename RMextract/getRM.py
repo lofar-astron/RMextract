@@ -146,14 +146,14 @@ def getRM(MS=None,
     for time_array in times:
         #get RM per timeslot
         starttime=time_array[0]
-        print "getting ionexfile for",starttime
+        print ("getting ionexfile for",starttime)
         date_parms =  PosTools.obtain_observation_year_month_day_fraction(starttime)
         dayofyear = date(date_parms[0],date_parms[1],date_parms[2]).timetuple().tm_yday  
         emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
         ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
         if ionexf==-1:
-           print "error opening ionex data"
+           print ("error opening ionex data")
            return
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
@@ -162,7 +162,7 @@ def getRM(MS=None,
             stat_pos = []
             stat_pos.append(stn_mean)
             stat_pos_mean = True
-            print 'stat_pos.mean', stn_mean
+            print ('stat_pos.mean', stn_mean)
         for station,position in  zip(stat_names,stat_pos):
           print ('generating data for station ', station)
  

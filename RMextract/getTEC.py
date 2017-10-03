@@ -88,12 +88,12 @@ def getTEC(MS=None,
         #get relevant ionex file
         ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
         if ionexf==-1:
-            print "error opening ionex data"
+            print ("error opening ionex data")
             return
        
         tecinfo=ionex.readTEC(ionexf)
         for station,position in  zip(stat_names,stat_pos):
-          #print "getting TEC for",station,"at",position,"time",time_array 
+          #print ("getting TEC for",station,"at",position,"time",time_array )
           for time in time_array:
             result =  PosTools.obtain_observation_year_month_day_fraction(time)
             part_of_day= result[3] * 24
