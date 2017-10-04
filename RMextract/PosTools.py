@@ -42,28 +42,28 @@ f = 1.0 / invf
 # Convert latitude (radians), longitude (radians) and elevation (metres) 
 # to ITRF XYZ and vice versa
 def WGS84ToITRF(lat, lon, h): # WGS-84 to ITRF (input in radians)
-	SINK = math.sin(lat)
-	COSK = math.cos(lat)
-	e2 = 2.0 * f - f * f
-	v = sm_a / math.sqrt(1.0 - e2 * SINK * SINK)
-	x = (v + h) * COSK * math.cos(lon)
-	y = (v + h) * COSK * math.sin(lon)
-	z = ((1 - e2) * v + h) * SINK
-	return x, y, z
+        SINK = math.sin(lat)
+        COSK = math.cos(lat)
+        e2 = 2.0 * f - f * f
+        v = sm_a / math.sqrt(1.0 - e2 * SINK * SINK)
+        x = (v + h) * COSK * math.cos(lon)
+        y = (v + h) * COSK * math.sin(lon)
+        z = ((1 - e2) * v + h) * SINK
+        return x, y, z
 
 def ITRFToWGS84(x, y, z):
-	e2 = 2.0 * f - f * f
-	E = e2 / (1.0 - e2)
-	b = sm_a * (1.0 - f)
-	p = math.sqrt(x * x + y * y)
-	q = math.atan2(z * sm_a, (p * b))
-	lat = math.atan2((z + E * b * math.sin(q) * math.sin(q) * math.sin(q)), (p - e2 * sm_a * math.cos(q) * math.cos(q) * math.cos(q)))
-	v = sm_a / math.sqrt(1.0 - e2 * math.sin(lat) * math.sin(lat))
-	lon = math.atan2(y, x)
-	h = (p / math.cos(lat)) - v
+        e2 = 2.0 * f - f * f
+        E = e2 / (1.0 - e2)
+        b = sm_a * (1.0 - f)
+        p = math.sqrt(x * x + y * y)
+        q = math.atan2(z * sm_a, (p * b))
+        lat = math.atan2((z + E * b * math.sin(q) * math.sin(q) * math.sin(q)), (p - e2 * sm_a * math.cos(q) * math.cos(q) * math.cos(q)))
+        v = sm_a / math.sqrt(1.0 - e2 * math.sin(lat) * math.sin(lat))
+        lon = math.atan2(y, x)
+        h = (p / math.cos(lat)) - v
         lat = math.degrees(lat)
         lon = math.degrees(lon)
-	return lat, lon, h       # output in degrees here
+        return lat, lon, h       # output in degrees here
 
 ########################################
 # convert geodetic latitude to geocentric latitude
@@ -182,7 +182,7 @@ def obtain_observation_year_month_day_fraction(start_time):
 # Get the day of year from the Year, month, day for the start of observations
 def obtain_observation_year_month_day_hms(start_time):
     if HAS_PYRAP:
-      #print "getting time", str(start_time)+'s'
+      #print ("getting time", str(start_time)+'s')
       date_list = qu.quantity(str(start_time)+'s').formatted("YMD").split("/")
       year = int(date_list[0])
       month = int(date_list[1])
@@ -200,17 +200,17 @@ def obtain_observation_year_month_day_hms(start_time):
 
 def getMSinfo(MS=None):
     if MS is None:
-        print "No measurement set given"
+        print ("No measurement set given")
         return
     if not HAS_PYRAP:
-        print "Install pyrap to be able to extract info from MS"
+        print ("Install pyrap to be able to extract info from MS")
         return
 
         
     if os.path.isdir(MS):
         myMS=tab.table(MS)
     else:
-        print "Do not understand the format of MS",MS,"bailing out"
+        print ("Do not understand the format of MS",MS,"bailing out")
         return;
     timerange=[np.amin(myMS.getcol('TIME_CENTROID')),np.amax(myMS.getcol('TIME_CENTROID'))]
     timestep=myMS.getcell('INTERVAL',0)
@@ -428,9 +428,9 @@ def getuvw(ra,dec,time, pos1,pos2):
     
     p = me.position('ITRF',str(pos1[0])+'m',str(pos1[1])+'m',str(pos1[2])+'m')
     bl = me.baseline('ITRF',str(pos2[0]-pos1[0])+'m',str(pos2[1]-pos1[1])+'m',str(pos2[2]-pos1[2])+'m')
-    print bl
+    print (bl)
     me.do_frame(p);
-    print me.to_uvw(bl)['xyz']
+    print (me.to_uvw(bl)['xyz'])
     #return uvw;
      
 def getIONEXtimerange(timerange,timestep):
@@ -439,7 +439,7 @@ def getIONEXtimerange(timerange,timestep):
     oldtimerange=-100
     while timerange[0]< timerange[1] and timerange[0]>oldtimerange:
       oldtimerange=timerange[0]
-      #print timerange
+      #print (timerange)
       result =  obtain_observation_year_month_day_fraction(timerange[0])
       part_of_day = result[3]
       result2 =  obtain_observation_year_month_day_fraction(timerange[1])
@@ -447,9 +447,9 @@ def getIONEXtimerange(timerange,timestep):
         times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #make sure to include the last timestep
       else:
         nr_remaining_seconds=(1.-part_of_day) * 24.0 * 60. * 60.;
-        #print "new day",nr_remaining_seconds
+        #print ("new day",nr_remaining_seconds)
         times.append(np.arange(timerange[0],timerange[0]+nr_remaining_seconds,timestep));
-      #print "in postools",len(times),times[-1],timerange,nr_remaining_seconds,result2,result,times[-1][-1],part_of_day
+      #print ("in postools",len(times),times[-1],timerange,nr_remaining_seconds,result2,result,times[-1][-1],part_of_day)
       if len(times[-1]):
         timerange[0]=times[-1][-1]+timestep
     return times,timerange
@@ -512,7 +512,7 @@ def getAzEl(pointing,time,position,ha_limit=-1000):
             me.doframe(t)
             hadec=me.measure(phasedir,"HADEC")
             if abs(hadec['m0']['value'])>ha_limit:
-                print "below horizon",tab.taql('calc ctod($time s)')[0],degrees(hadec['m0']['value']),degrees(hadec['m1']['value'])
+                print ("below horizon",tab.taql('calc ctod($time s)')[0],degrees(hadec['m0']['value']),degrees(hadec['m1']['value']))
                 return 999,999
             else:
                 azel=me.measure(phasedir,"AZEL")
@@ -521,7 +521,7 @@ def getAzEl(pointing,time,position,ha_limit=-1000):
                 el=azel['m1']['value'];
     elif HAS_EPHEM:
         if ha_limit!=-1000:
-            print "limiting on HA/DEC not implemented for PyEphem yet, ignoring"
+            print ("limiting on HA/DEC not implemented for PyEphem yet, ignoring")
         location_lat, location_lon, location_height = ITRFToWGS84(position[0], position[1], position[2])
         location = ephem.Observer()
         # convert geodetic latitude to geocentric
@@ -559,7 +559,7 @@ def get_time_range(start_time,end_time,timestep,time_in_sec,TIME_OFFSET=0):
         reference_time = start_time * 86400.0 - TIME_OFFSET
         st = reference_time - timestep 
         et = end_time * 86400.0 +  timestep + TIME_OFFSET
-        #print "getting string",reference_time
+        #print ("getting string",reference_time)
         str_start_time =  obtain_observation_year_month_day_hms(reference_time)
         timerange= [st, et]
       except:
