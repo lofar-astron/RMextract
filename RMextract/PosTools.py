@@ -378,7 +378,7 @@ def getLonLatStation(az=0,el=0,pos=posCS002):
     me=measures()
     me.do_frame(me.position('ITRF',str(pos[0])+'m',str(pos[1])+'m',str(pos[2])+'m'))
     #me.do_frame(me.epoch('utc', 'today'))
-    direction=me.direction("AZEL",az,el)
+    direction=me.direction("AZELGEO",az,el)
     return me.measure(direction,"ITRF");
 
 
@@ -404,7 +404,7 @@ def azel2radec(az,el,time, pos):
         az=str(az)+'rad';
     if type(el)!=str:
         el=str(el)+'rad';
-    phasedir=me.direction('AZEL',az,el)
+    phasedir=me.direction('AZELGEO',az,el)
     t=me.epoch("UTC",qu.quantity(time));
     me.do_frame(t);
 
@@ -515,7 +515,7 @@ def getAzEl(pointing,time,position,ha_limit=-1000):
                 print ("below horizon",tab.taql('calc ctod($time s)')[0],degrees(hadec['m0']['value']),degrees(hadec['m1']['value']))
                 return 999,999
             else:
-                azel=me.measure(phasedir,"AZEL")
+                azel=me.measure(phasedir,"AZELGEO")
   
                 az=azel['m0']['value'];
                 el=azel['m1']['value'];
