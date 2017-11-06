@@ -1,4 +1,4 @@
-import EMM_Model as emm
+import EMM.EMM_Model as emm
 from math import *
 import numpy as np
 from pkg_resources import resource_filename

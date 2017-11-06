@@ -7,7 +7,7 @@ from math import *
 from datetime import date
 
 
-from RMextract.EMM import EMM 
+import EMM.EMM as EMM
 import math
 
 

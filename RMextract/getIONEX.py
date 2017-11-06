@@ -121,7 +121,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
         '''Derive interpolated (in lon,lat,time) vTEC values. Lat should be angle in degrees between -90 and 90,Lon angle between -180,180. Time in hour of the day (eg. 23.5 for half past 11PM). With apply_earth_rotation you can specify (with a number between 0 and 1) how much of the earth rotaion is taken in to account in the interpolation step. This is assuming that the TEC maps move according to the rotation Earth (following method 3 of interpolation described in the IONEX document). Experiments with ROB data show that this is not really the case, resulting in strange wavelike structures when applying this smart interpolation. Negative values of this parameter would result in an ionosphere that moves with the roation of the earth''' 
         
         if debugmode:
-                print "lon,lat,time",lon,lat,time
+                print ("lon,lat,time",lon,lat,time)
 
         tecdata=tecinfo[0];  #TEC in TECU
         rmsdata=tecinfo[1];  # not used here
@@ -139,7 +139,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
         elif times[timeIdx1]==time:
                 exactTime=True;
         if timeIdx1<0:
-                print "timeslot missing!"
+                print ("timeslot missing!")
                 timeIdx1=timeIdx2=0
                 exactTime=True
 
@@ -222,9 +222,9 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
                 wtlat1=abs(lat-latarray[lat2])/latstep;
                 wtlat2=abs(latarray[lat1]-lat)/latstep;
         if debugmode:
-                print "indices t1,t2,lon1,lon2,lat1,lat2",timeIdx1,timeIdx2,lonIdx1,lonIdx2,lat1,lat2,lon11,lon12,lon21,lon22
-                print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
-                print "weights",wt1,wt2,wtlon11,wtlon12,wtlat1,wtlat2
+                print ("indices t1,t2,lon1,lon2,lat1,lat2",timeIdx1,timeIdx2,lonIdx1,lonIdx2,lat1,lat2,lon11,lon12,lon21,lon22)
+                print (tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22])
+                print ("weights",wt1,wt2,wtlon11,wtlon12,wtlat1,wtlat2)
         #now get all needed maps
         #print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
         timeinterpols=[wt1*tecdata[timeIdx1,lat1,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat1,lon21]*wtlon21,
@@ -236,7 +236,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
         tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
             timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
         if debugmode:
-                print "tecvalue",tecvalue
+                print ("tecvalue",tecvalue)
         #print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
         return tecvalue;
 
@@ -244,7 +244,7 @@ def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
 def combine_ionex(outpath,filenames,newfilename):
     """Combine separate IONEXfiles into 1 single file (needed for 15min ROBR data)"""
     if os.path.isfile(outpath+newfilename):
-            print "FILE exists: ",outpath+newfilename
+            print ("FILE exists: ",outpath+newfilename)
             return outpath+newfilename
     newf=open(outpath+newfilename,'w')
     filenames=sorted(filenames)
@@ -310,12 +310,12 @@ retval    O  The return code of the command.  Note that if the process times out
     """
     #first check if command is exectuable:
     if not cmd_exists(command):
-            raise RuntimeError, "Could not run '%s'.Please check your PATH"%command
+            raise RuntimeError("Could not run '%s'.Please check your PATH"%command)
     pid = os.fork()
     #print "my pid",pid
     if(pid == 0):
         # We are the child, execute the command
-        print "executing",command,args
+        print ("executing",command,args)
         os.execvp(command, args)
         # If we are here, something bad happened.  It must be the
         # user's fault.  :)
@@ -323,8 +323,8 @@ retval    O  The return code of the command.  Note that if the process times out
     elif(pid < 0):
         # fork failed
         raise OSError("Hey, I couldn't fork!")
-    for i in xrange(int(timeout)):
-        print "waiting",i,timeout
+    for i in range(int(timeout)):
+        print ("waiting",i,timeout)
         systime.sleep(1)
         status = os.waitpid(pid,os.WNOHANG)
         if(status == (0,0)):
@@ -350,11 +350,11 @@ def gunzip_some_file(compressed_file,
             new_compressed = compressed_file[:-1] + "gz"
             return gunzip_some_file(new_compressed, uncompressed_file,
                                     delete_file)
-        raise RuntimeError, "No such file '%s' to uncompress"%compressed_file
+        raise RuntimeError("No such file '%s' to uncompress"%compressed_file)
     command = "gunzip -dc %s > %s"%(compressed_file,uncompressed_file)
     retcode = os.system(command)
     if(retcode):
-        raise RuntimeError, "Could not run '%s'"%command
+        raise RuntimeError("Could not run '%s'"%command)
     if(delete_file):
         os.remove(compressed_file)
     return
@@ -367,7 +367,7 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                 try:
                         os.mkdir(outpath)
                 except:
-                        print "cannot create output directory for IONEXdata",outpath
+                        print ("cannot create output directory for IONEXdata",outpath)
                         return -1
         try:
           yy=time[2:4];
@@ -416,29 +416,29 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                                 backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                 S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
                 
-        print 'file needed:', filenames[0],S
-        print "checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2])
+        print ('file needed:', filenames[0],S)
+        print ("checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2]))
         for filename,backupfilename in zip(filenames,backupfilenames):
                 fname=filename.split("/")[-1]
                 if not overwrite and os.path.isfile(outpath+fname.strip(".Z")):
-                        print "file exists",outpath+fname;
+                        print ("file exists",outpath+fname)
                         continue
                 if server == None:
-                        print "File:",fname.strip(".Z"),"not found on disk and download is disabled."
+                        print ("File:",fname.strip(".Z"),"not found on disk and download is disabled.")
                         return -1
                 else:
                         extra_options=[]
                         if "ftp://213.184.6.172/" in server:
-                                print "adding user name and password for",server
+                                print ("adding user name and password for",server)
                                 extra_options=["data-out","Qz8803#mhR4z"] #user:passwrd
                                 
                         systime.sleep(2)
-                        print "retreiving",run_command_timeout("URL_download.py",
+                        print ("retreiving",run_command_timeout("URL_download.py",
                                                                ["URL_download.py", server+filename, outpath+fname,
                                                                 "%d"%DEFAULT_TIMEOUT]+extra_options,
-                                                               DEFAULT_TIMEOUT)
+                                                               DEFAULT_TIMEOUT))
                         if not os.path.isfile(outpath+fname):
-                                print "trying",server+backupfilename
+                                print ("trying",server+backupfilename)
                                 fname=backupfilename.split("/")[-1]
                                 #try backup name
                                 systime.sleep(2)
@@ -448,13 +448,13 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                                                     DEFAULT_TIMEOUT)
                         count=0
                         while count<10 and (not os.path.isfile(outpath+fname) and not os.path.isfile(outpath+fname.strip(".Z"))):
-                                print "waiting..."
+                                print ("waiting...")
                                 systime.sleep(1)
                                 count+=1
                         if os.path.isfile(outpath+fname) and fname[-2:]==".Z":
                                 gunzip_some_file(outpath+fname,outpath+fname[:-2]);
                         elif not os.path.isfile(outpath+fname):
-                                print "file",filename,"not found on server",server;
+                                print ("file",filename,"not found on server",server)
                                 return -1;
         if len(filenames)>1:
                 filenames=[i.split("/")[-1].strip(".Z") for i in filenames]
