@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-import PosTools
-import getIONEX as ionex;
+from RMextract import PosTools
+from RMextract import getIONEX as ionex;
 import os
 import numpy as np
 from math import *
 from datetime import date
 
 
-import EMM.EMM as EMM
-
+from RMextract.EMM import EMM 
 import math
 
 
