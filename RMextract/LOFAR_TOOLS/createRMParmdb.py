@@ -5,8 +5,8 @@ import numpy as np
 
 
 def createRMParmdb(MS,parmdbname,create=True,patchname='',
-                   server="ftp://ftp.unibe.ch/aiub/CODE/",
-                   prefix='CODG',
+                   server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+                   prefix='codg',
                    ionexPath="IONEXdata/",
                    earth_rot=0,
                    timestep=900.,

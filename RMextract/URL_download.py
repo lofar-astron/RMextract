@@ -2,6 +2,7 @@
 # AGW - Adapted from Albus_RINEX_download.py
 
 import sys
+import os
 try:
   import pycurl
   HAS_PYCURL = True
@@ -46,6 +47,7 @@ def main():
                c.close()
         except:
           print ('curl failure - ', sys.argv[1], ' probably not found')
+          os.remove(sys.argv[2])
 #         sys.exit(-3)
       except:
         pass

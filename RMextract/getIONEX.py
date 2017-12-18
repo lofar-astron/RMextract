@@ -360,7 +360,7 @@ def gunzip_some_file(compressed_file,
     return
 
                 
-def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/CODE/",prefix="CODG",outpath='./',overwrite=False):
+def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",prefix="codg",outpath='./',overwrite=False):
         if outpath[-1]!="/":
                 outpath+="/"
         if not os.path.isdir(outpath):
@@ -460,4 +460,4 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
                 filenames=[i.split("/")[-1].strip(".Z") for i in filenames]
                 newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
                 return combine_ionex(outpath,filenames,newfilename)
-        return outpath+filename.split("/")[-1].strip(".Z")
+        return outpath+fname.strip(".Z")

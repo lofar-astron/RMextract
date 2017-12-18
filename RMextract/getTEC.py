@@ -7,8 +7,8 @@ from math import *
 ION_HEIGHT=450.e3
 
 def getTEC(MS=None,
-           server="ftp://ftp.unibe.ch/aiub/CODE/",
-           prefix='CODG',
+           server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+           prefix='codg',
            ionexPath="IONEXdata/",
            earth_rot=0,ha_limit=-1000,
            **kwargs):

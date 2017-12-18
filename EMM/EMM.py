@@ -1,4 +1,5 @@
-import EMM_Model as emm
+from __future__ import absolute_import
+import EMM.EMM_Model as emm
 from math import *
 import numpy as np
 from pkg_resources import resource_filename
