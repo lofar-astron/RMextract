@@ -73,8 +73,10 @@ def readTEC(filename,use_filter=None):
         for line in NewLongList:
                 splitted =line.split();
                 #print "evaluating",splitted;
-                if splitted[0]=='END' and splitted[2]=='FILE':
-                        break;
+		if not line:           
+                          break
+                #if splitted[0]=='END' and splitted[2]=='FILE':
+                #        break;
                 if splitted[-1] == 'MAP' and splitted[-4] == 'START':
                         start_fill=True;
                         # found map start filling
@@ -412,7 +414,7 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://cddis.gsfc.nasa.gov
                                 
                         else:
 
-                                filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
+                                filenames=[str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                                 backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                 S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
                 
