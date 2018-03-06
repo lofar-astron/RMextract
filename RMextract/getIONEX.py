@@ -413,11 +413,15 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://cddis.gsfc.nasa.gov
                                 backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                                 
                         else:
+                                if not server==Node and  "unibe" in server:
+                                        filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]      
+                                        backupfilenames = [str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                                else:
 
-                                filenames=[str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                                        filenames=[str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
+                                        backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
                 S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
-                
+        #TODO: create a general list ofpossible filenames       
         print ('file needed:', filenames[0],S)
         print ("checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2]))
         for filename,backupfilename in zip(filenames,backupfilenames):
