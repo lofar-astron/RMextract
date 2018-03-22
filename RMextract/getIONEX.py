@@ -73,7 +73,7 @@ def readTEC(filename,use_filter=None):
         for line in NewLongList:
                 splitted =line.split();
                 #print "evaluating",splitted;
-		if not line:           
+                if not line:           
                           break
                 #if splitted[0]=='END' and splitted[2]=='FILE':
                 #        break;
