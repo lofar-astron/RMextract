@@ -11,6 +11,10 @@ Created on Tue Aug 7 11:46:57 2018
 from losoto.h5parm import h5parm
 from RMextract import getRM
 from RMextract import PosTools
+import os
+import numpy as np
+import sys
+import logging
 
 
 def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timestep=300,
