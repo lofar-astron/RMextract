@@ -460,8 +460,8 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    ftpserver = server.strip("ftp:://").split("/")[0]
-    ftppath = "/".join(server.strip("ftp:://").split("/")[1:])
+    ftpserver = server.strip("ftp:").strip("/").split("/")[0]
+    ftppath = "/".join(server.strip("ftp:").strip("/").split("/")[1:])
     ftp = ftplib.FTP(ftpserver)
     try:
         ftp.login()
@@ -486,7 +486,8 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     logging.info("Retrieving data from %s", totpath)
     myl = []
     ftp.retrlines("NLST", myl.append)
-    filenames = [i for i in myl if (prefix.lower() in i.lower()) and
+    filenames = [i for i in myl if (prefix.lower() in i.lower()) and 
+                 ("%03d"%dayofyear in i.lower()) and
                  (i.lower().endswith("i.z") or i.lower().endswith("i"))]
     logging.info(" ".join(filenames))
     assert len(filenames) > 0, "No files found on %s for %s" % (server,

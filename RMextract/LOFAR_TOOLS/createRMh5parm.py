@@ -11,14 +11,42 @@ Created on Tue Aug 7 11:46:57 2018
 from losoto.h5parm import h5parm
 from RMextract import getRM
 from RMextract import PosTools
+import pyrap.tables as pt
 import os
 import numpy as np
 import sys
 import logging
 
 
+def makesolset(ms, data, solset_name):
+    solset = data.makeSolset(solset_name)    
+
+    antennaFile = MS+"/ANTENNA"
+    logging.info('Collecting information from the ANTENNA table.')
+    antennaTable = pt.table(antennaFile, ack=False)
+    antennaNames = antennaTable.getcol('NAME')
+    antennaPositions = antennaTable.getcol('POSITION')
+    antennaTable.close()
+    antennaTable = solset._f_get_child('antenna')
+    antennaTable.append(zip(*(antennaNames,antennaPositions)))
+    
+    fieldFile = MS + "FIELD"
+    logging.info('Collecting information from the FIELD table.')
+    fieldTable = pt.table(fieldFile, ack=False)
+    phaseDir = fieldTable.getcol('PHASE_DIR')
+    pointing = phaseDir[0, 0, :]
+    fieldTable.close()
+
+    sourceTable = solset._f_get_child('source')
+    # add the field centre, that is also the direction for Gain and Common*
+    sourceTable.append([('pointing',pointing)])
+
+
+
+
 def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timestep=300,
-                server="ftp://ftp.aiub.unibe.ch/CODE/",prefix='CODG',ionexPath="./",earth_rot=0):
+                ionex_server="ftp://ftp.aiub.unibe.ch/CODE/",
+                ionex_prefix='CODG',ionexPath="./",earth_rot=0):
     '''Add rotation measure to existing h5parmdb
     
     Args:
@@ -29,60 +57,56 @@ def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timeste
         all_stations (bool) : optional calculate RM values for all stations in the MS,'
                             default only for position of CS002LBA 
         timestep (float) : timestep in seconds
-        server (string) : ftp server for IONEX files
-        prefix (string) : prefix of IONEX files
+        ionex_server (string) : ftp server for IONEX files
+        ionex_prefix (string) : prefix of IONEX files
         ionexPath (string) : location where IONEX files are stored
         earth_rot (float) : parameter to determine how much earth rotation is taken \
         into account when interpolating IONEX data. (0 is none, 1 is full)
     '''
     
-    data          = h5parm(h5parmdb, readonly=False)
-    solset        = data.getSolset(solset_name)
-    station_names = solset.getAnt().keys()
+
     if not all_stations:
         rmdict = getRM.getRM(MS, 
-                             server=server, 
-                             prefix=prefix, 
+                             server=ionex_server, 
+                             prefix=ionex_prefix, 
                              ionexPath=ionexPath, 
                              timestep=timestep,
-                             stat_pos=PosTools.posCS002,
+                             stat_names = ["st0"],
+                             stat_pos=[PosTools.posCS002],
                              earth_rot=earth_rot)
-        if not rmdict:
-            if not server:
-                raise ValueError("One or more IONEX files is not found on disk and download is disabled!\n"
-                                 "(You can run \"bin/download_IONEX.py\" outside the pipeline if needed.)")
-            else:
-                raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
 
-        rm_vals=np.ones((len(station_names),rmdict['RM']['st0'].shape[0]),dtype=float)
-        rm_vals+=rmdict['RM']['st0'][np.newaxis]
     else:
         rmdict = getRM.getRM(MS, 
-                             server=server, 
-                             prefix=prefix, 
+                             server=ionex_server, 
+                             prefix=ionex_prefix, 
                              ionexPath=ionexPath, 
                              timestep=timestep,
                              earth_rot=earth_rot)
-        if not rmdict:
-            if not server:
-                raise ValueError("One or more IONEX files is not found on disk and download is disabled!\n"
+    if not rmdict:
+        if not server:
+            raise ValueError("One or more IONEX files is not found on disk and download is disabled!\n"
                                  "(You can run \"bin/download_IONEX.py\" outside the pipeline if needed.)")
-            else:
-                raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
+        else:
+            raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
+ 
+    data          = h5parm(h5parmdb, readonly=False)
+    if not data.getSolsets().has_key(solset_name):
+        makesolset(MS,data,solset_name)
+    solset        = data.getSolset(solset_name)
+    station_names = solset.antenna.cols.name[:]
 
-        rm_vals=np.array([rmdict["RM"][stat] for stat in station_names])
-
+ 
     logging.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
-    try:
-        new_soltab = solset.getSoltab('RMextract')
-        new_soltab.delete()
-    except:
-        pass
-    new_soltab = solset.makeSoltab(soltype='rotationmeasure', soltabName='RMextract',
+    if all_stations:
+        rm_vals=np.array([rmdict["RM"][stat] for stat in station_names])[:,:,0]
+    else:
+        rm_vals=np.ones((len(station_names),rmdict['RM']['st0'].shape[0]),dtype=float)
+        rm_vals+=rmdict['RM']['st0'][:,0][np.newaxis]
+        
+    new_soltab = data.makeSoltab(solset = solset_name,soltype='rotationmeasure', soltab='RMextract',
                                    axesNames=['ant', 'time'], axesVals=[station_names, rmdict['times']],
                                    vals=rm_vals,
                                    weights=np.ones_like(rm_vals, dtype=np.float16))
-    new_soltab.addHistory('CREATE (by createRMh5parm (RMextract) script)')
 
 
     
@@ -95,8 +119,8 @@ if __name__ == '__main__':
                         help='MS for which the parmdb should be created.')
     parser.add_argument('h5parm', type=str,
                         help='H5parm to which the results of the CommonRotationAngle is added.')
-    parser.add_argument('--server', type=str, default='None',
-                        help='URL of the server to use. (default: None)')
+    parser.add_argument('--server', type=str, default='ftp://ftp.aiub.unibe.ch/CODE/',
+                        help='URL of the server to use. (default: ftp://ftp.aiub.unibe.ch/CODE/)')
     parser.add_argument('--prefix', type=str, default='CODG',
                         help='Prefix of the IONEX files. (default: \"CODG\")')
     parser.add_argument('--ionexpath', '--path', type=str, default='IONEXdata/',
