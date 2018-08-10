@@ -18,7 +18,7 @@ import sys
 import logging
 
 
-def makesolset(ms, data, solset_name):
+def makesolset(MS, data, solset_name):
     solset = data.makeSolset(solset_name)    
 
     antennaFile = MS+"/ANTENNA"
@@ -30,7 +30,7 @@ def makesolset(ms, data, solset_name):
     antennaTable = solset.obj._f_get_child('antenna')
     antennaTable.append(zip(*(antennaNames,antennaPositions)))
     
-    fieldFile = MS + "FIELD"
+    fieldFile = MS + "/FIELD"
     logging.info('Collecting information from the FIELD table.')
     fieldTable = pt.table(fieldFile, ack=False)
     phaseDir = fieldTable.getcol('PHASE_DIR')
@@ -44,13 +44,13 @@ def makesolset(ms, data, solset_name):
 
 
 
-def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timestep=300,
+def main(MSfiles, h5parmdb, solset_name = "sol000",all_stations=False,timestep=300,
                 ionex_server="ftp://ftp.aiub.unibe.ch/CODE/",
                 ionex_prefix='CODG',ionexPath="./",earth_rot=0):
     '''Add rotation measure to existing h5parmdb
     
     Args:
-        ms (string) :  path + filename of Measurement Set 
+        MSfiles (string) :  path + filename of Measurement Set 
         h5parmdb (string) : name of existing h5parm
         solset_name (string) : optional name of solset in h5parmdb, 
                             if not set, first one will be chosen
@@ -64,7 +64,15 @@ def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timeste
         into account when interpolating IONEX data. (0 is none, 1 is full)
     '''
     
-
+    mslist = MSfiles.lstrip('[').rstrip(']').replace(' ','').replace("'","").split(',')
+    
+    if len(mslist) == 0:
+        raise ValueError("Did not find any existing directory in input MS list!")
+        pass
+    else:
+        MS = mslist[0]
+        pass
+    
     if not all_stations:
         rmdict = getRM.getRM(MS, 
                              server=ionex_server, 
@@ -114,7 +122,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Adds CommonRotationAngle to an H5parm from RMextract.')
 
-    parser.add_argument('MSfile', type=str,
+    parser.add_argument('MSfiles', type=str,
                         help='MS for which the parmdb should be created.')
     parser.add_argument('h5parm', type=str,
                         help='H5parm to which the results of the CommonRotationAngle is added.')
@@ -140,14 +148,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    MS = args.MSfile
+    MS = args.MSfiles
     h5parmdb = args.h5parm
     logging.info("Working on:", MS, h5parmdb)
-    createh5Parm(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
+    main(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
                  ionexPath=args.ionexpath, solset_name=args.solsetName, 
                  all_stations=args.allStations, timestep=args.timestep,
                  earth_rot=args.earth_rot)
-    
-    
-    
     
