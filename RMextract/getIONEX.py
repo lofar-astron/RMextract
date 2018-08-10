@@ -1,469 +1,564 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-#------------------------------------------------------
-# Extract TEC values from an IONEX file
-# given a specific time and geographic coordinate.
+"""
+Extract TEC values from an IONEX file given a specific time and geographic coordinate.
 
+Created on Tue Apr 24 11:46:57 2018
+
+@author: mevius
+"""
 import numpy as np
-import math
-from datetime import date
-import os
-import time as systime
-import string
-import subprocess
+import datetime
 import scipy.ndimage.filters as myfilter
+import logging
+import os
+import ftplib
 
-debugmode=False
-
-DEFAULT_TIMEOUT=100;
-
-def readTEC(filename,use_filter=None): 
-
-        # Opening and reading the IONEX file into memory
-        linestring = open(filename, 'r').read()
-        LongList = linestring.split('\n')
-        # creating a new array without the header and only
-        # with the TEC maps
-        exponent=0.1 #Default
-        for i,line in enumerate(LongList):
-                splitted=line.split()
-                #print "evaluating",splitted;
-                if splitted[-1] == 'DESCRIPTION' or splitted[-1] == 'COMMENT':
-                        continue;
-                if splitted[-1] == 'FILE':
-                        if splitted[-2] == 'IN':
-                                NumberOfMaps = int(splitted[0])
-                                continue;
-                if splitted[-1] == 'DHGT':
-                        IonH = float(splitted[0])
-                        continue;
-                if splitted[-1] == 'EXPONENT':
-                        exponent = pow(10,float(splitted[0]))
-                        continue;
-                if splitted[-1] == 'DLAT':
-                        startLat = float(splitted[0])
-                        endLat = float(splitted[1])
-                        stepLat = float(splitted[2])
-                        continue;
-                if splitted[-1] == 'DLON':
-                        startLon = float(splitted[0])
-                        endLon = float(splitted[1])
-                        stepLon = float(splitted[2])
-                        continue;
-                if splitted[-1]=='MAP' and (splitted[-4]+splitted[-2] == 'EPOCHFIRST'):
-                        startYear = int(splitted[0])
-                        startMonth = int(splitted[1])
-                        startDay = int(splitted[2])
-                        date=startYear*366.+startMonth*31.+startDay;
-                        continue;
-                if splitted[0] == 'END':
-                        if splitted[2] == 'HEADER':
-                                break;
-        NewLongList=LongList[i+1:];
-        # Variables that indicate the number of points in Lat. and Lon.
-        # 3D array that will contain TEC/RMS values only
-        lonarray=np.arange(startLon,endLon+stepLon,stepLon);
-        latarray=np.arange(startLat,endLat+stepLat,stepLat);
-        pointsLon = lonarray.shape[0]
-        pointsLat = latarray.shape[0]
-        times=np.zeros(NumberOfMaps,dtype='float32');
-        tecdata = np.zeros((NumberOfMaps,pointsLat,pointsLon))
-        rmsdata = np.zeros((NumberOfMaps,pointsLat,pointsLon))
-        start_fill=False;
-        for line in NewLongList:
-                splitted =line.split();
-                #print "evaluating",splitted;
-                if not line:           
-                          break
-                #if splitted[0]=='END' and splitted[2]=='FILE':
-                #        break;
-                if splitted[-1] == 'MAP' and splitted[-4] == 'START':
-                        start_fill=True;
-                        # found map start filling
-                        if splitted[-2] == 'TEC':
-                                fillarray=tecdata
-                        else:
-                                if splitted[-2] == 'RMS':
-                                        fillarray=rmsdata
-                                else:
-                                        start_fill=False;
-                                        # something else
-                                        continue;
-                        mapnr=int(splitted[0])-1;
-                        continue;
-                if start_fill:
-                        if splitted[-1] == 'MAP' and splitted[1] == 'END':
-                                start_fill=False;
-                                continue;
-                        if splitted[-1] == 'MAP' and splitted[-4] == 'EPOCH':
-                                #print "checking epoch",line,splitted
-                                times[mapnr]=float(splitted[3])+float(splitted[4])/60.+float(splitted[5])/3600.;
-                                if (float(splitted[0])*366+float(splitted[1])*31+float(splitted[2]))>date: #next day
-                                        times[mapnr]+=24.;
-                                continue;
-                        if splitted[-1] == 'LAT/LON1/LON2/DLON/H':
-                                latidx=np.argmin(np.absolute(latarray-float(line[:8])));
-                                lonidx=0;
-                                #print "latidx",latidx,float(line[:8])
-                                continue
-                        datalength=len(splitted)
-                        fillarray[mapnr,latidx,lonidx:lonidx+datalength]=\
-                            np.array([float(i)*exponent for i in splitted]);
-                        lonidx+=datalength;
-
-        if not use_filter is None:
-                tecdata=myfilter.gaussian_filter(tecdata,use_filter,mode='nearest')
-
-        return (tecdata,rmsdata,lonarray,latarray,times);
+logging.basicConfig(level=logging.DEBUG)
 
 
+def _read_ionex_header(filep):
+    """reads header from ionex file. returns data shape and position of first
+    data in the file.
+
+    Args:
+        filep (filepointer) : pointer to opened ionex file.
+
+    Returns:
+        Tuple[float, np.array, np.array, np.array]:
+            multiplication factor,lonarray,latarray,timearray
+    """
+
+    filep.seek(0)
+    for line in filep:
+        if "END OF HEADER" in line:
+            break
+        stripped = line.strip()
+        if stripped.endswith("EPOCH OF FIRST MAP"):
+            starttime = datetime.datetime(
+                *(int(i) for i in
+                  stripped.strip("EPOCH OF FIRST MAP").split()))
+        if stripped.endswith("EPOCH OF LAST MAP"):
+            endtime = datetime.datetime(
+                *(int(i) for i in
+                  stripped.strip("EPOCH OF LAST MAP").split()))
+        if stripped.endswith("INTERVAL"):
+            timestep = float(stripped.split()[0]) / 3600.
+        if stripped.endswith("EXPONENT"):
+            exponent = pow(10, float(stripped.split()[0]))
+        if stripped.endswith("DLON"):
+            start_lon, end_lon, step_lon = \
+                (float(i) for i in stripped.split()[:3])
+        if stripped.endswith("DLAT"):
+            start_lat, end_lat, step_lat = \
+                (float(i) for i in stripped.split()[:3])
+        if stripped.endswith("OF MAPS IN FILE"):
+            ntimes = int(stripped.split()[0])
+
+    lonarray = np.arange(start_lon, end_lon + step_lon, step_lon)
+    latarray = np.arange(start_lat, end_lat + step_lat, step_lat)
+    dtime = endtime - starttime
+    dtimef = dtime.days * 24. + dtime.seconds / 3600.
+    logging.debug("timerange %f hours. step = %f ", dtimef, timestep)
+    timearray = np.arange(0,
+                          dtimef + timestep,
+                          timestep)
+    if timearray.shape[0] < ntimes:
+        # bug in ILTF files,last time in header is incorrect
+        extratimes = np.arange(timearray[-1] + timestep,
+                               timearray[-1]
+                               + (ntimes -
+                                  timearray.shape[0] + 0.5) * timestep,
+                               timestep)
+        timearray = np.concatenate((timearray, extratimes))
+    timearray += starttime.hour\
+        + starttime.minute/60.\
+        + starttime.second/3600.
+
+    return exponent, lonarray, latarray, timearray
 
 
-def getTECinterpol(time,lat,lon,tecinfo,apply_earth_rotation=False):
-        '''Derive interpolated (in lon,lat,time) vTEC values. Lat should be angle in degrees between -90 and 90,Lon angle between -180,180. Time in hour of the day (eg. 23.5 for half past 11PM). With apply_earth_rotation you can specify (with a number between 0 and 1) how much of the earth rotaion is taken in to account in the interpolation step. This is assuming that the TEC maps move according to the rotation Earth (following method 3 of interpolation described in the IONEX document). Experiments with ROB data show that this is not really the case, resulting in strange wavelike structures when applying this smart interpolation. Negative values of this parameter would result in an ionosphere that moves with the roation of the earth''' 
-        
-        if debugmode:
-                print ("lon,lat,time",lon,lat,time)
+def read_tec(filename, _use_filter=None):
+    """ returns TEC, RMS longitude, lattitude and time read from an IONEX file.
 
-        tecdata=tecinfo[0];  #TEC in TECU
-        rmsdata=tecinfo[1];  # not used here
-        lonarray=tecinfo[2]; # longitude in degrees from West to East (- to +)
-        latarray=tecinfo[3]; # lattitude in degrees
-        times=tecinfo[4];    # times in hour of the day (eg. 23.5 for half past 11PM)
-        exactTime=False;
+    Args:
+        filename (string) : the full path to the IONEXfile
+        _use_filter (float) : optional filter the data in space and time
+                             with a gaussian filter with sigma use_filter.
+                             calls scipy.ndimage.filter.gaussian_filter(tec,
+                             use_filter)
 
-        #get indices of nearest time,lon,lat
-        #assume time is  sorted from early to late
-        timeIdx2=timeIdx1=np.argmin(np.absolute(times-time));
-        if times[timeIdx1]>time:
-                timeIdx1-=1;
-                timeIdx2=timeIdx1;
-        elif times[timeIdx1]==time:
-                exactTime=True;
-        if timeIdx1<0:
-                print ("timeslot missing!")
-                timeIdx1=timeIdx2=0
-                exactTime=True
-
-        # get rotation  angle for method 3 (rotate maps before interpolating)
-        rot1=rot2=0;
-        wt1=wt2=0.5;
-        lonstep = abs(lonarray[1]-lonarray[0]);
-        #assume lon is sorted from west to east BUG:: Should be checked! but ok for ODG and ROB files
-        #BUG: take into acount in between lon,lat grid if rotation larger than the lon/lat resolution
-        if not exactTime:
-                # rotation in degrees of the earlier map
-                rot1 = ((time-times[timeIdx1])*360./24.)*apply_earth_rotation;
-                # rotation in degrees of the later map
-                rot2 = ((times[timeIdx1+1]-time)*360./24.)*apply_earth_rotation;
-                lonarray1=lonarray-rot1  #create new rotated longitude array
-                lonarray2=lonarray+rot2   #create new rotated longitude array
-                timeIdx2+=1
-                timestep=times[timeIdx2]-times[timeIdx1];
-                wt1=(times[timeIdx2]-time)/timestep; #weight of earlier map
-                wt2=(time-times[timeIdx1])/timestep; #weight of later map
-        else:
-                lonarray1=lonarray
-                lonarray2=lonarray
-        exactLon=False;
-        # index of longitude1 in earlier map
-        lonIdx1=np.argmin(np.absolute(np.fmod(lonarray1-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
-        # index of longitude1 in later map
-        lonIdx2=np.argmin(np.absolute(np.fmod(lonarray2-lon+540.,360.)-180.)); #make sure it lies in [-180,180]
-
-
-        if lonarray1[lonIdx1]>lon or (lonIdx1==0 and (lonarray1[lonIdx1]+lonstep)<lon) :
-                lonIdx1-=1;
-                if lonIdx1 <0:
-                        lonIdx1+=lonarray.shape[0]; #BUG: this only works if you have coordinates of a full rotation (-180,180)
-        if lonarray2[lonIdx2]>lon or (lonIdx2==0 and (lonarray2[lonIdx2]+lonstep)<lon) :
-                lonIdx2-=1;
-                if lonIdx2 <0:
-                        lonIdx2+=lonarray.shape[0];#BUG: this only works if you have coordinates of a full rotation (-180,180)
-        elif lonarray1[lonIdx1]==lon and lonarray2[lonIdx2]==lon:
-                exactLon=True;
-
-        #indices used for method 3 interpol, remainder correctly treats negative indices, only works correctly if data has all longitudes between -180,180. Otherwise you get into trouble at the edges.
-        lon12=lon11=(np.remainder(lonIdx1,lonarray.shape[0])).astype(int); #coordinates of earlier map
-        lon22=lon21=(np.remainder(lonIdx2,lonarray.shape[0])).astype(int); #coordinates of later map
-        wtlon11=wtlon21=wtlon12=wtlon22=0.5;
-        if not exactLon: 
-                lon12=np.remainder(lonIdx1+1,lonarray.shape[0]);
-                lon22=np.remainder(lonIdx2+1,lonarray.shape[0]);
-                wtlon11=np.remainder(lonarray1[lon12]-lon,360.)/lonstep;
-                wtlon12=np.remainder(lon-lonarray1[lon11],360.)/lonstep;
-                wtlon21=np.remainder(lonarray2[lon22]-lon,360.)/lonstep;
-                wtlon22=np.remainder(lon-lonarray2[lon21],360.)/lonstep;
-                
-                
-
-        exactLat=False;
-        latIdx1=np.argmin(np.absolute(latarray-lat));
-        #find orientation
-        if(latarray[0]>latarray[1]):
-                NSorient=True
-        else:
-                NSorient=False
-
-        if NSorient:
-                if latarray[latIdx1]<lat:
-                        latIdx1-=1;
-                elif latarray[latIdx1]==lat or latIdx1==(latarray.shape[0]-1):
-                        exactLat=True;
-        else:
-                if latarray[latIdx1]>lat:
-                        latIdx1-=1;
-                elif latarray[latIdx1]==lat or latIdx1==(latarray.shape[0]-1):
-                        exactLat=True;
-        lat1=lat2=latIdx1;
-        wtlat1=wtlat2=0.5;
-                
-        if not exactLat:
-                lat2+=1;
-                latstep = abs(latarray[lat1]-latarray[lat2]);
-                wtlat1=abs(lat-latarray[lat2])/latstep;
-                wtlat2=abs(latarray[lat1]-lat)/latstep;
-        if debugmode:
-                print ("indices t1,t2,lon1,lon2,lat1,lat2",timeIdx1,timeIdx2,lonIdx1,lonIdx2,lat1,lat2,lon11,lon12,lon21,lon22)
-                print (tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22])
-                print ("weights",wt1,wt2,wtlon11,wtlon12,wtlat1,wtlat2)
-        #now get all needed maps
-        #print "getting data",timeIdx1,timeIdx2,lat1,lat2,lon11,lon21,lon12,lon22,lon,lat
-        timeinterpols=[wt1*tecdata[timeIdx1,lat1,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat1,lon21]*wtlon21,
-                       wt1*tecdata[timeIdx1,lat1,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat1,lon22]*wtlon22,
-                       wt1*tecdata[timeIdx1,lat2,lon11]*wtlon11+wt2*tecdata[timeIdx2,lat2,lon21]*wtlon21,
-                       wt1*tecdata[timeIdx1,lat2,lon12]*wtlon12+wt2*tecdata[timeIdx2,lat2,lon22]*wtlon22]#weighted points
-        
-        #print tecdata[timeIdx1,lat1,lon11],tecdata[timeIdx2,lat1,lon21],tecdata[timeIdx1,lat1,lon12],tecdata[timeIdx2,lat1,lon22],tecdata[timeIdx1,lat2,lon11],tecdata[timeIdx2,lat2,lon21],tecdata[timeIdx1,lat2,lon12],tecdata[timeIdx2,lat2,lon22]
-        tecvalue=timeinterpols[0]*wtlat1 + timeinterpols[1]*wtlat1 + \
-            timeinterpols[2]*wtlat2 + timeinterpols[3]*wtlat2
-        if debugmode:
-                print ("tecvalue",tecvalue)
-        #print timeinterpols[0],timeinterpols[1],timeinterpols[2],timeinterpols[3],tecvalue
-        return tecvalue;
+    Returns:
+        Tuple[np.array, np.array, np.array, np.array, np.array]:
+            3D-arrays (time,lat,lon) of (optionally filtered) TEC and RMS +
+            longitude, latitude and time array
+    """
+    ionex_file = open(filename, "r")
+    exponent, lonarray, latarray, timearray = _read_ionex_header(ionex_file)
+    logging.info("reading data with shapes %d  x %d x %d",
+                 timearray.shape[0],
+                 latarray.shape[0],
+                 lonarray.shape[0])
+    tecarray = np.zeros(timearray.shape
+                        + latarray.shape + lonarray.shape, dtype=float)
+    rmsarray = np.zeros_like(tecarray)
+    timeidx = 0
+    lonidx = 0
+    latidx = 0
+    tecdata = False
+    rmsdata = False
+    readdata = False
+    for line in ionex_file:
+        if "START OF TEC MAP" in line:
+            tecdata = True
+            rmsdata = False
+            timeidx = int(line.strip().split()[0]) - 1
+            continue
+        if "START OF RMS MAP" in line:
+            rmsdata = True
+            tecdata = False
+            timeidx = int(line.strip().split()[0]) - 1
+            continue
+        if "LAT/LON1/LON2/DLON/H" in line:
+            readdata = True
+            latstr = line.strip().strip("LAT/LON1/LON2/DLON/H")
+            lat = np.fromstring(" -".join(latstr.split("-")), sep=" ")
+            latidx = np.argmin(np.abs(latarray - lat[0]))
+            lonidx = 0
+            continue
+        if tecdata and ("END OF TEC MAP" in line):
+            readdata = False
+            continue
+        if rmsdata and ("END OF RMS MAP" in line):
+            readdata = False
+            continue
+        if readdata:
+            data = np.fromstring(" -".join(line.strip().split("-")),
+                                 sep=" ") * exponent
+            if tecdata:
+                tecarray[timeidx, latidx, lonidx:lonidx + data.shape[0]] = data
+            elif rmsdata:
+                rmsarray[timeidx, latidx, lonidx:lonidx + data.shape[0]] = data
+            lonidx += data.shape[0]
+    if not _use_filter is None:
+        tecarray = myfilter.gaussian_filter(
+            tecarray, _use_filter, mode='nearest')
+    return tecarray, rmsarray, lonarray, latarray, timearray
 
 
-def combine_ionex(outpath,filenames,newfilename):
-    """Combine separate IONEXfiles into 1 single file (needed for 15min ROBR data)"""
-    if os.path.isfile(outpath+newfilename):
-            print ("FILE exists: ",outpath+newfilename)
-            return outpath+newfilename
-    newf=open(outpath+newfilename,'w')
-    filenames=sorted(filenames)
-    firstfile=open(outpath+filenames[0])
-    lastfile=open(outpath+filenames[-1])
+def readTEC(filename, use_filter=None):
+    """oldfunction name for compatibility. Use read_tec."""
+
+    logging.warning("function readTEC obsolete, use read_tec instead")
+    return read_tec(filename, _use_filter=use_filter)
+
+
+def _compute_index_and_weights(maparray, mapvalues):
+    '''helper function  to get indices and weights for interpolating tecmaps
+
+
+    Args:
+        maparray (np.array) : array to get indices in
+        mapvalues (Union[float,np.array]) :  values to get indices for
+    Returns:
+        Tuple[np.array, np.array, np.array]: idx1,idx2 and weights for idx2,
+                                             idx2 is always >= idx1
+
+    '''
+    is_reverse = maparray[1] < maparray[0]
+    idx1 = np.argmin(np.absolute(maparray[np.newaxis]
+                                 - mapvalues[:, np.newaxis]), axis=1)
+    idx2 = idx1.copy()
+    if not is_reverse:
+        idx1[maparray[idx1] > mapvalues] -= 1
+        idx2[maparray[idx2] < mapvalues] += 1
+    else:
+        idx1[maparray[idx1] < mapvalues] -= 1
+        idx2[maparray[idx2] > mapvalues] += 1
+    idx1[idx1 < 0] = 0
+    idx2[idx2 < 0] = 0
+    idx1[idx1 >= maparray.shape[0]] = maparray.shape[0] - 1
+    idx2[idx2 >= maparray.shape[0]] = maparray.shape[0] - 1
+    _steps = np.absolute(maparray[idx2] - maparray[idx1])
+    weights = np.absolute(mapvalues - maparray[idx1])
+    _steps[_steps == 0] = weights[_steps == 0]
+    weights = weights / _steps
+    return idx1, idx2, weights
+
+
+def compute_tec_interpol(times, lats, lons, tecinfo, apply_earth_rotation=0):
+    '''Get interpolated TEC for array of times/lats and lons
+
+    Derive interpolated (4 point in lon,lat,2 point in time) vTEC values,
+    optionally correcting for earth rotation.
+
+    Args:
+        lats (np.array) : angles in degrees between -90 and 90
+        lons (np.array) : angles in degrees between -180,180
+        times (np.array) : times in decimal hour of the day (eg. 23.5
+        for half past 11PM)
+        tecinfo (tuple) : tuple with the return values of read_tec function
+        apply_earth_rotation(float) : specify (with a number between 0 and 1)
+        how much of the earth rotaion is taken in to account in the
+        interpolation step.
+        This is assuming that the TEC maps move according to the rotation
+        Earth (following method 3 of interpolation described in the IONEX
+        document). Experiments with high time resolution ROB data show that
+        this is not really the case, resulting in strange wavelike structures
+        when applying this smart interpolation. Negative values of this
+        parameter would result in an ionosphere that moves with the rotation
+        of the earth
+    Returns:
+        np.array : interpolated tecvalues
+    '''
+    assert times.shape == lats.shape,\
+        "times and lats should be array with same shape"
+    assert times.shape == lons.shape, \
+        "times and lons should be array with same shape"
+    tecdata = tecinfo[0]  # TEC in TECU
+    lonarray = tecinfo[2]  # longitude in degrees from West to East (- to +)
+    latarray = tecinfo[3]  # lattitude in degrees
+    # times in hour of the day (eg. 23.5 for half past 11PM)
+    maptimes = tecinfo[4]
+
+    # get indices of nearest 2 time frames + inverse distance weights
+    # assume time is  sorted from early to late
+    timeidx1, timeidx2, time_weights = _compute_index_and_weights(
+        maptimes, times)
+
+    # latarray is sorted small to large
+    latidx1, latidx2, lat_weights = _compute_index_and_weights(
+        latarray, lats)
+
+    # for getting lon idx take into account earth_rotation
+    # if longitudes cover all range between -180 and 180 you can modulate the
+    # indices, otherwise we have to take the edge of the map.
+    lonstep = lonarray[1] - lonarray[0]
+    full_circle = np.remainder(lonarray[0] - lonarray[-1], 360.)\
+        <= 1.1 * lonstep
+
+    rot1 = ((times - maptimes[timeidx1]) * 360. / 24.) * apply_earth_rotation
+    rot2 = ((times - maptimes[timeidx2]) * 360. / 24.) * apply_earth_rotation
+
+    if not full_circle:
+        lonidx11, lonidx12, lon_weights1 = _compute_index_and_weights(
+            lonarray, lons + rot1)
+        lonidx21, lonidx22, lon_weights2 = _compute_index_and_weights(
+            lonarray, lons + rot2)
+    else:
+        lonidx11 = np.argmin(np.absolute(np.remainder(lonarray[np.newaxis]
+                                                      - rot1[:, np.newaxis]
+                                                      - lons[:, np.newaxis]
+                                                      + 180., 360.)
+                                         - 180.), axis=1)
+        lonidx12 = lonidx11.copy()
+        lonidx11[np.remainder(lonarray[lonidx11] - rot1 - lons + 180., 360.)
+                 - 180. > 0] -= 1
+        lonidx12[np.remainder(lonarray[lonidx12] - rot1 - lons + 180., 360.)
+                 - 180. < 0] += 1
+        lonidx11[lonidx11 < 0] += lonarray.shape[0]
+        lonidx12[lonidx12 < 0] += lonarray.shape[0]
+        lonidx11[lonidx11 >= lonarray.shape[0]] -= lonarray.shape[0]
+        lonidx12[lonidx12 >= lonarray.shape[0]] -= lonarray.shape[0]
+        lon_weights1 = np.absolute(np.remainder(lonarray[lonidx11]
+                                                - rot1
+                                                - lons + 180., 360.)
+                                   - 180.) / lonstep
+
+        lonidx21 = np.argmin(np.absolute(np.remainder(lonarray[np.newaxis]
+                                                      - rot2[:, np.newaxis]
+                                                      - lons[:, np.newaxis]
+                                                      + 180., 360.)
+                                         - 180.), axis=1)
+        lonidx22 = lonidx21.copy()
+        lonidx21[np.remainder(lonarray[lonidx21] - rot2 - lons + 180., 360.)
+                 - 180. > 0] -= 1
+        lonidx22[np.remainder(lonarray[lonidx22] - rot2 - lons + 180., 360.)
+                 - 180. < 0] += 1
+        lonidx21[lonidx21 < 0] += lonarray.shape[0]
+        lonidx22[lonidx22 < 0] += lonarray.shape[0]
+        lonidx21[lonidx21 >= lonarray.shape[0]] -= lonarray.shape[0]
+        lonidx22[lonidx22 >= lonarray.shape[0]] -= lonarray.shape[0]
+        lon_weights2 = np.absolute(np.remainder(lonarray[lonidx21]
+                                                - rot2
+                                                - lons + 180., 360.)
+                                   - 180.) / lonstep
+    logging.debug("inidces time %d %d indices lat %d %d indices \
+                  lon %d %d %d %d", timeidx1[0], timeidx2[0],
+                  latidx1[0], latidx2[0],
+                  lonidx11[0], lonidx12[0],
+                  lonidx21[0], lonidx22[0])
+    logging.debug("weights time %f lat %f lon %f %f",
+                  time_weights[0],
+                  lat_weights[0],
+                  lon_weights1[0],
+                  lon_weights2[0])
+    tecs = (tecdata[timeidx1, latidx1, lonidx11] * (1. - lon_weights1)
+            + tecdata[timeidx1, latidx1, lonidx12] * lon_weights1) \
+        * (1. - time_weights)
+    tecs += (tecdata[timeidx2, latidx1, lonidx21] * (1. - lon_weights2)
+             + tecdata[timeidx2, latidx1, lonidx22] * lon_weights2) \
+        * (time_weights)
+    tecs *= 1. - lat_weights
+    tecs += lat_weights \
+        * (tecdata[timeidx1, latidx2, lonidx11] * (1. - lon_weights1)
+           + tecdata[timeidx1, latidx2, lonidx12] * lon_weights1) \
+        * (1. - time_weights)
+    tecs += lat_weights \
+        * (tecdata[timeidx2, latidx2, lonidx21] * (1. - lon_weights2)
+           + tecdata[timeidx2, latidx2, lonidx22] * lon_weights2) \
+        * (time_weights)
+    return tecs
+
+
+def getTECinterpol(time, lat, lon, tecinfo, apply_earth_rotation=0):
+    """old function name for compatibility. Use compute_tec_interpol
+    instead"""
+
+    logging.warning("obsolete, use compute_tec_interpol instead")
+    if np.isscalar(time):
+        time = [time]
+        lat = [lat]
+        lon = [lon]
+    return compute_tec_interpol(np.array(time), np.array(lat), np.array(lon),
+                                tecinfo,
+                                apply_earth_rotation)
+
+
+def _combine_ionex(outpath, filenames, newfilename):
+    """Helper function to combine separate IONEXfiles into 1 single file
+    (needed for 15min ROBR data)"""
+
+    if os.path.isfile(outpath + newfilename):
+        logging.info("FILE exists: " + outpath + newfilename)
+        return outpath + newfilename
+    newf = open(outpath + newfilename, 'w')
+    filenames = sorted(filenames)
+    firstfile = open(filenames[0])
+    lastfile = open(filenames[-1])
     for line in lastfile:
         if "EPOCH OF LAST MAP" in line:
-            lastepoch=line
+            lastepoch = line
             lastfile.close()
             break
-    #write header + tec map
+    # write header + tec map
     for line in firstfile:
         if "END OF TEC MAP" in line:
             break
-        if not "EPOCH OF LAST MAP" in line:
+        if "EPOCH OF LAST MAP" not in line:
             if "OF MAPS IN FILE" in line:
-                newf.write(line.replace('1',str(len(filenames))))
+                newf.write(line.replace('1', str(len(filenames))))
             else:
                 newf.write(line)
         else:
             newf.write(lastepoch)
-    tecmapnr=2
+    tecmapnr = 2
     for myfname in filenames[1:]:
-        myf=open(outpath+myfname)
-        end_of_header=False
+        myf = open(myfname)
+        end_of_header = False
         for line in myf:
             if not end_of_header and "END OF HEADER" in line:
-                end_of_header=True
+                end_of_header = True
             else:
                 if end_of_header:
                     if "END OF TEC MAP" in line:
-                        newf.write(line.replace('1',str(tecmapnr)))
+                        newf.write(line.replace('1', str(tecmapnr)))
                         break
                     if "START OF TEC MAP" in line:
-                        newf.write(line.replace('1',str(tecmapnr)))
+                        newf.write(line.replace('1', str(tecmapnr)))
                     else:
                         newf.write(line)
-        tecmapnr+=1
+        tecmapnr += 1
     newf.write("END OF FILE\n")
-    return outpath+newfilename
-    #ignore RMS map for now, since it is filled with zeros anyway
-
-def cmd_exists(cmd):
-    return subprocess.call("type " + cmd, shell=True, 
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+    return os.path.join(outpath, newfilename)
+    # ignore RMS map for now, since it is filled with zeros anyway
 
 
-def run_command_timeout(command, args, timeout):
-    """run some command with a timeout limit
-
-INPUTS:
-command   I  The name of the program to run
-args      I  The full argument list tot he command.  Note that this should
-             be an array, with element 0 the name of the program
-timeout   I  The timeout, in s.  If the program has not finished within
-             timeout seconds, kill it
-
-OUTPUTS: retval
-retval    O  The return code of the command.  Note that if the process times out,
-             this function raises a Command_Timeout_Error
-
-
-    """
-    #first check if command is exectuable:
-    if not cmd_exists(command):
-            raise RuntimeError("Could not run '%s'.Please check your PATH"%command)
-    pid = os.fork()
-    #print "my pid",pid
-    if(pid == 0):
-        # We are the child, execute the command
-        print ("executing",command,args)
-        os.execvp(command, args)
-        # If we are here, something bad happened.  It must be the
-        # user's fault.  :)
-        os._exit(2)
-    elif(pid < 0):
-        # fork failed
-        raise OSError("Hey, I couldn't fork!")
-    for i in range(int(timeout)):
-        print ("waiting",i,timeout)
-        systime.sleep(1)
-        status = os.waitpid(pid,os.WNOHANG)
-        if(status == (0,0)):
-            # still waiting
-            continue
-        if(os.WIFEXITED(status[1])):
-            return os.WEXITSTATUS(status[1])
-        if(os.WIFSIGNALED(status[1])):
-            # someone killed the process.  This is probably bad, and means the
-            # user got tired of waiting.  Try calling this a timeout
-            raise Command_Timeout_Error("Command '%s' signalled with %d"%(command, os.WTERMSIG(status[1])))
-    os.kill(pid,signal.SIGKILL)
-    raise Command_Timeout_Error("Command '%s' timed out after %d seconds"%(command, timeout))
-
-def gunzip_some_file(compressed_file,
-                     uncompressed_file,
-                     delete_file = 1):
-    # make sure there is a file
-    if not os.path.isfile(compressed_file):
-        if(compressed_file[-1] == 'Z'):
-            # try another form
-            warnings.warn("No .Z form of compressed file '%s', trying .gz"%compressed_file)
-            new_compressed = compressed_file[:-1] + "gz"
-            return gunzip_some_file(new_compressed, uncompressed_file,
-                                    delete_file)
-        raise RuntimeError("No such file '%s' to uncompress"%compressed_file)
-    command = "gunzip -dc %s > %s"%(compressed_file,uncompressed_file)
+def _gunzip_some_file(compressed_file,
+                      uncompressed_file,
+                      delete_file=1):
+    command = "gunzip -dc %s > %s" % (compressed_file, uncompressed_file)
     retcode = os.system(command)
-    if(retcode):
-        raise RuntimeError("Could not run '%s'"%command)
-    if(delete_file):
+    if retcode:
+        raise RuntimeError("Could not run '%s'" % command)
+    if delete_file:
         os.remove(compressed_file)
-    return
+    return uncompressed_file
 
-                
-def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",prefix="codg",outpath='./',overwrite=False):
-        if outpath[-1]!="/":
-                outpath+="/"
-        if not os.path.isdir(outpath):
-                try:
-                        os.mkdir(outpath)
-                except:
-                        print ("cannot create output directory for IONEXdata",outpath)
-                        return -1
-        try:
-          yy=time[2:4];
-          year=int(time[:4])
-          month=int(time[5:7])
-          day=int(time[8:10])
-        except:
-          year = time[0]
-          yy = year - 2000
-          month = time[1]
-          day = time[2]
-        dayofyear = date(year,month,day).timetuple().tm_yday;
-        if prefix=='ROBR':
-                filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[:24] for minutes in range(0,60,15)]
-                # IONEX format needs data of first file of next day
-                #check if next day is next year (take into account lepa years....)"
-                if month==12 and day==31:
-                        nextday=0
-                        nextyear=year+1
-                        nextyy=yy+1
-                else:
-                        nextday=dayofyear+1
-                        nextyear=year
-                        nextyy=yy
-                filenames.append(str(nextyear)+"/%03d/"%(nextday)+prefix+"%03d"%(nextday)+"A00"+".%sI.Z"%nextyy)
-                
-                
-                backupfilenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[26:26+24] for minutes in range(0,60,15)]
-                backupfilenames.append(str(year)+"/%03d/"%(dayofyear+1)+prefix+"%03d"%(dayofyear+1)+"A00"+".%sI.Z"%yy)
-                
-                S=len(filenames[0])-len(str(year)+"/%03d/"%(dayofyear))
 
+def _store_files(ftp, filenames, outpath, overwrite=False):
+    """helper function to store files from ftp server to outpath"""
+
+    nfilenames = []
+    for myf in filenames:
+        #make sure filename is always stored uppercase
+        mypath = os.path.join(outpath, myf.upper())
+        if not overwrite and os.path.isfile(mypath):
+            nfilenames.append(mypath)
+            logging.info("file %s exists", mypath)
+        elif not overwrite and\
+        os.path.isfile(mypath.strip(".Z")):
+            nfilenames.append(mypath.strip(".Z"))
+            logging.info("file %s exists",
+                         mypath.strip(".Z"))
         else:
-                if server == "ftp://igs-final.man.olsztyn.pl/pub/gps_data/GPS_IONO/cmpcmb/":
-                        filenames=["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]      
-                        backupfilenames = ["%02d%03d/"%(yy,dayofyear)+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]
-                else:
-                        if not (server==None) and "ftp://213.184.6.172/" in server:
+            myp = open(mypath, "wb")
+            ftp.retrbinary("RETR " + myf, myp.write)
+            myp.close()
+            nfilenames.append(mypath)
+    nfilenames_copy = nfilenames[:]
+    nfilenames = []
+    for myf in nfilenames_copy:
+        if myf.endswith(".Z"):
+            nfilenames.append(_gunzip_some_file(
+                myf,
+                myf.strip(".Z")))
+        else:
+            nfilenames.append(myf)
+    return nfilenames
 
-                                filenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si"%(dayofyear,yy)]
-                                backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-                                
-                        else:
-                                if not(server==None) and  "unibe" in server:
-                                        filenames=[str(year)+"/"+prefix+"%03d0.%sI.Z"%(dayofyear,yy)]      
-                                        backupfilenames = [str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-                                else:
 
-                                        filenames=[str(year)+"/"+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-                                        backupfilenames = [str(year)+"/%03d/"%(dayofyear)+prefix+"%03d0.%si.Z"%(dayofyear,yy)]
-                S=len(prefix+"%03d0.%si.Z"%(dayofyear,yy))
-        #TODO: create a general list ofpossible filenames       
-        print ('file needed:', filenames[0],S)
-        print ("checking",outpath+filenames[0][-S:-2],os.path.isfile(outpath+filenames[0][-S:-2]))
-        for filename,backupfilename in zip(filenames,backupfilenames):
-                fname=filename.split("/")[-1]
-                if not overwrite and os.path.isfile(outpath+fname.strip(".Z")):
-                        print ("file exists",outpath+fname)
-                        continue
-                if server == None:
-                        print ("File:",fname.strip(".Z"),"not found on disk and download is disabled.")
-                        return -1
-                else:
-                        extra_options=[]
-                        if "ftp://213.184.6.172/" in server:
-                                print ("adding user name and password for",server)
-                                extra_options=["data-out","Qz8803#mhR4z"] #user:passwrd
-                                
-                        systime.sleep(2)
-                        print ("retreiving",run_command_timeout("URL_download.py",
-                                                               ["URL_download.py", server+filename, outpath+fname,
-                                                                "%d"%DEFAULT_TIMEOUT]+extra_options,
-                                                               DEFAULT_TIMEOUT))
-                        if not os.path.isfile(outpath+fname):
-                                print ("trying",server+backupfilename)
-                                fname=backupfilename.split("/")[-1]
-                                #try backup name
-                                systime.sleep(2)
-                                run_command_timeout("URL_download.py",
-                                                    ["URL_download.py", server+backupfilename, outpath+fname,
-                                                     "%d"%DEFAULT_TIMEOUT]+extra_options,
-                                                    DEFAULT_TIMEOUT)
-                        count=0
-                        while count<10 and (not os.path.isfile(outpath+fname) and not os.path.isfile(outpath+fname.strip(".Z"))):
-                                print ("waiting...")
-                                systime.sleep(1)
-                                count+=1
-                        if os.path.isfile(outpath+fname) and fname[-2:]==".Z":
-                                gunzip_some_file(outpath+fname,outpath+fname[:-2]);
-                        elif not os.path.isfile(outpath+fname):
-                                print ("file",filename,"not found on server",server)
-                                return -1;
-        if len(filenames)>1:
-                filenames=[i.split("/")[-1].strip(".Z") for i in filenames]
-                newfilename=prefix+"%03d0.%sI"%(dayofyear,yy)
-                return combine_ionex(outpath,filenames,newfilename)
-        return outpath+fname.strip(".Z")
+def _get_IONEX_file(time="2012/03/23/02:20:10.01",
+                    server="ftp://cddis.gsfc.nasa.gov/gnss/productsionex/",
+                    prefix="codg",
+                    outpath='./',
+                    overwrite=False):
+    """Get IONEX file with prefix from server for a given day
+
+    Downloads files with given prefix from the ftp server, unzips and stores
+    the data. For prefix ROBR the data is stored on the server in a separate
+    IONEX file every 15 minutes, these are automatically combined for
+    compatibility.
+
+    Args:
+        time (string or list) : date of the observation
+        server (string) : ftp server + path to the ionex directories
+        prefix (string) : prefix of the IONEX files (case insensitive)
+        outpath (string) : path where the data is stored
+        overwrite (bool) : Do (not) overwrite existing data
+    """
+
+    if outpath[-1] != "/":
+        outpath += "/"
+    if not os.path.isdir(outpath):
+        try:
+            os.makedirs(outpath)
+        except:
+            logging.error("cannot create output dir for IONEXdata: %s",
+                          outpath)
+            raise
+    try:
+        yy = time[2:4]
+        year = int(time[:4])
+        month = int(time[5:7])
+        day = int(time[8:10])
+    except:
+        year = time[0]
+        yy = year - 2000
+        month = time[1]
+        day = time[2]
+    mydate = datetime.date(year, month, day)
+    dayofyear = mydate.timetuple().tm_yday
+    ftpserver = server.strip("ftp:://").split("/")[0]
+    ftppath = "/".join(server.strip("ftp:://").split("/")[1:])
+    ftp = ftplib.FTP(ftpserver)
+    try:
+        ftp.login()
+    except ftplib.error_perm:
+        ftp.login("data-out", "Qz8803#mhR4z")
+    ftp.cwd(ftppath)
+    totpath = ftppath
+    myl = []
+    ftp.retrlines("NLST", myl.append)
+    logging.info("Retrieving data for %d or %02d%03d", year, yy, dayofyear)
+    if str(year) in myl:
+        ftp.cwd(str(year))
+        totpath += "/%d" % (year)
+    elif "%02d%03d" % (yy, dayofyear) in myl:
+        ftp.cwd("%02d%03d" % (yy, dayofyear))
+        totpath += "/%02d%03d" % (yy, dayofyear)
+    myl = []
+    ftp.retrlines("NLST", myl.append)
+    if str(dayofyear) in myl:
+        ftp.cwd(str(dayofyear))
+        totpath += "/%d" % (dayofyear)
+    logging.info("Retrieving data from %s", totpath)
+    myl = []
+    ftp.retrlines("NLST", myl.append)
+    filenames = [i for i in myl if (prefix.lower() in i.lower()) and
+                 (i.lower().endswith("i.z") or i.lower().endswith("i"))]
+    logging.info(" ".join(filenames))
+    assert len(filenames) > 0, "No files found on %s for %s" % (server,
+                                                                prefix)
+    if prefix.lower() == "robr" and len(filenames) > 1:
+        filenames = sorted(filenames)
+        filenames = _store_files(ftp, filenames, outpath, overwrite)
+        # get data for next day
+        nextday = mydate + datetime.timedelta(days=1)
+        nyear = nextday.year
+        ndayofyear = nextday.timetuple().tm_yday
+        ftp.cwd("/" + ftppath)
+        myl = []
+        ftp.retrlines("NLST", myl.append)
+        if str(nyear) in myl:
+            ftp.cwd(str(nyear))
+        myl = ftp.retrlines("NLST")
+        if str(ndayofyear) in myl:
+            ftp.cwd(str(ndayofyear))
+        myl = ftp.retrlines("NLST")
+        nfilenames = [i for i in myl if (prefix.lower() in i.lower()) and
+                      (i.lower().endswith("i.z")) and "A00" in i.upper()]
+        nfilenames = _store_files(ftp, nfilenames, outpath, overwrite)
+        filenames += nfilenames
+        _combine_ionex(outpath, filenames,
+                       prefix + "%03d0.%sI" % (dayofyear, yy))
+        return os.path.join(outpath, prefix + "%03d0.%sI" % (dayofyear, yy))
+    else:
+        nfilenames = _store_files(ftp, filenames, outpath, overwrite)
+        return nfilenames[0]
+
+
+def getIONEXfile(time="2012/03/23/02:20:10.01",
+                 server="ftp://cddis.gsfc.nasa.gov/gnss/productsionex/",
+                 prefix="codg",
+                 outpath='./',
+                 overwrite=False):
+    getIONEXfile.__doc__ = _get_IONEX_file.__doc__
+    return _get_IONEX_file(time, server, prefix, outpath, overwrite)
+
+def get_TEC_data(times, lonlatpp, server, prefix, outpath, use_filter=None,earth_rot=0.):
+    '''Returns vtec for given times and lonlats.
+    If times has the same length as the first axis  of lonlatpp, 
+    it is assumed that there is a one to one correspondence.
+    Else vTEC is calculated for every combination of lonlatpp and times.
+    
+    Args:
+        times (np.array) : float of time in MJD seconds
+        lonlatpp (np.array) : array of time X 2 ,longitude lattitude of 
+                              piercepoints
+        server (string) : ftp server to get IONEX data from
+        prefix (string) : prefix of IONEX data 
+        outpath (string) : local location of the IONEX files
+    Returns:
+        np.array : array with shape times.shape x lonlatpp.shape[0], unless both
+                   are equal
+    '''
+    
+    date_parms = PosTools.obtain_observation_year_month_day_fraction(times[0])
+    ionexf=get_IONEX_file(time=date_parms,server=server,prefix=prefix,outpath=outpath)
+    tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
+    latpp = lonlatpp[:, 1]
+    lonpp = lonlatpp[:, 0]
+    if latpp.shape == times.shape:
+        vtec = compute_tec_interpol(times,lat=latpp,lon=lonpp,tecinfo=tecinfo,apply_earth_rotation=earth_rot)
+    else:
+        vtec=[]
+        for itime in range(times.shape[0]):
+            vtec.append(compute_tec_interpol(times[itime]*np.ones_like(latpp),
+                                             lat=latpp,
+                                             lon=lonpp,
+                                             tecinfo=tecinfo,
+                                             apply_earth_rotation=earth_rot))
+    return np.array(vtec)
+            

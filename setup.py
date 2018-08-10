@@ -4,12 +4,14 @@ from numpy.distutils.core import Extension as Extension2
 import sys
 
 packages=['RMextract','EMM']
-scripts = ['RMextract/URL_download.py']
+#scripts = ['RMextract/URL_download.py']
+scripts = []
 ext=[Extension2('_EMM_Model', ['EMM/EMM_Model.cc','EMM/GeomagnetismLibrary.c','EMM/EMM_Model_wrap.cc'],extra_compile_args=['-Wno-format-security'])]
 
 if "--add-lofar-utils" in sys.argv:
     packages.append("RMextract/LOFAR_TOOLS")
     scripts.append("RMextract/LOFAR_TOOLS/createRMParmdb")
+    scripts.append("RMextract/LOFAR_TOOLS/createRMh5parm.py")
     sys.argv.remove("--add-lofar-utils")
 if "--add-iri" in sys.argv:
     packages.append("pyiri")
