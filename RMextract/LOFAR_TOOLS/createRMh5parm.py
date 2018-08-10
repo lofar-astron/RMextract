@@ -27,7 +27,7 @@ def makesolset(ms, data, solset_name):
     antennaNames = antennaTable.getcol('NAME')
     antennaPositions = antennaTable.getcol('POSITION')
     antennaTable.close()
-    antennaTable = solset._f_get_child('antenna')
+    antennaTable = solset.obj._f_get_child('antenna')
     antennaTable.append(zip(*(antennaNames,antennaPositions)))
     
     fieldFile = MS + "FIELD"
@@ -37,7 +37,7 @@ def makesolset(ms, data, solset_name):
     pointing = phaseDir[0, 0, :]
     fieldTable.close()
 
-    sourceTable = solset._f_get_child('source')
+    sourceTable = solset.obj._f_get_child('source')
     # add the field centre, that is also the direction for Gain and Common*
     sourceTable.append([('pointing',pointing)])
 
@@ -90,10 +90,10 @@ def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timeste
             raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
  
     data          = h5parm(h5parmdb, readonly=False)
-    if not data.getSolsets().has_key(solset_name):
+    if not solset_name in data.getSolsetNames():
         makesolset(MS,data,solset_name)
     solset        = data.getSolset(solset_name)
-    station_names = solset.antenna.cols.name[:]
+    station_names = sorted(solset.getAnt().keys())
 
  
     logging.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
@@ -102,8 +102,7 @@ def createh5Parm(ms, h5parmdb, solset_name = "sol000",all_stations=False,timeste
     else:
         rm_vals=np.ones((len(station_names),rmdict['RM']['st0'].shape[0]),dtype=float)
         rm_vals+=rmdict['RM']['st0'][:,0][np.newaxis]
-        
-    new_soltab = data.makeSoltab(solset = solset_name,soltype='rotationmeasure', soltab='RMextract',
+    new_soltab = solset.makeSoltab(soltype='rotationmeasure', soltabName='RMextract',
                                    axesNames=['ant', 'time'], axesVals=[station_names, rmdict['times']],
                                    vals=rm_vals,
                                    weights=np.ones_like(rm_vals, dtype=np.float16))
