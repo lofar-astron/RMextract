@@ -522,9 +522,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         filenames += nfilenames
         _combine_ionex(outpath, filenames,
                        prefix + "%03d0.%sI" % (dayofyear, yy))
+        ftp.quit()
         return os.path.join(outpath, prefix + "%03d0.%sI" % (dayofyear, yy))
     else:
         nfilenames = _store_files(ftp, filenames, outpath, overwrite)
+        ftp.quit()
         return nfilenames[0]
 
 
