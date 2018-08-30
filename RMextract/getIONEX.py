@@ -462,11 +462,19 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     dayofyear = mydate.timetuple().tm_yday
     ftpserver = server.strip("ftp:").strip("/").split("/")[0]
     ftppath = "/".join(server.strip("ftp:").strip("/").split("/")[1:])
-    ftp = ftplib.FTP(ftpserver)
-    try:
-        ftp.login()
-    except ftplib.error_perm:
-        ftp.login("data-out", "Qz8803#mhR4z")
+    nr_tries = 0
+    try_again = True
+    while try_again and nr_tries<10:
+        try:
+            ftp = ftplib.FTP(ftpserver)
+            ftp.login()
+            try_again=False
+        except ftplib.error_perm:
+            ftp.login("data-out", "Qz8803#mhR4z")
+            try_again=False
+        except ftplib.error_temp:
+            try_again=True
+            nr_tries += 1
     ftp.cwd(ftppath)
     totpath = ftppath
     myl = []
