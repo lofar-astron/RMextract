@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     MS = args.MSfiles
     h5parmdb = args.h5parm
-    logging.info("Working on: %s %s", MS, h5parmdb)
+    logging.info("Working on: %s %s" % (MS, h5parmdb))
     main(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
                  ionexPath=args.ionexpath, solset_name=args.solsetName, 
                  all_stations=args.allStations, timestep=args.timestep,
