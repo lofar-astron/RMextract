@@ -18,7 +18,12 @@ class pyiri:
 
     def get_profile(self,hstart,hend,hstep):
         #res=_iri.iri_sub(self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=hstart,heiend=hend,heistp=hstep)[0][0]
-        res=_iri.iri_get(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=hstart,heiend=hend,heistp=hstep)[0][0]
+        res=_iri.iri_get_sub(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=hstart,heiend=hend,heistp=hstep)[0][0]
         myshape=np.arange(hstart,hend+hstep,hstep).shape[0]
         return res[:myshape]
+
+    def get_tec(self):
+        #res=_iri.iri_sub(self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=hstart,heiend=hend,heistp=hstep)[0][0]
+        res=_iri.iri_get_tec(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=50,heiend=1500)
+        return res
 

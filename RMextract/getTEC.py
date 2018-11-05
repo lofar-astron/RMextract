@@ -72,7 +72,7 @@ def getTEC(MS=None,
 
     #IONEX files go per day, check if more than one file is  needed.
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
-    times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
+    #times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
     timegrid=np.array([])
     TECs={};
     ams={};

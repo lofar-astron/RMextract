@@ -38,11 +38,11 @@ def _read_ionex_header(filep):
         if stripped.endswith("EPOCH OF FIRST MAP"):
             starttime = datetime.datetime(
                 *(int(i) for i in
-                  stripped.strip("EPOCH OF FIRST MAP").split()))
+                  stripped.replace("EPOCH OF FIRST MAP","").split()))
         if stripped.endswith("EPOCH OF LAST MAP"):
             endtime = datetime.datetime(
                 *(int(i) for i in
-                  stripped.strip("EPOCH OF LAST MAP").split()))
+                  stripped.replace("EPOCH OF LAST MAP","").split()))
         if stripped.endswith("INTERVAL"):
             timestep = float(stripped.split()[0]) / 3600.
         if stripped.endswith("EXPONENT"):
@@ -122,7 +122,7 @@ def read_tec(filename, _use_filter=None):
             continue
         if "LAT/LON1/LON2/DLON/H" in line:
             readdata = True
-            latstr = line.strip().strip("LAT/LON1/LON2/DLON/H")
+            latstr = line.strip().replace("LAT/LON1/LON2/DLON/H","")
             lat = np.fromstring(" -".join(latstr.split("-")), sep=" ")
             latidx = np.argmin(np.abs(latarray - lat[0]))
             lonidx = 0
@@ -345,6 +345,7 @@ def _combine_ionex(outpath, filenames, newfilename):
     # write header + tec map
     for line in firstfile:
         if "END OF TEC MAP" in line:
+            newf.write(line)
             break
         if "EPOCH OF LAST MAP" not in line:
             if "OF MAPS IN FILE" in line:
@@ -398,10 +399,10 @@ def _store_files(ftp, filenames, outpath, overwrite=False):
             nfilenames.append(mypath)
             logging.info("file %s exists", mypath)
         elif not overwrite and\
-        os.path.isfile(mypath.strip(".Z")):
-            nfilenames.append(mypath.strip(".Z"))
+        os.path.isfile(mypath.replace(".Z","")):
+            nfilenames.append(mypath.replace(".Z",""))
             logging.info("file %s exists",
-                         mypath.strip(".Z"))
+                         mypath.replace(".Z",""))
         else:
             myp = open(mypath, "wb")
             ftp.retrbinary("RETR " + myf, myp.write)
@@ -413,7 +414,7 @@ def _store_files(ftp, filenames, outpath, overwrite=False):
         if myf.endswith(".Z"):
             nfilenames.append(_gunzip_some_file(
                 myf,
-                myf.strip(".Z")))
+                myf.replace(".Z","")))
         else:
             nfilenames.append(myf)
     return nfilenames
@@ -460,8 +461,8 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    ftpserver = server.strip("ftp:").strip("/").split("/")[0]
-    ftppath = "/".join(server.strip("ftp:").strip("/").split("/")[1:])
+    ftpserver = server.replace("ftp:","").strip("/").split("/")[0]
+    ftppath = "/".join(server.replace("ftp:","").strip("/").split("/")[1:])
     nr_tries = 0
     try_again = True
     while try_again and nr_tries<10:

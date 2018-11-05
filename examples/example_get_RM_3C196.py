@@ -9,7 +9,7 @@ rc('font', family='serif', size=16)
 #a=tab.taql('calc MJD("2013/03/02/17:02:54")')[0]*3600*24
 #b=tab.taql('calc MJD("2013/03/03/01:02:50")')[0]*3600*24
 a=tab.taql('calc MJD("2012/12/06/22:46:05")')[0]*3600*24
-b=tab.taql('calc MJD("2012/12/07/06:35:55")')[0]*3600*24
+b=tab.taql('calc MJD("2012/12/07/16:35:55")')[0]*3600*24
 
 statpos=gt.PosTools.posCS002
 pointing=array([ 2.15374123,  0.8415521 ]) #3C196
