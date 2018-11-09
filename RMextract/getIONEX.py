@@ -14,6 +14,8 @@ import scipy.ndimage.filters as myfilter
 import logging
 import os
 import ftplib
+import socket
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -448,7 +450,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         except:
             logging.error("cannot create output dir for IONEXdata: %s",
                           outpath)
-            raise
+
     try:
         yy = time[2:4]
         year = int(time[:4])
@@ -473,9 +475,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         except ftplib.error_perm:
             ftp.login("data-out", "Qz8803#mhR4z")
             try_again=False
-        except ftplib.error_temp:
+        except socket.gaierror:
             try_again=True
             nr_tries += 1
+            if nr_tries>=10:
+                raise Exception("Could not connect to %s"%ftpserver)
     ftp.cwd(ftppath)
     totpath = ftppath
     myl = []
