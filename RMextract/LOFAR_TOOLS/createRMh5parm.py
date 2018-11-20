@@ -106,10 +106,10 @@ def main(MSfiles, h5parmdb, solset_name = "sol000",all_stations=False,timestep=3
  
     logging.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
     if all_stations:
-        rm_vals=np.array([rmdict["RM"][stat] for stat in station_names])[:,:,0]
+        rm_vals=np.array([rmdict["RM"][stat].flatten() for stat in station_names])
     else:
         rm_vals=np.ones((len(station_names),rmdict['RM']['st0'].shape[0]),dtype=float)
-        rm_vals+=rmdict['RM']['st0'][:,0][np.newaxis]
+        rm_vals+=rmdict['RM']['st0'].flatten()[np.newaxis]
     new_soltab = solset.makeSoltab(soltype='rotationmeasure', soltabName='RMextract',
                                    axesNames=['ant', 'time'], axesVals=[station_names, rmdict['times']],
                                    vals=rm_vals,

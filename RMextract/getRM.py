@@ -35,9 +35,9 @@ def getRM(MS=None,
     Returns the (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN '''
 
-    print ('earth_rot', earth_rot)
-    print ('timerange ', timerange)
-    print ('use_azel ', use_azel)
+    #print ('earth_rot', earth_rot)
+    #print ('timerange ', timerange)
+    #print ('use_azel ', use_azel)
     stat_names=[]
     useEMM=False
     use_mean = False
@@ -95,7 +95,7 @@ def getRM(MS=None,
        return
         
     if useEMM:
-        print ("USING EMM for EarthMagnetic Field")
+        #print ("USING EMM for EarthMagnetic Field")
         emm=EMM.EMM()
     else:
         emm=EMM.WMM()
@@ -145,7 +145,7 @@ def getRM(MS=None,
     for time_array in times:
         #get RM per timeslot
         starttime=time_array[0]
-        print ("getting ionexfile for",starttime)
+        #print ("getting ionexfile for",starttime)
         date_parms =  PosTools.obtain_observation_year_month_day_fraction(starttime)
         dayofyear = date(date_parms[0],date_parms[1],date_parms[2]).timetuple().tm_yday  
         emm.date=date_parms[0]+float(dayofyear)/365.
@@ -161,9 +161,9 @@ def getRM(MS=None,
             stat_pos = []
             stat_pos.append(stn_mean)
             stat_pos_mean = True
-            print ('stat_pos.mean', stn_mean)
+            #print ('stat_pos.mean', stn_mean)
         for station,position in  zip(stat_names,stat_pos):
-          print ('generating data for station ', station)
+          #print ('generating data for station ', station)
  
           
           for time in time_array:
@@ -190,6 +190,7 @@ def getRM(MS=None,
                   continue
             flags[station].append(1)   
             latpp,lonpp,height,lon,lat,am1=PosTools.getlonlatheight(az,el,position)
+
             if latpp==-1 and lonpp==-1 and height==-1:
                return
             #get VTEC from IONEX interpolation

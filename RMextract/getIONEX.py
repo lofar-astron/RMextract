@@ -318,7 +318,7 @@ def getTECinterpol(time, lat, lon, tecinfo, apply_earth_rotation=0):
     """old function name for compatibility. Use compute_tec_interpol
     instead"""
 
-    logging.warning("obsolete, use compute_tec_interpol instead")
+    #logging.warning("obsolete, use compute_tec_interpol instead")
     if np.isscalar(time):
         time = [time]
         lat = [lat]

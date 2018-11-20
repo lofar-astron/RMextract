@@ -394,7 +394,7 @@ def radec2azel(ra,dec,time, pos):
 
     p = me.position('ITRF',str(pos[0])+'m',str(pos[1])+'m',str(pos[2])+'m')
     me.do_frame(p);
-    print ("input radec2azel",phasedir,ra,dec,p,t)
+    #print ("input radec2azel",phasedir,ra,dec,p,t)
     azel = me.measure(phasedir,'azel');
     return azel;
 
@@ -428,9 +428,9 @@ def getuvw(ra,dec,time, pos1,pos2):
     
     p = me.position('ITRF',str(pos1[0])+'m',str(pos1[1])+'m',str(pos1[2])+'m')
     bl = me.baseline('ITRF',str(pos2[0]-pos1[0])+'m',str(pos2[1]-pos1[1])+'m',str(pos2[2]-pos1[2])+'m')
-    print (bl)
+    #print (bl)
     me.do_frame(p);
-    print (me.to_uvw(bl)['xyz'])
+    #print (me.to_uvw(bl)['xyz'])
     #return uvw;
      
 def getIONEXtimerange(timerange,timestep):
