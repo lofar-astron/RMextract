@@ -17,7 +17,7 @@ import ftplib
 import socket
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 
 def _read_ionex_header(filep):
@@ -423,10 +423,11 @@ def _store_files(ftp, filenames, outpath, overwrite=False):
 
 
 def _get_IONEX_file(time="2012/03/23/02:20:10.01",
-                    server="ftp://cddis.gsfc.nasa.gov/gnss/productsionex/",
+                    server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
                     prefix="codg",
                     outpath='./',
-                    overwrite=False):
+                    overwrite=False,
+                    backupserver="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/"):
     """Get IONEX file with prefix from server for a given day
 
     Downloads files with given prefix from the ftp server, unzips and stores
@@ -463,23 +464,42 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    ftpserver = server.replace("ftp:","").strip("/").split("/")[0]
-    ftppath = "/".join(server.replace("ftp:","").strip("/").split("/")[1:])
-    nr_tries = 0
-    try_again = True
-    while try_again and nr_tries<10:
-        try:
-            ftp = ftplib.FTP(ftpserver)
-            ftp.login()
-            try_again=False
-        except ftplib.error_perm:
-            ftp.login("data-out", "Qz8803#mhR4z")
-            try_again=False
-        except socket.gaierror:
-            try_again=True
-            nr_tries += 1
-            if nr_tries>=10:
-                raise Exception("Could not connect to %s"%ftpserver)
+    tried_backup=False
+    serverfound=False
+    while not serverfound: 
+        ftpserver = server.replace("ftp:","").strip("/").split("/")[0]
+        ftppath = "/".join(server.replace("ftp:","").strip("/").split("/")[1:])
+        nr_tries = 0
+        try_again = True
+        while try_again and nr_tries<10:
+            try:
+                ftp = ftplib.FTP(ftpserver)
+                ftp.login()
+                try_again=False
+                serverfound=True
+            except ftplib.error_perm:
+                if "213.184.6.172" in server:
+                    ftp.login("data-out", "Qz8803#mhR4z")
+                    try_again=False
+                    serverfound=True
+                else:
+                    try_again=True
+                    nr_tries += 1
+                    if nr_tries>=10:
+                        if tried_backup or server==backupserver:
+                            raise Exception("Could not connect to %s"%ftpserver)
+                        else:
+                            server=backupserver
+                            tried_backup=True
+            except socket.gaierror:
+                try_again=True
+                nr_tries += 1
+                if nr_tries>=10:
+                    if tried_backup or server==backupserver:
+                        raise Exception("Could not connect to %s"%ftpserver)
+                    else:
+                        server=backupserver
+                        tried_backup=True
     ftp.cwd(ftppath)
     totpath = ftppath
     myl = []
@@ -493,9 +513,9 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         totpath += "/%02d%03d" % (yy, dayofyear)
     myl = []
     ftp.retrlines("NLST", myl.append)
-    if str(dayofyear) in myl:
-        ftp.cwd(str(dayofyear))
-        totpath += "/%d" % (dayofyear)
+    if "%03d"%dayofyear in myl:
+        ftp.cwd("%03d"%dayofyear)
+        totpath += "/%03d" % (dayofyear)
     logging.info("Retrieving data from %s", totpath)
     myl = []
     ftp.retrlines("NLST", myl.append)
