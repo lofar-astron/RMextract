@@ -27,3 +27,8 @@ class pyiri:
         res=_iri.iri_get_tec(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=50,heiend=1500)
         return res
 
+    def get_sub(self,hstart=399,hend=400,hstep=1):
+        res=_iri.iri_get_sub(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=hstart,heiend=hend,heistp=hstep)
+        #res=_iri.iri_get_tec(self.datapath,self.flags,jmag=self.jmag,alati=self.lat,along=self.lon,iyyyy=self.yr,mmdd=self.month*100+self.day,dhour=self.hour,heibeg=50,heiend=1500)
+        return res
+
