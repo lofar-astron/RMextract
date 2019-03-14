@@ -612,6 +612,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     if "None" not in proxy_server:
     	import socket
     	import socks
+	import urllib2
 	s = socks.socksocket()
 	if proxy_type=="socks4":
 		ProxyType = socks.SOCKS4
