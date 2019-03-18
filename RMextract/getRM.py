@@ -46,6 +46,7 @@ def getRM(MS=None,
     pointing=[0.,0.5*np.pi]
     out_file=''
     stat_pos=[PosTools.posCS002]
+    use_proxy = False
     #stat_names=['LOFAR_CS002']
     if not (MS is None):
 
@@ -80,7 +81,6 @@ def getRM(MS=None,
                 stat_names =['st%d'%(i+1) for i in range(len(stat_pos))]
         if key=='useEMM':
             useEMM=kwargs[key]
-
 	if key=="proxy_server":		#Check to see if user wants to use a proxy for downloading IONEX files.
 	    use_proxy = True
 	    proxy_server=kwargs["proxy_server"]
