@@ -594,7 +594,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                           outpath)
 
     try:
-        yy = time[2:4]
+        yy = int(time[2:4])
         year = int(time[:4])
         month = int(time[5:7])
         day = int(time[8:10])
@@ -609,10 +609,10 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     serverfound=False
     backupfound=False    
     #If proxy url is given, enable proxy using pysocks
-    if "None" not in proxy_server:
+    import urllib2
+    if proxy_server and ("None" not in proxy_server):
     	import socket
     	import socks
-	import urllib2
 	s = socks.socksocket()
 	if proxy_type=="socks4":
 		ProxyType = socks.SOCKS4
@@ -631,28 +631,34 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
 	    try:	
 		secondary = urllib2.urlopen(backupserver,timeout=30)
 		backupfound = True
+                server=backupserver
 	    except:
 		logging.error('Primary and Backup Server not responding') #enable in lover environment
-    if serverfound:
+    if "ftp://ftp.aiub.unibe.ch" in server:
     	url = "ftp://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
-    elif backupfound:
+    elif "ftp://cddis.gsfc.nasa.gov" in server:
     	url = "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
+    elif "igsiono.uwm.edu.pl" in server:
+        url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
 
     # Download IONEX file
     fname = outpath+'/'+url.split('/')[-1]
+    print ("opening",url)
     site = urllib2.urlopen(url,timeout=30)
     output=open(fname,'wb')
     output.write(site.read())
     output.close()
     ###### gunzip files
-    command = "gunzip -dc %s > %s" % (fname, fname[:-2])
-    retcode = os.system(command)
-    if retcode:
-        raise RuntimeError("Could not run '%s'" % command)
-    else:
-    	os.remove(fname)
+    if fname[-2:].upper()==".Z":
+        command = "gunzip -dc %s > %s" % (fname, fname[:-2])
+        retcode = os.system(command)
+        if retcode:
+            raise RuntimeError("Could not run '%s'" % command)
+        else:
+            os.remove(fname)
+        fname=fname[:-2]
     #returns filename of uncompressed file
-    return fname[:-2]
+    return fname
 
 def getIONEXfile(time="2012/03/23/02:20:10.01",
                  server="ftp://cddis.gsfc.nasa.gov/gnss/productsionex/",
