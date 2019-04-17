@@ -464,6 +464,10 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
+    #if file exists just return filename
+    if not overwrite and os.path.isfile("%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)):
+        return "%s%03d0.%02di"%(prefix,dayofyear,yy)
+    
     tried_backup=False
     serverfound=False
     while not serverfound: 
@@ -605,6 +609,8 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
+    if not overwrite and os.path.isfile("%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)):
+        return "%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)
     tried_backup=False
     serverfound=False
     backupfound=False    
@@ -641,9 +647,8 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     elif "igsiono.uwm.edu.pl" in server:
         url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
 
-    # Download IONEX file
-    fname = outpath+'/'+url.split('/')[-1]
-    print ("opening",url)
+    # Download IONEX file, make sure it is always lowercase
+    fname = outpath+'/'+(url.split('/')[-1]).lower()
     site = urllib2.urlopen(url,timeout=30)
     output=open(fname,'wb')
     output.write(site.read())
