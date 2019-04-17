@@ -442,7 +442,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
     """
-
+    prefix=prefix.lower()
     if outpath[-1] != "/":
         outpath += "/"
     if not os.path.isdir(outpath):
@@ -550,9 +550,9 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         nfilenames = _store_files(ftp, nfilenames, outpath, overwrite)
         filenames += nfilenames
         _combine_ionex(outpath, filenames,
-                       prefix + "%03d0.%sI" % (dayofyear, yy))
+                       prefix + "%03d0.%si" % (dayofyear, yy))
         ftp.quit()
-        return os.path.join(outpath, prefix + "%03d0.%sI" % (dayofyear, yy))
+        return os.path.join(outpath, prefix + "%03d0.%si" % (dayofyear, yy))
     else:
         nfilenames = _store_files(ftp, filenames, outpath, overwrite)
         ftp.quit()
@@ -588,6 +588,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
 	proxy_user (string): username for proxyserver
 	proxy_pass (string): password for proxyserver
     """
+    prefix=prefix.lower()
     if outpath[-1] != "/":
         outpath += "/"
     if not os.path.isdir(outpath):
