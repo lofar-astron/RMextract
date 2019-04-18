@@ -442,7 +442,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
     """
-    prefix=prefix.lower()
+    prefix=prefix.upper()
     if outpath[-1] != "/":
         outpath += "/"
     if not os.path.isdir(outpath):
@@ -465,8 +465,9 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
     #if file exists just return filename
-    if not overwrite and os.path.isfile("%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)):
-        return "%s%03d0.%02di"%(prefix,dayofyear,yy)
+    if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
+        logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
+        return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
     
     tried_backup=False
     serverfound=False
@@ -527,8 +528,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
                  ("%03d"%dayofyear in i.lower()) and
                  (i.lower().endswith("i.z") or i.lower().endswith("i"))]
     logging.info(" ".join(filenames))
-    assert len(filenames) > 0, "No files found on %s for %s" % (server,
-                                                                prefix)
+    #assert len(filenames) > 0, "No files found on %s for %s" % (server,prefix)
+    if len(filenames) <=0:
+        logging.info("No files found on %s for %s",server,prefix)
+        return -1
+        
     if prefix.lower() == "robr" and len(filenames) > 1:
         filenames = sorted(filenames)
         filenames = _store_files(ftp, filenames, outpath, overwrite)
@@ -550,9 +554,9 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         nfilenames = _store_files(ftp, nfilenames, outpath, overwrite)
         filenames += nfilenames
         _combine_ionex(outpath, filenames,
-                       prefix + "%03d0.%si" % (dayofyear, yy))
+                       prefix + "%03d0.%sI" % (dayofyear, yy))
         ftp.quit()
-        return os.path.join(outpath, prefix + "%03d0.%si" % (dayofyear, yy))
+        return os.path.join(outpath, prefix + "%03d0.%sI" % (dayofyear, yy))
     else:
         nfilenames = _store_files(ftp, filenames, outpath, overwrite)
         ftp.quit()
@@ -588,7 +592,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
 	proxy_user (string): username for proxyserver
 	proxy_pass (string): password for proxyserver
     """
-    prefix=prefix.lower()
+    prefix=prefix.upper()
     if outpath[-1] != "/":
         outpath += "/"
     if not os.path.isdir(outpath):
@@ -610,8 +614,9 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         day = time[2]
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    if not overwrite and os.path.isfile("%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)):
-        return "%s%s%03d0.%02di"%(outpath,prefix,dayofyear,yy)
+    if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
+        logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
+        return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
     tried_backup=False
     serverfound=False
     backupfound=False    
@@ -648,9 +653,14 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     elif "igsiono.uwm.edu.pl" in server:
         url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
 
-    # Download IONEX file, make sure it is always lowercase
-    fname = outpath+'/'+(url.split('/')[-1]).lower()
-    site = urllib2.urlopen(url,timeout=30)
+    # Download IONEX file, make sure it is always uppercase
+    fname = outpath+'/'+(url.split('/')[-1]).upper()
+    try:
+        site = urllib2.urlopen(url,timeout=30)
+    except:
+        logging.info("No files found on %s for %s",server,fname)
+        return -1
+
     output=open(fname,'wb')
     output.write(site.read())
     output.close()

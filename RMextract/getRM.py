@@ -159,13 +159,15 @@ def getRM(MS=None,
         emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
 	if not use_proxy:
+            if not "http" in server: #ftp server use ftplib
 	        ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
+            else:
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
 	else:
 		ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass)
 
-        if ionexf==-1:
-           print ("error opening ionex data")
-           return
+        assert (ionexf!=-1),"error getting ionex data"
+           
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
           if not stat_pos_mean:
