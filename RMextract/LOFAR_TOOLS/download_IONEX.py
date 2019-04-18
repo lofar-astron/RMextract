@@ -3,6 +3,8 @@
 import sys
 import RMextract.getIONEX as ionex
 from RMextract import PosTools
+import numpy as np
+import logging
 import argparse
 parser = argparse.ArgumentParser(description='Downloads relevant IONEX files for a given MS')
 

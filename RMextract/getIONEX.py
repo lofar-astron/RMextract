@@ -468,7 +468,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
         logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
         return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
-    
+    #check if IGRG (fast files) exist, use those instead (UGLY!!)
+    if not overwrite and os.path.isfile("%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)):
+        logging.info("fast FILE exists: %sIGRG%03d0.%02dI",outpath,dayofyear,yy)
+        return "%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)
+   
     tried_backup=False
     serverfound=False
     while not serverfound: 
@@ -617,6 +621,11 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
         logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
         return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
+    #check if IGRG (fast files) exist, use those instead (UGLY!!)
+    if not overwrite and os.path.isfile("%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)):
+        logging.info("fast FILE exists: %sIGRG%03d0.%02dI",outpath,dayofyear,yy)
+        return "%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)
+   
     tried_backup=False
     serverfound=False
     backupfound=False    
