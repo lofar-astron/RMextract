@@ -12,6 +12,7 @@ if "--add-lofar-utils" in sys.argv:
     packages.append("RMextract/LOFAR_TOOLS")
     scripts.append("RMextract/LOFAR_TOOLS/createRMParmdb")
     scripts.append("RMextract/LOFAR_TOOLS/createRMh5parm.py")
+    scripts.append("RMextract/LOFAR_TOOLS/download_IONEX.py")
     sys.argv.remove("--add-lofar-utils")
 if "--add-iri" in sys.argv:
     packages.append("pyiri")
