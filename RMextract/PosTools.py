@@ -395,7 +395,7 @@ def radec2azel(ra,dec,time, pos):
     p = me.position('ITRF',str(pos[0])+'m',str(pos[1])+'m',str(pos[2])+'m')
     me.do_frame(p);
     #print ("input radec2azel",phasedir,ra,dec,p,t)
-    azel = me.measure(phasedir,'azel');
+    azel = me.measure(phasedir,'AZELGEO');
     return azel;
 
 def azel2radec(az,el,time, pos):
