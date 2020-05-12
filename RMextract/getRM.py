@@ -81,12 +81,12 @@ def getRM(MS=None,
                 stat_names =['st%d'%(i+1) for i in range(len(stat_pos))]
         if key=='useEMM':
             useEMM=kwargs[key]
-	if key=="proxy_server":		#Check to see if user wants to use a proxy for downloading IONEX files.
-	    use_proxy = True
-	    proxy_server=kwargs["proxy_server"]
-	    proxy_type=kwargs["proxy_type"]
-	    proxy_port=kwargs["proxy_port"]
-	    proxy_user=kwargs["proxy_user"]
+        if key=="proxy_server":		#Check to see if user wants to use a proxy for downloading IONEX files.
+            use_proxy = True
+            proxy_server=kwargs["proxy_server"]
+            proxy_type=kwargs["proxy_type"]
+            proxy_port=kwargs["proxy_port"]
+            proxy_user=kwargs["proxy_user"]
             proxy_pass=kwargs["proxy_pass"]
       
     if timerange != 0:
@@ -158,13 +158,13 @@ def getRM(MS=None,
         dayofyear = date(date_parms[0],date_parms[1],date_parms[2]).timetuple().tm_yday  
         emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
-	if not use_proxy:
+        if not use_proxy:
             if not "http" in server: #ftp server use ftplib
-	        ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
+                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
             else:
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
-	else:
-		ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass)
+        else:
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass)
 
         assert (ionexf!=-1),"error getting ionex data"
            
