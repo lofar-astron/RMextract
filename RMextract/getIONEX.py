@@ -572,11 +572,11 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                     outpath='./',
                     overwrite=False,
                     backupserver="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
-		    proxy_server=None,
-		    proxy_type=None,
-		    proxy_port=None,
-		    proxy_user=None,
-		    proxy_pass=None):
+                    proxy_server=None,
+                    proxy_type=None,
+                    proxy_port=None,
+                    proxy_user=None,
+                    proxy_pass=None):
     """Get IONEX file with prefix from server for a given day
 
     Downloads files with given prefix from the ftp server, unzips and stores
@@ -585,16 +585,16 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     Proxy args are optional.
 
     Args:
-	time (string or list) : date of the observation
-	server (string) : ftp server + path to the ionex directories
-	prefix (string) : prefix of the IONEX files (case insensitive)
-	outpath (string) : path where the data is stored
-	overwrite (bool) : Do (not) overwrite existing data
-	proxy_server (string): address of proxyserver, either url or ip address
-	proxy_type (string): socks4 or socks5
-	proxy_port (int): port of proxy server
-	proxy_user (string): username for proxyserver
-	proxy_pass (string): password for proxyserver
+        time (string or list) : date of the observation
+        server (string) : ftp server + path to the ionex directories
+        prefix (string) : prefix of the IONEX files (case insensitive)
+        outpath (string) : path where the data is stored
+        overwrite (bool) : Do (not) overwrite existing data
+        proxy_server (string): address of proxyserver, either url or ip address
+        proxy_type (string): socks4 or socks5
+        proxy_port (int): port of proxy server
+        proxy_user (string): username for proxyserver
+        proxy_pass (string): password for proxyserver
     """
     prefix=prefix.upper()
     if outpath[-1] != "/":
@@ -632,33 +632,33 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     #If proxy url is given, enable proxy using pysocks
     import urllib2
     if proxy_server and ("None" not in proxy_server):
-    	import socket
-    	import socks
-	s = socks.socksocket()
-	if proxy_type=="socks4":
-		ProxyType = socks.SOCKS4
-	if proxy_type=="socks5":
-		ProxyType = socks.SOCKS5
-	s.set_proxy(ProxyType, proxy_server, proxy_port, rdns=True, username=proxy_user, password=proxy_pass)
+        import socket
+        import socks
+        s = socks.socksocket()
+        if proxy_type=="socks4":
+            ProxyType = socks.SOCKS4
+        if proxy_type=="socks5":
+            ProxyType = socks.SOCKS5
+        s.set_proxy(ProxyType, proxy_server, proxy_port, rdns=True, username=proxy_user, password=proxy_pass)
 
     # Url of the primary server has the syntax "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
     # Url of the backup server has the syntax "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/YYYY/DOY/codgDOY.YYi.Z where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
     #try primary url
 
-    try:	
-	primary = urllib2.urlopen(server,timeout=30)
-	serverfound = True
+    try:
+        primary = urllib2.urlopen(server,timeout=30)
+        serverfound = True
     except:
-	    try:	
-		secondary = urllib2.urlopen(backupserver,timeout=30)
-		backupfound = True
+            try:
+                secondary = urllib2.urlopen(backupserver,timeout=30)
+                backupfound = True
                 server=backupserver
-	    except:
-		logging.error('Primary and Backup Server not responding') #enable in lover environment
+            except:
+                logging.error('Primary and Backup Server not responding') #enable in lover environment
     if "ftp://ftp.aiub.unibe.ch" in server:
-    	url = "ftp://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
+        url = "ftp://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
     elif "ftp://cddis.gsfc.nasa.gov" in server:
-    	url = "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
+        url = "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
     elif "igsiono.uwm.edu.pl" in server:
         url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
 
