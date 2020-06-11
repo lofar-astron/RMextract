@@ -80,12 +80,12 @@ deg_str  I  string containing a degree angle in sexagesimal notation
     deg_str = copy.copy(deg_str.strip())
     sign = +1.0
     if(deg_str[0] == '-'): sign = -1.0
-    for i in xrange(len(deg_str)):
+    for i in range(len(deg_str)):
         if( (deg_str[i].isdigit()) or (deg_str[i]=='.') ):
             pass
         else:
             deg_str = deg_str.replace(deg_str[i],' ')
-    deg_deg = map(float, deg_str.strip().split())
+    deg_deg = list(map(float, deg_str.strip().split()))
     assert(len(deg_deg) == 3)
     deg_rad = deg_num_to_rad(deg_deg[0], deg_deg[1], deg_deg[2]) * sign    
     return deg_rad
@@ -109,26 +109,26 @@ ra_rad   O  ra in radians
 dec_rad  O  dec in radians
             """
     ra_str = copy.copy(ra_str.strip())
-    for i in xrange(len(ra_str)):
+    for i in range(len(ra_str)):
         if( (ra_str[i].isdigit()) or (ra_str[i]=='.') ):
             pass
         else:
             ra_str = ra_str.replace(ra_str[i],' ')
-    ra_hours = map(float, ra_str.strip().split())
+    ra_hours = list(map(float, ra_str.strip().split()))
     assert(len(ra_hours) == 3)
     ra_rad = hour_num_to_rad(ra_hours[0], ra_hours[1], ra_hours[2])
     dec_str = copy.copy(dec_str.strip())
     sign = +1.0
     if(dec_str[0] == '-'): sign = -1.0
-    for i in xrange(len(dec_str)):
+    for i in range(len(dec_str)):
         if( (dec_str[i].isdigit()) or (dec_str[i]=='.') ):
             pass
         else:
             dec_str = dec_str.replace(dec_str[i],' ')
-    dec_deg = map(float, dec_str.strip().split())
+    dec_deg = list(map(float, dec_str.strip().split()))
     assert(len(dec_deg) == 3)
     dec_rad = deg_num_to_rad(dec_deg[0], dec_deg[1], dec_deg[2]) * sign    
-    print 'observing in direction RA, DEC in radians ', ra_rad, dec_rad
+    print ('observing in direction RA, DEC in radians ', ra_rad, dec_rad)
     return ra_rad, dec_rad
 
 
@@ -162,7 +162,7 @@ dec_rad  O  dec in radians
     # Else, we do it this way with one big string
     # get the numbers
     str = copy.copy(ra_str.strip())
-    for i in xrange(len(str)):
+    for i in range(len(str)):
         if( (str[i].isdigit()) or (str[i]=='.') or (str[i]=='-') ):
             pass
         else:
@@ -175,7 +175,7 @@ dec_rad  O  dec in radians
             str[3:] = str[4:]
         else:
             str[3] = str[3].replace('-',' ')
-    nums = map(float, str)
+    nums = list(map(float, str))
     assert(len(nums) == 6)
     ra_rad = hour_num_to_rad(nums[0], nums[1], nums[2])
     dec_rad = deg_num_to_rad(nums[3], nums[4], nums[5]) * sign    
@@ -261,4 +261,23 @@ Taken from _Astronomical Algorithms_, Meeus, 1991
     hav_d = hav(delta_dec) + math.cos(dec_1)*math.cos(dec_2)*hav(delta_ra)
     d = ahav(hav_d)
     return d
+
+################################################################################
+def deg_str_dot_to_rad(deg_str):
+    """converts a string of degrees minutes seconds to a radian float
+
+deg_str  I  string containing a degree angle in sexagesimal notation with dot/period separation
+            such as '-45.16.57.10000' - needed for ASKAP field centre conversion
+    """
+    newStr = ''
+    counter = 0
+    for i in deg_str:
+      if i == '.' and counter < 2:
+        newStr += ':'
+        counter = counter +1
+      else:
+        newStr += i
+    deg_rad = deg_str_to_rad(newStr)
+    return deg_rad
+
 
