@@ -1,6 +1,7 @@
 from setuptools import find_packages,Extension
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension as Extension2
+import numpy
 import sys
 
 packages=['RMextract','EMM']
@@ -16,7 +17,7 @@ if "--add-lofar-utils" in sys.argv:
     sys.argv.remove("--add-lofar-utils")
 if "--add-iri" in sys.argv:
     packages.append("pyiri")
-    ext.append(Extension2('_iri',sources=['pyiri/iri.pyf','pyiri/cira.for',  'pyiri/igrf.for',  'pyiri/iridreg.for',  'pyiri/iriflip.for',  'pyiri/irifun.for',  'pyiri/irisub.for',  'pyiri/iritec.for',  'pyiri/iriget.for']))
+    ext.append(Extension2('_iri',sources=['pyiri/iri.pyf','pyiri/cira.for',  'pyiri/igrf.for',  'pyiri/iridreg.for',  'pyiri/iriflip.for',  'pyiri/irifun.for',  'pyiri/irisub.for',  'pyiri/iritec.for',  'pyiri/iriget.for'],include_dirs=[numpy.get_include()]))
     sys.argv.remove("--add-iri")
 
 
