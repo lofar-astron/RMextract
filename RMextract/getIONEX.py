@@ -214,9 +214,9 @@ def compute_tec_interpol(times, lats, lons, tecinfo, apply_earth_rotation=0):
     Returns:
         np.array : interpolated tecvalues
     '''
-    assert np.isscalar(times) or np.isscalar(lats) or times.shape == lats.shape,\
+    assert times.shape == lats.shape,\
         "times and lats should be array with same shape"
-    assert  np.isscalar(times) or np.isscalar(lons) or times.shape == lons.shape, \
+    assert times.shape == lons.shape, \
         "times and lons should be array with same shape"
     tecdata = tecinfo[0]  # TEC in TECU
     lonarray = tecinfo[2]  # longitude in degrees from West to East (- to +)
