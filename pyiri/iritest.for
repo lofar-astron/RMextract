@@ -39,6 +39,9 @@ C 2015.01 07/12/15 call read_ig_rz readapf107
 C 2015.02 08/13/15 delete COMMON/CONST2
 C 2015.02 08/13/15 ursifo=jf(5) just before IRI_SUB call
 C 2016.01 06/01/16 User specified B0 when jf(43)=false
+C 2016.02 08/22/16 Allow user input options for F10.7D and F10.7_81
+C 2016.03 04/25/18 cleaned up user input options: B0,B1,F10.7D,F10.7_81
+C 2016.04 09/05/18 user input options: HNEA and HNEE
 C
       INTEGER           pad1(6),jdprof(77),piktab
       DIMENSION         outf(20,1000),oar(100,1000),jfi(6)
@@ -52,7 +55,7 @@ C
       CHARACTER*8       bopt,topt
       CHARACTER*9       pname(7)
       CHARACTER*10      dopt,hopt
-      CHARACTER*11      iopt,rzopt,igopt,f8opt
+      CHARACTER*11      iopt,rzopt,igopt,f8opt,fdopt
       CHARACTER*16      f1opt
 
       DATA  IMZ  /' km ','GEOD','GEOD','yyyy',' mm ',' dd ','YEAR',
@@ -136,47 +139,58 @@ c
           if(piktab.eq.4) jf(24)=.false.
         if(jchoice.eq.0) then
 c defaults for jf(1:50)
-c          jf(1)=.false.      ! f=no electron densities 
-c          jf(2)=.false.      ! f=no temperatures 
-c          jf(3)=.false.      ! f=no ion composition 
+c          jf(1)=.false.      ! f=no electron densities (t) 
+c          jf(2)=.false.      ! f=no temperatures (t)
+c          jf(3)=.false.      ! f=no ion composition (t)
           jf(4)=.false.      ! t=B0table f=other models (f)
           jf(5)=.false.      ! t=CCIR  f=URSI foF2 model (f)
-          jf(6)=.false.      ! t=DS95+DY85   f=RBV10+TTS03 (f)
+          jf(6)=.false.      ! t=DS95+DY85   f=RBV10+TBT15 (f)
 c          jf(7)=.false.      ! t=tops f10.7<188 f=unlimited (t)
-          jf(21)=.false.     ! f=ion drift not computed (f)
+          jf(21)=.false.     ! t=ion drift computed f=not comp.(f)
 c          jf(22)=.false.     ! ion densities in m-3 (t)
-          jf(23)=.false.     ! t=AEROS/ISIS f=TTS Te with PF10.7
+          jf(23)=.false.     ! t=AEROS/ISIS f=TTS Te with PF10.7 (f)
 c          jf(24)=.false.     ! t=D-reg-IRI-1990 f=FT-2001 (t)
-c          jf(26)=.false.	  ! f=STORM model turned off (t)
-          jf(28)=.false.	  ! f=spread-F not computed (f)
+c		   jf(25)=.false.     ! t=F107D from APF107.DAT  f=user (t)
+          jf(26)=.false.	 ! t=STORM model on   f= off (t)
+          jf(28)=.false.	 ! t=spread-F computed f=not comp. (f)
           jf(29)=.false.     ! t=old  f=New Topside options (f)
           jf(30)=.false.     ! t=corr f=NeQuick topside (f)
 c          jf(31)=.false.     ! t=B0ABT f=Gulyaeva (t)
-          jf(33)=.false. 	  ! f=auroral boundary off (f)
-c          jf(34)=.false. 	  ! t=messages on 
-          jf(35)=.false. 	  ! f=auroral E-storm model off
-c          jf(36)=.false. 	  ! t=hmF2 w/out foF2_storm f=with
-c          jf(37)=.false. 	  ! t=topside w/out foF2_storm f=with
-c          jf(38)=.false. 	  ! t=WRITEs off in IRIFLIP f=on 
-          jf(39)=.false. 	  ! new hmF2 models 
-c          jf(40)=.false. 	  ! t=AMTB-model, f=Shubin-COSMIC model 
-c          jf(41)=.false. 	  ! COV=f(IG12) (IRI before Oct 2015) 
-c          jf(42)=.false. 	  ! Te w/o PF10.7 dependance 
-c          jf(43)=.false. 	  ! B0 user input 
+c		   jf(32)=.false.     ! t=F107_81 from APF107.DAT  f=user (t)
+          jf(33)=.false. 	  ! t=auroral boundary   f=off (f)
+c          jf(34)=.false. 	  ! t=messages on f= off (t)
+          jf(35)=.false. 	  ! t=auroral E-storm model on f=off (f)
+c          jf(36)=.false. 	  ! t=hmF2 w/out foF2_storm f=with (t)
+c          jf(37)=.false. 	  ! t=topside w/out foF2_storm f=with (t)
+c          jf(38)=.false. 	  ! t=WRITEs off in IRIFLIP f=on (t)
+          jf(39)=.false. 	  ! t=M3000F2 model f=new hmF2 models (f)
+c          jf(40)=.false. 	  ! t=AMTB-model, f=Shubin-COSMIC model (t) 
+c          jf(41)=.false. 	  ! t:COV=F10.7_386 f:COV=f(IG12) (t) 
+c          jf(42)=.false. 	  ! t/f=Te w/o PF10.7 dependance (t)
+c          jf(43)=.false. 	  ! t= B0 model f= B0 user input (t)
+c          jf(44)=.false. 	  ! t= B1 model f= B1 user input (t)
+c          jf(45)=.false. 	  ! t=HNEA=65/80 f=user input oarr(89)
+c          jf(46)=.false. 	  ! t=HNEE=2000  f=user input oarr(90)
         else
           print *,'Compute Ne, T, Ni? (enter: t,t,t  if you want all)'
           read(5,*) jf(1),jf(2),jf(3)
-        if(jf(1)) then 
+        if(jf(1)) then
+              print *,'Ne lower boundary: t=65/80km day/night, ',
+     &              'f=user input {t}'
+              read(5,*) jf(45)
+              print *,'Ne upper boundary: t=2000km day/night, ',
+     &              'f=user input {t}'
+              read(5,*) jf(46)
               print *,'LAY version: t=standard ver., f=LAY version.',
      &              ' {standard:t}'
               read(5,*) jf(11)
-              print *,'Ne Topside: t=IRI-2001/h0.5, f=new options {f}'
+              print *,'Ne Topside: t=IRI-2001, f=new options {f}'
               read(5,*) jf(29)
-              print *,'Ne Topside: t=IRI01_corrt, f=NeQuick/h0.5 {f}'
+              print *,'Ne Topside: t=IRI01_corr, f=NeQuick {f}'
               read(5,*) jf(30)
               print *,'Ne Topside: t=F10.7<188, f=unlimited {t}'
               read(5,*) jf(7)
-              print *,'Ne topside: t=w/o foF2 storm model, f=with {t}'
+              print *,'Ne Topside: t=w/o foF2 storm model, f=with {t}'
               read(5,*) jf(37)
               print *,'foF2 model: t=CCIR, f=URSI-88 {f}'
               read(5,*) jf(5)
@@ -196,6 +210,12 @@ c          jf(43)=.false. 	  ! B0 user input
               print *,'F2 peak height or M3000F2: t=model, ',
      &              'f=user input {t}'
               read(5,*) jf(9)
+              print *,'B0 bottomside thickness: t=model, ',
+     &              'f=user input {t}'
+              read(5,*) jf(43)
+              print *,'B1 bottomside shape: t=model, ',
+     &              'f=user input {t}'
+              read(5,*) jf(44)
               print *,'Auroral boundary model: t=on, f=off {f}'
               read(5,*) jf(33)
               print *,'Bottomside thickness B0: t=Bil-2000, ',
@@ -236,9 +256,9 @@ c          jf(43)=.false. 	  ! B0 user input
               read(5,*) jf(23)
               print *,'Te: t=TBT-2012 with PF107 dep., f=w/o {t}'
               read(5,*) jf(42)
-          endif
+          	  endif
         if(jf(3)) then
-              print *,'Ion comp. model: t=DS95/DY85, f=RBV10/TTS05 {f}' 
+              print *,'Ion comp. model: t=DS95/DY85, f=RBV10/TBT15 {f}' 
               read(5,*) jf(6)
               if(.not.jf(6)) then
               	print *,'IRIFLIP: t=messages off, f=on {t}' 
@@ -254,7 +274,7 @@ c          jf(43)=.false. 	  ! B0 user input
            print *,'Spread-F probability: t=computed, ',
      &            'f=not computed {t}'
               read(5,*) jf(28)
-           print *,'COV: t=F10.7_12, f=func(IG12) (before Oct 2015).{t}'
+           print *,'COV: t: COV=F10.7_365, f: COV=func(IG12).  {t}'
               read(5,*) jf(41)
            print *,'Sunspot index: t=from file, f=user input.  {t}'
               read(5,*) jf(17)
@@ -323,9 +343,10 @@ c
               if(ivar.eq.1) numstp=1
        if(jf(1)) then
          if(.not.jf(8).or..not.jf(9).or..not.jf(13).or..not.jf(14).or.
-     &      .not.jf(15).or..not.jf(16).or..not.jf(43)) then
+     &  .not.jf(15).or..not.jf(16).or..not.jf(43).or..not.jf(44)) then
             var=vbeg
             i=1
+c --------- user input: foF2 or NmF2            
 2234        if(.not.jf(8)) then
               jf(26)=.false.    ! storm model off, if user input
               print *,'foF2/Mhz or NmF2/m-3 for ',itext(ivar),
@@ -334,6 +355,7 @@ c
               pname(1)='foF2/MHz'
               if(oar(1,i).gt.30.) pname(1)='NmF2/m-3'
               endif
+c --------- user input: hmf2 or M(3000)F2            
             if(.not.jf(9)) then
               print *,'hmF2/km or M3000F2 for ',itext(ivar),
      &              '=',var
@@ -341,6 +363,7 @@ c
               pname(2)='M(3000)F2'
               if(oar(2,i).gt.50.) pname(2)='hmF2/km'
               endif
+c --------- user input: foF1 or NmF1            
             if(.not.jf(13)) then
               print *,'foF1/MHz or NmF1/m-3 for ',itext(ivar),
      &               '=',var
@@ -348,11 +371,13 @@ c
               pname(3)='foF1/MHz'
               if(oar(3,i).gt.30.) pname(3)='NmF1/m-3'
               endif
+c --------- user input: hmF1            
             if(.not.jf(14)) then
               print *,'hmF1/km for ',itext(ivar),'=',var
               read(5,*) oar(4,i)
               pname(4)='hmF1/km'
               endif
+c --------- user input: foE or NmE            
             if(.not.jf(15)) then
               print *,'foE/MHz or NmE/m-3 for ',itext(ivar),
      &                '=',var
@@ -360,15 +385,23 @@ c
               pname(5)='foE/MHz'
               if(oar(5,i).gt.30.) pname(5)='NmE/m-3'
               endif
+c --------- user input: hmE            
             if(.not.jf(16)) then
               print *,'hmE/km for ',itext(ivar),'=',var
               read(5,*) oar(6,i)
               pname(6)='hmE/km'
               endif
+c --------- user input: B0            
             if(.not.jf(43)) then
               print *,'B0/km for ',itext(ivar),'=',var
               read(5,*) oar(10,i)
               pname(7)='B0/km '
+              endif
+c --------- user input: B1            
+            if(.not.jf(44)) then
+              print *,'B1 for ',itext(ivar),'=',var
+              read(5,*) oar(35,i)
+              pname(7)='B1    '
               endif
             i=i+1
             var=var+vstp
@@ -387,41 +420,58 @@ c
 1235        var=var+vstp
           endif
 
-c option to enter F107D and/or PF107 
+c option to enter F107D and/or F107_81 
 c
             if(.not.jf(25)) then
-                        print *,'User input for F107D:'
-                        read(5,*) f107d
-                        do i=1,100
-                                    oar(41,i)=f107d
-                                    enddo
-                        endif
+                    print *,'User input for F10.7D'
+                    read(5,*) oar(41,1)
+                    do i=2,100
+                        oar(41,i)=oar(41,1)
+                        enddo
+                    endif
 
             if(.not.jf(32)) then
-                        print *,'User input for PF107:'
-                        read(5,*) pf107d
-                        do i=1,100
-                                    oar(46,i)=pf107d
-                                    enddo
-                        endif
+                    print *,'User input for F10.7_81avg'
+                    read(5,*) oar(46,1)
+                    do i=2,100
+                        oar(46,i)=oar(46,1)
+                        enddo
+                    endif
 
 c option to enter Rz12 and/or IG12
 c
             if(.not.jf(17)) then
-                        print *,'User input for Rz12'
-                        read(5,*) oar(33,1)
-                        do i=2,100
-                                    oar(33,i)=oar(33,1)
-                                    enddo
-                        endif
+                    print *,'User input for Rz12'
+                    read(5,*) oar(33,1)
+                    do i=2,100
+                        oar(33,i)=oar(33,1)
+                        enddo
+                    endif
 
             if(.not.jf(27)) then
-                        print *,'User input for IG12'
-                        read(5,*) oar(39,1)
-                        do i=2,100
-                                    oar(39,i)=oar(39,1)
-                                    enddo
-                        endif
+                    print *,'User input for IG12'
+                    read(5,*) oar(39,1)
+                    do i=2,100
+                        oar(39,i)=oar(39,1)
+                        enddo
+                    endif
+
+c option to enter HNEA and/or HNEE
+c
+            if(.not.jf(45)) then
+                    print *,'User input for HNEA/km'
+                    read(5,*) oar(89,1)
+                    do i=2,100
+                        oar(89,i)=oar(89,1)
+                        enddo
+                    endif
+            if(.not.jf(46)) then
+                    print *,'User input for HNEE/km'
+                    read(5,*) oar(90,1)
+                    do i=2,100
+                        oar(90,i)=oar(90,1)
+                        enddo
+                    endif
 
 c end of user input
 c
@@ -462,7 +512,7 @@ c
              endif
         endif
 
-        iopt='RBV10+TTS05'
+        iopt='RBV10+TBT15'
         if(jf(6)) iopt='DS95 + DY85'
 
         dopt='FT01+DRS95'
@@ -489,6 +539,8 @@ c
         if(jf(17)) rzopt=' '
         igopt=' user input'
         if(jf(27)) igopt=' '
+        fdopt=' user input'
+        if(jf(25)) fdopt=' '
         f8opt=' user input'
         if(jf(32)) f8opt=' '
         
@@ -549,6 +601,7 @@ c
 
         write(7,223) oar(33,1),rzopt
         write(7,2231) oar(39,1),igopt
+        write(7,2238) oar(41,1),fdopt
         write(7,2237) oar(46,1),f8opt
 
         if(htec_max.gt.50.0) write(7,3914) htec_max
@@ -583,6 +636,8 @@ c
 223     format('Solar Sunspot Number (12-months running mean) Rz12',
      &          4X,F5.1,A11)
 2231    format('Ionospheric-Effective Solar Index IG12',16X,
+     &          F5.1,A11)
+2238    format('Solar radio flux F10.7 (daily)',24X,
      &          F5.1,A11)
 2237    format('Solar radio flux F10.7 (81-day average)',15X,
      &          F5.1,A11)
@@ -801,8 +856,8 @@ c     &    outf(11,li),outf(9,li),outf(8,li)
             tec=-1.0
             itopp=-1
         endif
-c        print *, XCOR,jne,xner,jtn,jti,jte,jio,jin,
-c     &        jih,jihe,jino,jio2,jicl,tec,itopp
+        print *, XCOR,jne,xner,jtn,jti,jte,jio,jin,
+     &        jih,jihe,jino,jio2,jicl,tec,itopp
         WRITE(7,7117) XCOR,jne,xner,jtn,jti,jte,jio,jin,
      &        jih,jihe,jio2,jino,jicl,tec,itopp
 7117    FORMAT(F6.1,I8,1x,F6.3,3I6,7I4,f6.1,i4)
@@ -812,6 +867,6 @@ c     &        jih,jihe,jino,jio2,jicl,tec,itopp
 2357    print *,'Enter 0 to exit or 1 to generate another profile?' 
         read(5,*) icontinue
         if (icontinue.gt.0) goto 1
-		    
+		print *,oar(51,1),oar(52,1),oar(83,1)    
             stop
             end

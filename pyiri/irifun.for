@@ -113,27 +113,43 @@ C 2012.01 01/24/12 STORME_AP: change 365 to 366 leap year    [F. Simoes]
 C 2012.01 06/30/12 HMF2ED: hmF2 too low foF2/foE ge 1.7 [I.Zakharenkova]
 C 2012.01 09/14/12 SHAMDB0D,SHAB1D: initializing CONS2      [P. Coisson]
 C 2012.02 12/12/12 STORME_AP: add KONSOL and ERROR ouput STORME_AP=-5.
-C 2014.00 01/22/14 TPCORR: INVDIP --> INVDP                [J.K. Knight]
-C 2014.02 07/24/14 COMMON/iounit/ added 'mess'
-C 2014.03 08/25/14 ELTEIK,INVDPC,SOCO: ACOS: if(abs(x).gt.1) x=sign(1,x)
-C 2014.03 10/02/14 IONLOW,IONHIGH: C1(82) added for SPHARM_IK [J.C. Xue]
-C 2014.05 12/22/14 APFMSIS: changed text if out of range of APF107.DAT
-C 2015.01 04/27/15 TCON: ionoindx(806),indrz(806)
-C 2015.02 07/12/15 add read_ig_rz, readapf107 change TCON,APF* 
-C 2015.02 07/20/15 APFMSIS: remove duplicate iiap(8)         [E. Blanch]
-C 2015.03 08/13/15 DATA in subr: DATA values only used first CALL 
-C 2015.03 08/13/15 COMMON/CONST/UMR,PI 
-C 2015.03 09/30/15 hmF2 new: SHAMDHMF2, SDMF2 and associated subroutines 
-C 2015.03 09/30/15 ELTEIK,CALION,IONLOW,IONHIGH w/o invdip calc; INVDPC
-C 2015.03 10/12/15 READAPF107: F365 -> F107_365             [M. Hausman]
-C 2015.03 10/14/15 LEGFUN: replace print * with write(konsol,..)
-C 2015.03 10/14/15 SHAMDB0D,SHAB1D,SCHNEVPD: COMMON/ATB/
-C 2015.03 10/14/15 CLCMLT,DPMTRX --> IGRF.FOR
-C 2015.04 02/01/16 TAL: if(SHBR.le.0.0) -> RETURN
-C 2015.04 02/01/16 IONLOW,IONHIGH: ALT -> ALTI extrapolation [S.R. Zhang]
-C 2016.01 02/24/16 SCHNEVPH: COSD(X) -> COS(X*UMR); CONST/UMR  [W. Toler]
-C 2016.01 02/24/16 SCHNEVP,LEGFUN: COMMON/COST/dfarg,PI        [W. Toler]
-C 2016.02 03/23/16 CALION, IONLOW, IONHIGH, INVDPC  revised  [V. Truhlik]
+C 2012.03 01/22/14 TPCORR: INVDIP --> INVDP                [J.K. Knight]
+C 2012.04 07/24/14 COMMON/iounit/ added 'mess'
+C 2012.05 08/25/14 ELTEIK,INVDPC,SOCO: ACOS: if(abs(x).gt.1) x=sign(1,x)
+C 2012.06 10/02/14 IONLOW,IONHIGH: C1(82) added for SPHARM_IK [J.C. Xue]
+C 2012.07 12/22/14 APFMSIS: changed text if out of range of APF107.DAT
+C 2012.08 04/27/15 TCON: ionoindx(806),indrz(806)
+C 2012.09 07/12/15 add read_ig_rz, readapf107 change TCON,APF* 
+C 2012.10 07/20/15 APFMSIS: remove duplicate iiap(8)         [E. Blanch]
+C 2012.11 04/11/18 read_ig_rz: rz=rz_new*0.7 from 01/2014, ig_rz_10_2016
+C 2012.12 04/16/18 Versioning now based on year of major releases
+C
+C 2016.01 08/13/15 DATA in subr: DATA values only used first CALL 
+C 2016.01 08/13/15 COMMON/CONST/UMR,PI 
+C 2016.02 09/30/15 hmF2 new: SHAMDHMF2, SDMF2 and associated subroutines 
+C 2016.02 09/30/15 ELTEIK,CALION,IONLOW,IONHIGH w/o invdip calc; INVDPC
+C 2016.03 10/12/15 READAPF107: F365 -> F107_365             [M. Hausman]
+C 2016.04 10/14/15 LEGFUN: replace print * with write(konsol,..)
+C 2016.04 10/14/15 SHAMDB0D,SHAB1D,SCHNEVPD: COMMON/ATB/
+C 2016.04 10/14/15 CLCMLT,DPMTRX --> IGRF.FOR
+C 2016.05 02/01/16 TAL: if(SHBR.le.0.0) -> RETURN
+C 2016.05 02/01/16 IONLOW,IONHIGH: ALT -> ALTI extrapolation  [S.R. Zhang]
+C 2016.06 02/24/16 SCHNEVPH: COSD(X) -> COS(X*UMR); CONST/UMR   [W. Toler]
+C 2016.06 02/24/16 SCHNEVP,LEGFUN: COMMON/COST/dfarg,PI         [W. Toler]
+C 2016.07 03/23/16 CALION, IONLOW, IONHIGH, INVDPC  revised   [V. Truhlik]
+C 2016.08 07/19/16 XE3_1: change D1F1 to C1                    [I. Galkin]
+C 2016.09 09/08/16 CALION: Version 2.5 C/NOFS correction      [V. Truhlik]
+C 2016.09 09/08/16 NEW: model_hmF2                             [V. Shubin]
+C 2016.10 10/19/16 read_ig_rz: *0.7 for r12_new starting 01/2014
+C 2016.11 02/23/17 SHAB1D: new SCHNEVPDB1 and COMMON/ATB1/ 
+C 2016.12 03/22/18 INVDPC= ... ALFA*SIGN(1.0,DIPL)*INVL       [V. Truhlik]
+C 2016.12 03/22/18 INVDPC_OLD for ELTEIK                      [V. Truhlik]
+C 2016.13 04/06/18 read_data_SD: add web dir. location for mcsat%%.dat
+C 2016.14 04/23/18 Versioning now based on year of major releases
+C 2016.15 05/07/18 StormVd: AE7_12S -> AEd7_12S                [K. Knight]
+C 2020.01 07/02/19 Added subroutines BOOKER and tops_cor2 (COMMON/BLO11) 
+C 2020.02 07/19/19 XE1:itopn=3 is topside cor2 option (solar activity term)
+C 2020.03 08/05/19 XE1: corrections and BLO11 change 
 C                  
 c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 c IRI functions and subroutines:
@@ -143,8 +159,8 @@ C		    SPLINE,SPLINT,SWAPEL,TEDIFI,TPCAS,TPCORR},TEBA,SPHARM,
 C           ELTE,TEDE,TI,TN
 C Ni:       RPID,RDHHE,RDNO,KOEFP1,KOEFP2,KOEFP3,SUFE,IONDANI,IONCO1, 
 C           IONCO2,APROK,CALION,IONLOW,IONHIGH,INVDPC
-C PEAKS:    FOUT,XMOUT,HMF2ED,XM3000HM,SHAMDHMF2,SCHNEVPDH,SDMF2,
-C     		hmF2_med_SD,read_data_SD,fun_hmF2_SD,fun_Gk,Legendre, 
+C PEAKS:    FOUT,XMOUT,HMF2ED,XM3000HM,SHAMDHMF2,SCHNEVPDH,model_hmF2,
+C     		SDMF2,hmF2_med_SD,read_data_SD,fun_hmF2_SD,fun_Gk,Legendre, 
 C     		fun_hmF2UT,Koeff_UT,fun_Akp_UT,fun_Fk_UT,fun_Gk_UT
 C     		FOF1ED,f1_c1,f1_prob,FOEEDI,XMDED,GAMMA1
 C PROFILE:  TOPH05,CHEBISH,SHAMDB0D,SHAB1D,SCHNEVPD,TBFIT,LEGFUN,  
@@ -190,7 +206,8 @@ C           =3 Gulyaeva-0.5 is not yet implemented.
 c----------------------------------------------------------------
         COMMON  /BLOCK1/HMF2,XNMF2,HMF1,F1REG
      &          /BLO10/BETA,ETA,DELTA,ZETA
-     &          /BLO11/B2TOP,TC3,itopn,alg10,hcor1
+c     &          /BLO11/B2TOP,TC3,itopn,alg10,hcor1,tcor2
+     &          /BLO11/B2TOP,itopn,tcor
      &          /QTOP/Y05,H05TOP,QF,XNETOP,xm3000,hhalf,tau
      &          /ARGEXP/ARGMAX
 
@@ -211,23 +228,85 @@ c----------------------------------------------------------------
         Y = y * dxdh
         if(abs(Y).gt.argmax) Y = sign(argmax,Y)
 
-        IF(itopn.eq.3) then
-	         IF((QF.EQ.1.).AND.(ABS(H-H05TOP).LT.1.)) QF=Y05/Y
-             XE1 = XNMF2 * EXP(-Y*QF)                             
-             RETURN          
-             endif
-        TCOR = 0.
-        IF(itopn.eq.1.and.h.gt.hcor1) then
-             xred = h - hcor1
-             rco = tc3 * xred
-             TCOR = rco * alg10
-             endif
+c        IF(itopn.eq.3) then
+c	         IF((QF.EQ.1.).AND.(ABS(H-H05TOP).LT.1.)) QF=Y05/Y
+c             XE1 = XNMF2 * EXP(-Y*QF)                             
+c             RETURN          
+c             endif
+c        TCORS = 0.0
+c        IF(itopn.eq.1.or.itopn.eq.3) then             
+c             xred = h - hcor1
+c             rco = tc3 * xred
+c             TCOR = rco * alg10
+c             endif
+c        IF(h.gt.hcor1) TCORS=TCORS+TCOR
+c        TCOR=TCOR+TCOR2
         XE1 = XNMF2 * EXP(-Y+TCOR)                             
         RETURN          
         END             
 C
 C
+      subroutine tops_cor2(xh,vmod,a01)
+C-------------------------------------------------------------------------
+C Determines solar activity correction factor for topside cor option:
+C		xh	height in km
+C		vmod	modified dip latitude in degree
+C		ap01(1:2,1)		A0 and A1 for daytime
+C		ap01(1:2,2)		A0 and A1 for nighttime
+C	        IRI-new = IRI-old * exp(A0+A1*PF10.7)
+C-------------------------------------------------------------------------
+      REAL	pa(6,3,2,2),ha(6,3,2,2),sh(5),thh(4)
+      REAL	ah(6),av(6),ap01(3,2,2),a01(2,2)
+      REAL  xmod(7),thhb(5),pb(7,2,2),bv(7)
 
+      DATA pa/0,0,-2.4,-2.4,0,0,
+     &	0,0,-1.6,-1.6,0,0,0,0,-2.2,-2.2,0,0,
+     &	0,0,0.0185,0.0185,0,0,0,0,0.018,0.018,0,0,
+     &	0,0,0.0175,0.0175,0,0,0,0,-1.1,-1.1,0,0,
+     &	0,0,-0.7,-0.7,0,0,0,0,-1.4,-1.4,0,0,
+     &	0,0,0.007,0.007,0,0,0,0,0.005,0.005,0,0,
+     &	0,0,0.01,0.01,0,0/
+      DATA ha/0,200,600,900,1400,1700,
+     &	0,550,700,1100,1400,1700,
+     &	0,200,600,950,1600,1700,
+     &	0,300,650,750,1300,1700,
+     &	0,450,750,850,1400,1700,
+     &	0,300,650,750,1500,1700,
+     &	0,400,500,900,1200,1700,
+     &	0,400,500,900,1200,1700,
+     &	0,350,550,800,1200,1700,
+     &	0,400,500,750,900,1700,
+     &	0,400,550,750,900,1700,
+     &	0,400,550,750,900,1700/
+      DATA xmod/-90.,-60.,-25.,0.,25.,60.,90./
+      DATA thh/4*30.0/thhb/5*0.1/
+
+      do 11 j2=1,3 
+        do 11 k=1,2 
+          do 11 l3=1,2 
+            do 12 i=1,6
+              AH(I)=HA(I,J2,K,L3)
+12            AV(I)=PA(I,J2,K,L3)
+11          AP01(J2,K,L3)=BOOKER(XH,6,AH,AV,THH)	
+
+      do 20 i=1,2
+        do 20 k=1,2
+          do 21 l=1,2
+            pb(l,i,k)=0
+            pb(l+5,i,k)=0
+21          pb(l+2,i,k)=ap01(l,i,k)                                                                             8i,*,*)
+20        pb(5,i,k)=ap01(3,i,k)
+
+      do 14 k=1,2 
+        do 14 l4=1,2
+          do 15 i=1,7 
+15          BV(I)=PB(I,K,L4)
+14        A01(K,L4)=BOOKER(VMOD,7,XMOD,BV,THHB)
+
+      return
+      end
+C
+C
         REAL FUNCTION TOPQ(h,No,hmax,Ho)
 c----------------------------------------------------------------
 c  NeQuick formula
@@ -314,11 +393,11 @@ C ELECTRON DENSITY FOR THE F1-LAYER (HZ.....HMF1)
 C USING THE NEW DEFINED F1-LAYER FUNCTION (Reinisch and Huang, Advances 
 C in Space Research, Volume 25, Number 1, 81-88, 2000)
         COMMON	/BLOCK1/	HMF2,XNMF2,HMF1,F1REG
-     &		/BLOCK2/	B0,B1,D1F1
+     &		/BLOCK2/	B0,B1,C1
 	    logical	f1reg
 C
 	    h1bar=h
-        if (f1reg) H1BAR=HMF1*(1.0-((HMF1-H)/HMF1)**(1.0+D1F1))
+        if (f1reg) H1BAR=HMF1*(1.0-((HMF1-H)/HMF1)**(1.0+C1))
         XE3_1=XE2(H1BAR)
         RETURN
         END
@@ -3358,36 +3437,27 @@ c-----------------------------------------------------------------
           R2=R2+(R12-R2)*rk
         endif
        end
-c
-c
+C
+C
 	SUBROUTINE CALION(INVDIP,MLT,ALT,DDD,PF107,NO,NH,NHE,NN)
-c	SUBROUTINE CALION(CRD,INVDIP,FL,DIMO,B0,
-c     &                    DIPL,MLT,ALT,DDD,PF107,NO,NH,NHE,NN)
 C----------------------------------------------------------------------
-C Version 2.0 (released 2.9.2013)
+C Version 2.5 (released 6.4.2016) (Includes a correction for PF107<87.5 
+C based on C/NOFS CINDI data)
 C CALION calculates ion density of O+, H+, He+ and N+  in the outer
 C ionosphere with regard to solar activity (F107 index).
 C CALION uses subroutines IONLOW and IONHIGH.
-C Linearly interpolates for solar activity.
-Cc Inputs: CRD - 0 .. INVDIP
-Cc               1 .. FL, DIMO, B0, DIPL (used for calculation INVDIP inside)
-C         INVDIP - "mix" coordinate of the dip latitude and of
+C Linearly interpolates the logarithmic ion densities in solar activity.
+C Inputs: INVDIP - "mix" coordinate of the dip latitude and of
 C                    the invariant latitude;
 C                    positive northward, in deg, range <-90.0;90.0>
-Cc         FL, DIMO, B0 - McIlwain L parameter, dipole moment in
-Cc                        Gauss, magnetic field strength in Gauss -
-Cc                        parameters needed for invariant latitude
-Cc                        calculation
-Cc         DIPL - dip latitude
-Cc                positive northward, in deg, range <-90.0;90.0>
 C         MLT - magnetic local time (central dipole)
 C               in hours, range <0;24)
 C         ALT - altitude above the Earth's surface;
 C               in km, range <350;2000>
 C         DDD - day of year; range <0;365>
 C         PF107 - PF107 index
-C Output: NO,NH,NHE,NN - relative/absolute density of O+, H+, He+, and N+
-C Versions:  2.0 FORTRAN
+C Output: NO,NH,NHE,NN - relative density of O+, H+, He+, and N+ in %
+C Versions:  2.5 FORTRAN
 C
 C REFERENCES:
 C   Triskova, L., Truhlik, V., Smilauer, J. An empirical model of ion
@@ -3411,13 +3481,13 @@ C         Czech Republic
 C         e-mail: vtr@ufa.cas.cz
 C         tel/fax: +420 267103058, +420 728073539 / +420 272 762528
 C----------------------------------------------------------------------
-c      REAL INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,PF107
-c	INTEGER CRD,DDD,ION
       REAL INVDIP,MLT,ALT,PF107
-	  INTEGER DDD,ION
+      INTEGER DDD,ION
       REAL NO,NH,NHE,NN,NOH,NHH,NHEH,NNH,NOL,NHL,NHEL,NNL,NTOT
+      REAL NOCORR,NHCORR
       DIMENSION  DOL(4,3,49),DHL(4,3,49),DHEL(4,3,49),DNL(4,3,49)
       DIMENSION  DOH(4,3,49),DHH(4,3,49),DHEH(4,3,49),DNH(4,3,49)
+      DIMENSION  CORRO(3),CORRH(3)
 C/////////////////////coefficients high solar activity////////////////////////
 C//////////////////////////////////O+/////////////////////////////////////////
 C     550km equinox
@@ -4587,28 +4657,22 @@ C     1000km June solstice
      &                        6.3315E-004,-1.2200E-002,-5.4789E-003,
      &                       -1.6331E-002,-1.5537E-003,-5.9603E-003,
      &                       -3.9097E-003/
+      DATA (CORRH(J),J=1,3)/ 0.762,0.836,1.033/
+      DATA (CORRO(J),J=1,3)/ 1.872,1.640,1.234/
 C//////////////////////////////////////////////////////////////////////
 C/////////////////////////solar minimum////////////////////////////////
-c      CALL IONLOW(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DOL,0,NOL)
-c      CALL IONLOW(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DHL,1,NHL)
-c      CALL IONLOW(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DHEL,2,NHEL)
-c      CALL IONLOW(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DNL,3,NNL)
       CALL IONLOW(INVDIP,MLT,ALT,DDD,DOL,0,NOL)
       CALL IONLOW(INVDIP,MLT,ALT,DDD,DHL,1,NHL)
       CALL IONLOW(INVDIP,MLT,ALT,DDD,DHEL,2,NHEL)
       CALL IONLOW(INVDIP,MLT,ALT,DDD,DNL,3,NNL)
 C///////////////////////////solar maximum//////////////////////////////
-c      CALL IONHIGH(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DOH,0,NOH)
-c      CALL IONHIGH(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DHH,1,NHH)
-c      CALL IONHIGH(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DHEH,2,NHEH)
-c      CALL IONHIGH(CRD,INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,DDD,DNH,3,NNH)
       CALL IONHIGH(INVDIP,MLT,ALT,DDD,DOH,0,NOH)
       CALL IONHIGH(INVDIP,MLT,ALT,DDD,DHH,1,NHH)
       CALL IONHIGH(INVDIP,MLT,ALT,DDD,DHEH,2,NHEH)
       CALL IONHIGH(INVDIP,MLT,ALT,DDD,DNH,3,NNH)
 C     interpolation (in logarithm)
       IF (PF107 .GT. 260) PF107=260
-	  IF (PF107 .LT. 65) PF107=65
+	IF (PF107 .LT. 65) PF107=65
       NO=(ALOG10(NOH)-ALOG10(NOL))/(210.0-85.0)*(PF107-85.0)+ALOG10(NOL)
       NH=(ALOG10(NHH)-ALOG10(NHL))/(210.0-85.0)*(PF107-85.0)+ALOG10(NHL)
       NHE=(ALOG10(NHEH)-ALOG10(NHEL))/(210.0-85.0)*(PF107-85.0)+
@@ -4625,13 +4689,33 @@ C     normalization
       NH=NH/NTOT
       NHE=NHE/NTOT
       NN=NN/NTOT
+C     C/NOFS correction
+      IF (PF107 .LE. 67.5) THEN
+       NOCORR=CORRO(1)
+       NHCORR=CORRH(1)
+      ENDIF
+      IF ((PF107 .GT. 67.5) .AND. (PF107 .LT. 87.5)) THEN
+       IL=IFIX((PF107-57.5)/10.0)
+       NOCORR=(CORRO(IL+1)-CORRO(IL))/10.0*(PF107-57.5-10*IL)+CORRO(IL)
+       NHCORR=(CORRH(IL+1)-CORRH(IL))/10.0*(PF107-57.5-10*IL)+CORRH(IL)
+      ENDIF 
+      IF (PF107 .GE. 87.5) GOTO 10
+      NO=NO/NOCORR
+      NH=NH/NHCORR
+      NHE=NHE/NHCORR
+      NN=NN/NOCORR
+C     normalization
+      NTOT=NO+NH+NHE+NN
+      NO=NO/NTOT
+      NH=NH/NTOT
+      NHE=NHE/NTOT
+      NN=NN/NTOT
+10    CONTINUE      
       RETURN
       END
 C
 C
       SUBROUTINE IONLOW(INVDIP,MLT,ALT,DDD,D,ION,NION)
-c      SUBROUTINE IONLOW(CRD,INVDIP,FL,DIMO,B0,
-c     &                   DIPL,MLT,ALT,DDD,D,ION,NION)
 C---------------------------------------------------------------------------
 C IONLOW calculates absolute density of O+, H+, He+ or N+  in the outer
 C ionosphere for a low solar activity (F107 < 100).
@@ -4641,17 +4725,9 @@ C For intermediate altitudes an interpolation is used.
 C Recommended altitude range: 350-2500 km!!!
 C For days between seasons centred at (21.3. = 79; 21.6. = 171;
 C 23.9. 265; 21.12. = 354) relative ion density is linearly interpolated.
-Cc Inputs: CRD - 0 .. INVDIP
-Cc               1 .. FL, DIMO, B0, DIPL (used for calculation INVDIP inside)
-C         INVDIP - "mix" coordinate of the dip latitude and of
+Cc Inputs: INVDIP - "mix" coordinate of the dip latitude and of
 C                    the invariant latitude;
 C                    positive northward, in deg, range <-90.0;90.0>
-Cc         FL, DIMO, BO - McIlwain L parameter, dipole moment in
-Cc                        Gauss, magnetic field strength in Gauss -
-Cc                        parameters needed for invariant latitude
-Cc                        calculation
-Cc         DIPL - dip latitude
-Cc                positive northward, in deg, range <-90.0;90.0>
 C         MLT - magnetic local time (central dipole)
 C               in hours, range <0;24)
 C         ALT - altitude above the Earth's surface;
@@ -4661,12 +4737,10 @@ C         D - coefficints of spherical harmonics for a given ion
 C         ION - ion species (0...O+, 1...H+, 2...He+, 3...N+)
 C Output: NION - absolute density for given ion 
 C---------------------------------------------------------------------------
-c      REAL INVDIP,FL,DIMO,B0,DIPL,MLT,ALTI,ALT,NION
-c      INTEGER CRD,DDD,ION
       REAL INVDIP,MLT,ALT,NION
       INTEGER DDD,ION
       DIMENSION  D(4,3,49),MIRREQ(49)
-      REAL INVDP,INVDPC,DTOR
+      REAL INVDP,DTOR
       REAL RMLT,RCOLAT
       REAL C(49),C1(82)
       INTEGER SEZA,SEZB,SEZAI,SEZBI,DDDA,DDDB,DDDD
@@ -4675,27 +4749,18 @@ c      INTEGER CRD,DDD,ION
       REAL N0A750,N0B750,N750A,N750B,N750
       REAL N0A100,N0B100,N100A,N100B,N1000
 	REAL ANO(4),AH(4),DNO(2),ST(3)
-c	COMMON/ARGEXP/ARGMAX /CONST/DTOR,PI
 	COMMON/CONST/DTOR,PI
 	DATA (MIRREQ(J),J=1,49)/
      &            1,-1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1,
      &            1,-1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1,
      &           -1, 1,-1, 1,-1, 1, 1,-1, 1, 1,-1, 1,-1, 1, 1/
 C////////////////////////////////////////////////////////////////////////////////////
-c      DTOR=3.1415926536/180.0
 C     coefficients for mirroring
       DO 10 I=1,49
        D(1,3,I)=D(1,2,I)*MIRREQ(I)
        D(2,3,I)=D(2,2,I)*MIRREQ(I)
        D(3,3,I)=D(3,2,I)*MIRREQ(I)
 10     D(4,3,I)=D(4,2,I)*MIRREQ(I)
-c      IF (CRD .EQ. 1) THEN
-c       INVDP=INVDPC(FL,DIMO,B0,DIPL,DTOR)
-c      ELSE IF	(CRD .EQ. 0) THEN
-c       INVDP=INVDIP
-c      ELSE
-c       RETURN
-c      END IF
       INVDP=INVDIP
 
       RMLT=MLT*DTOR*15.0
@@ -4831,8 +4896,6 @@ c      ARGMAX=88.0
 C
 C
       SUBROUTINE IONHIGH(INVDIP,MLT,ALT,DDD,D,ION,NION)
-c      SUBROUTINE IONHIGH(CRD,INVDIP,FL,DIMO,B0,
-c     &                   DIPL,MLT,ALT,DDD,D,ION,NION)
 C---------------------------------------------------------------------------
 C IONHIGH calculates absolute density of O+, H+, He+ or N+  in the outer
 C ionosphere for high solar activity conditions (PF10.7 = 210).
@@ -4842,17 +4905,9 @@ C For intermediate altitudes a interpolation is used.
 C Recommended altitude range: 500-2500 km!!!
 C For days between seasons centred at (21.3. = 79; 21.6. = 171;
 C 23.9. 265; 21.12. = 354) relative ion density is linearly interpolated.
-Cc Inputs: CRD - 0 .. INVDIP
-Cc               1 .. FL, DIMO, B0, DIPL (used for calculation INVDIP inside)
-C         INVDIP - "mix" coordinate of the dip latitude and of
+Cc Inputs: INVDIP - "mix" coordinate of the dip latitude and of
 C                    the invariant latitude;
 C                    positive northward, in deg, range <-90.0;90.0>
-Cc         FL, DIMO, BO - McIlwain L parameter, dipole moment in
-Cc                        Gauss, magnetic field strength in Gauss -
-Cc                        parameters needed for invariant latitude
-Cc                        calculation
-Cc         DIPL - dip latitude
-Cc                positive northward, in deg, range <-90.0;90.0>
 C         MLT - magnetic local time (central dipole)
 C               in hours, range <0;24)
 C         ALT - altitude above the Earth's surface;
@@ -4862,12 +4917,10 @@ C         D - coefficints of spherical harmonics for a given ion
 C         ION - ion species (0...O+, 1...H+, 2...He+, 3...N+)
 C Output: NION - absolute density for given ion 
 C---------------------------------------------------------------------------
-c      REAL INVDIP,FL,DIMO,B0,DIPL,MLT,ALT,NION
-c	INTEGER CRD,DDD,ION
       REAL INVDIP,MLT,ALT,NION
 	  INTEGER DDD,ION
       DIMENSION  D(4,3,49),MIRREQ(49)
-      REAL INVDP,INVDPC,DTOR
+      REAL INVDP,DTOR
       REAL RMLT,RCOLAT
       REAL C(49),C1(82)
       INTEGER SEZA,SEZB,SEZAI,SEZBI,DDDA,DDDB,DDDD
@@ -4876,27 +4929,18 @@ c	INTEGER CRD,DDD,ION
       REAL N0A150,N0B150,N150A,N150B,N1500
       REAL N0A250,N0B250,N250A,N250B,N2500
 	REAL ANO(4),AH(4),DNO(2),ST(3)
-c	COMMON/ARGEXP/ARGMAX
 	COMMON/CONST/DTOR,PI
 	DATA (MIRREQ(J),J=1,49)/
      &            1,-1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1,
      &            1,-1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1, 1,-1, 1,-1, 1,
      &           -1, 1,-1, 1,-1, 1, 1,-1, 1, 1,-1, 1,-1, 1, 1/
 C////////////////////////////////////////////////////////////////////////////////////
-c      DTOR=3.1415926536/180.0
 C     coefficients for mirroring
       DO 10 I=1,49
        D(1,3,I)=D(1,2,I)*MIRREQ(I)
        D(2,3,I)=D(2,2,I)*MIRREQ(I)
        D(3,3,I)=D(3,2,I)*MIRREQ(I)
 10     D(4,3,I)=D(4,2,I)*MIRREQ(I)
-c      IF (CRD .EQ. 1) THEN
-c       INVDP=INVDPC(FL,DIMO,B0,DIPL,DTOR)
-c      ELSE IF	(CRD .EQ. 0) THEN
-c       INVDP=INVDIP
-c      ELSE
-c       RETURN
-c      END IF
       INVDP=INVDIP
       
       RMLT=MLT*DTOR*15.0
@@ -5055,9 +5099,39 @@ C      invariant latitude (absolute value)
      &           1.0/(exp((-DIPL-25.0)/2.0)+1.0))
        BETA=1.0/(exp((INVL-25.0)/2.0)+1.0)+
      &      1.0/(exp((-INVL-25.0)/2.0)+1.0)-1.0
-       INVDPC=(ALFA*INVL+BETA*DIPL)/(ALFA+BETA)
+c       INVDPC=(ALFA*INVL+BETA*DIPL)/(ALFA+BETA)
+       INVDPC=(ALFA*SIGN(1.0,DIPL)*INVL+BETA*DIPL)/(ALFA+BETA)
        RETURN
        END
+C
+C       
+      REAL FUNCTION INVDPC_OLD(FL,DIMO,B0,DIPL)
+C---------------------------------------------------------------------------
+C     calculation of INVDIP from FL, DIMO, BO, and DIPL
+C     invariant latitude calculated by highly
+C     accurate polynomial expansion
+C---------------------------------------------------------------------------
+      REAL FL,DIMO,B0,DIPL
+      DOUBLE PRECISION B(8),A
+      REAL DTOR,ASA,INVL,RINVL,RDIPL,ALFA,BETA
+	  COMMON/CONST/DTOR,PI
+      DATA B/1.259921D0  ,-0.1984259D0 ,-0.04686632D0,-0.01314096D0,
+     &      -0.00308824D0, 0.00082777D0,-0.00105877D0, 0.00183142D0/
+      A=(DIMO/B0)**(1.0D0/3.0D0)/FL
+      ASA=A*(B(1)+B(2)*A+B(3)*A**2+B(4)*A**3+B(5)*A**4+
+     &        B(6)*A**5+B(7)*A**6+B(8)*A**7)
+      IF (ASA .GT. 1.0) ASA=1.0
+      IF (ASA .LT. 0.0) ASA=0.0
+c      invariant latitude (absolute value)
+      RINVL=ACOS(SQRT(ASA))
+      INVL=RINVL/DTOR
+      RDIPL=DIPL*DTOR
+      ALFA=SIN(ABS(RDIPL))**3
+      BETA=COS(RINVL)**3
+      INVDPC_OLD=(ALFA*SIGN(1.0,DIPL)*INVL+BETA*DIPL)/(ALFA+BETA)
+      RETURN
+      END
+
 C
 C                     
 C*************************************************************                  
@@ -5140,19 +5214,19 @@ C
 	SUBROUTINE  SHAMDHMF2 (RLAT,FLON,T,RZ,HMF2)
 C-------------------------------------------------------------------
 C	COMPUTES THE HOURLY VALUES OF hmF2 FROM A SET OF SH COEFFICIENTS
-C	IN A POINT OF A GIVEN GEOCENTRIC LATITUDE AND LONGITUDE
-C	OF THE EARTH'S SURFACE FOR A GIVEN MONTH AND A GIVEN SUSPOT NUMER.
+C	IN A POINT OF A GIVEN GEOCENTRIC LATITUDE AND LONGITUDE OF THE 
+C	EARTH'S SURFACE FOR A GIVEN MONTH AND A GIVEN SUNSPOT NUMBER.
 C   PARAMETERS AND COEFFICIENTS ARE GIVEN IN DATA STATEMENTS.
 C
-C INPUT:	RLAT    The geogrphic latitude on the meridian given by 
-C					the local time (FLON), where the modified dip
-C                   latitude is the same as of the orginal site.
-C			FLON	=LONGITUDE+15.*UT(hours)
-C			T		Month as a REAL number (1.0 to 12.0)
-C			RZ		12-month running mean
-C OUTPUT	HMF2	F2 peak altitude in km
+C INPUT:	RLAT    The geographic latitude on the FLON meridian  
+C                   where the modified dip latitude is equal to the 
+C                   modip value for the considered point in space.
+C           FLON    =LONGITUDE+15.*UT(hours)
+C           T       Month as a REAL number (1.0 to 12.0)
+C           RZ      12-month running mean
+C OUTPUT:   HMF2    F2 peak altitude in km
 C
-C  Altadill, D., S. Magdaleno, J.M. Torta, and E. Blanch 
+C Altadill, D., S. Magdaleno, J.M. Torta, and E. Blanch 
 C     Adv. Space Res. 52, 1756-1769, 2013.
 C-------------------------------------------------------------------
       PARAMETER   (IBO=0,JBO=1,KDIM=8,LDIM=4,L=-1)
@@ -5173,7 +5247,7 @@ c     ,CONST
       DATA THETA,RE,TZERO,IFIT,ICEN,IREF,IB,KINT,LINT,KEXT,LEXT
      *     /180.,6371.2,1.0,  -1,  0,   0,   2, 8,   4,   0,   -1/
 
-      DATA ((CONST(N,M), M=0,N), N=0,KDIM)
+  	  DATA ((CONST(N,M), M=0,N), N=0,KDIM)
      *	 /4*1.,1.73205,0.866025,1.,2.44949,1.93649,0.7905691,1.,
      *	  3.16228,3.35410,2.09165,0.739510,1.,3.87298,5.12348,
      *	  4.18330,2.21853,0.701561,1.,4.58258,2*7.24569,4.96078,
@@ -5181,7 +5255,7 @@ c     ,CONST
      *      5.69951,2.42182,0.647260,1.,6.,12.5499,16.9926,16.4531,
      *      11.8645,6.40755,2.50683,0.626707/
 
-      DATA IE /"I"/
+	  DATA IE /"I"/
 
       DATA (((GANM(N,M,J),GBNM(N,M,J),HANM(N,M,J),HBNM(N,M,J),
      *    	J=0,LDIM), M=0,N), N=0,KDIM)
@@ -5573,6 +5647,49 @@ c     change to intercept form of fourier series.
       END
 C
 C
+      subroutine model_hmF2(day,month,UT,xmodip,long,F107_81,hmF2)
+c--------------------------------------------------------------------------
+c  Input:
+c    day, month (integer)
+c    UT         (real) - universal time
+c    xmodip     (real) - modified dip latitude in degrees
+c    long       (real) - geodatic longitude    in degrees
+c    F107_81    (real) - F10.7 average over 3 solar rotations
+c                        (81 days, centered on the current day)
+c
+c Output:
+c    hmF2       (real) - F2-layer peak height in km
+c--------------------------------------------------------------------------
+	implicit none
+c     .. scalar arguments ..
+      integer day, month
+      real UT, xmodip, long, F107_81, hmF2
+c     .. local scalars ..
+      integer monthr, montha
+	real hmF2_0, hmF2_m, hmF2_p, hmF2med
+c     ..
+	call SDMF2(UT,month,F107_81,xmodip,long,hmF2_0)
+
+      if (day.le.15) then
+         if (day.eq.15) then
+             hmF2med = hmF2_0
+         else
+             monthr = month-1
+             if (monthr.eq.0) monthr = 12
+	       call SDMF2(UT,monthr,F107_81,xmodip,long,hmF2_m)
+             hmF2med = (hmF2_0-(day-15)*(hmF2_m-hmF2_0)/30.)
+         end if
+      else
+         montha = mod(month,12) + 1
+	   call SDMF2(UT,montha,F107_81,xmodip,long,hmF2_p)
+         hmF2med  = (hmF2_0+(day-15)*(hmF2_p-hmF2_0)/30.)
+      end if
+
+	hmF2 = hmF2med
+      return
+      end
+C
+C
       subroutine SDMF2(UT,monthut,F107A,xmodip,long,hmF2)
 c--------------------------------------------------------------------------
 c    Global median model of the F2-layer peak height
@@ -5746,8 +5863,9 @@ c	end do
 c
 	  return
 	
-c 10   format('data\mcsat',i2,'.dat')
  10   format('mcsat',i2,'.dat')
+c-web- special for web version
+c10     FORMAT('/var/www/omniweb/cgi/vitmo/IRI/mcsat',I2,'.dat')
  20   format(6(d12.5))
       end
 c
@@ -6134,7 +6252,7 @@ C--------------------------------------------- D. BILITZA, 1988.
         END             
 C
 C
-	real function f1_c1(xmodip,hour,suxnon,saxnon)
+	real function f1_c1(xmodip,hour,saxnon,suxnon)
 c F1 layer shape parameter C1 after Reinisch and Huang, Advances in
 c Space Research, Volume 25, Number 1, 81-88, 2000.
 
@@ -6709,6 +6827,230 @@ C     **********************************************************
       END
 C
 C
+      SUBROUTINE SCHNEVPD (RZ,FLAT,FLON,R,T,L,BN,BE,BV)
+C-------------------------------------------------------------------
+C     WHEN L IS POSITIVE:
+C     COMPUTES SPHERICAL CAP HARMONIC (GEOCENTRIC) FIELD COMPONENTS
+C     HORIZONTAL NORTH BN,HORIZONTAL EAST BE,AND VERTICAL DOWNWARD BV.
+C     WHEN L IS NEGATIVE:
+C     COMPUTES GENERAL FUNCTION BV, ITS HORIZONTAL NORTH DERIVATIVE BN,
+C     AND ITS HORIZONTAL EAST DERIVATIVE BE, ON SPHERICAL CAP SURFACE.
+C     NOTE THAT THESE ARE METRICAL DERIVATIVES, AND BE IS THE
+C     LONGITUDINAL DERIVATIVE DIVIDED BY SIN(COLATITUDE).
+
+C     FLAT,FLON,R ARE GEOCENTRIC SPHERICAL CAP LATITUDE,LONGITUDE,RADIAL
+C     DISTANCE; T IS TIME.
+
+C     L =  0  ON FIRST CALL:  RETURNS SPHERICAL CAP POLE POSITION FLATO,FLONO
+C             AND HALF-ANGLE THETA AS BN,BE, AND BV AFTER INITIALIZATION.
+C             ON SUBSEQUENT CALLS:  ACTS AS L=1.
+C          1  COMPUTES POTENTIAL FIELD COMPONENTS FROM INTERNAL COEFFICIENTS.
+C          2  COMPUTES POTENTIAL FIELD COMPONENTS FROM EXTERNAL COEFFICIENTS.
+C          3  COMPUTES FIELD FROM BOTH INTERNAL AND EXTERNAL COEFFICIENTS.
+C         -1  COMPUTES GENERAL FUNCTION BV AND DERIVATIVES BN WITH RESPECT TO
+C             LATITUDE AND BE WITH RESPECT TO LONGITUDE DIVIDED BY COS(LAT)
+C             (R IS DUMMY VARIABLE IN THIS CASE).
+C     NOTE:   SUBROUTINE IS INITIALIZED DURING FIRST CALL REGARDLESS OF L.
+
+C     SUBPROGRAM USED:  LEGFUN
+
+C	***** PARAMS & COEFFS TRANSFERRED FROM MAIN PROGRAM *****
+
+C	ADAPTED FROM SUBROUTINE SCHNEV OF G.V. HAINES (COMPUTERS & GEOSCIENCES, 
+C      14, 413-447, 1988)
+C-------------------------------------------------------------------
+
+      PARAMETER   (IBO=0,JBO=1,KDIM=6,LDIM=4)                                     
+      DIMENSION   FN(0:KDIM,0:KDIM), CONSTP(0:KDIM,0:KDIM)
+      DIMENSION   CML(KDIM), SML(KDIM)
+      DIMENSION   DELT(0:LDIM)
+      DIMENSION   BINT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM),
+     *            BEXT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM)
+      COMMON	/CONST/dfarg,PI 
+     * 			/ATB/BINT,BEXT,RE,TZERO,IFIT,IB,KINT,LINT,KEXT,
+     *              LEXT,KMAX,FN
+      CHARACTER*1 IE,RESP
+C
+      DATA ((CONSTP(N,M), M=0,N), N=0,KDIM)
+     *	 /4*1.,1.73205,0.866025,1.,2.44949,1.93649,0.7905691,1.,
+     *	  3.16228,3.35410,2.09165,0.739510,1.,3.87298,5.12348,
+     *	  4.18330,2.21853,0.701561,1.,4.58258,2*7.24569,4.96078,
+     *      2.32681,0.671693/
+
+C     IBF   =  0   TO USE ORDINARY POLYNOMIALS AS BASIS FUNCTIONS
+C              1          LEGENDRE POLYNOMIALS
+C              2          FOURIER SERIES
+C              3          COSINE SERIES
+C              4          SINE SERIES
+C     NOTE:    TZERO AND THINT MAY DEPEND ON IBF.
+      IBF   =  2                                                       
+      T1=1.
+      T2=12.
+      CALL TBFIT (T1,T2,IBF,THINT,TZERO)                                
+
+C      IF (L .NE. 0)  GO TO 100
+C      BN = FLATO
+C      BE = FLONO
+C      BV = THETA
+C      RETURN
+
+  100 IF (L .GE. 0)  THEN
+         IF (IFIT .LT. 0)  GO TO 999
+         AOR = RE/R
+         AR = AOR**2
+         IF (L .GT. 1)  GO TO 107
+      ELSE
+         IF (IFIT .GE. 0)  GO TO 999
+         AR = -1.
+         END IF
+      KT = LINT
+      GO TO 109
+  107 IF (KEXT .GT. 0)  AOR3 = AOR*AR
+      IF (L .GT. 2)  GO TO 108
+      KT = LEXT
+      GO TO 109
+  108 KT = MAX (LINT,LEXT)
+  109 DELT(0) = 1.
+      IF (KT .LE. 0)  GO TO 103
+      DEL = (T - TZERO)/THINT
+      DO 102 I=1,KT
+      IF (I .EQ. 1)  THEN
+         IF (IBF .LE. 1) THEN
+             DELT(I) = DEL
+             ELSE IF (IBF .EQ. 2)  THEN
+             ST = SIN(DEL)
+             DELT(I) = ST
+             ELSE IF (IBF .EQ. 3)  THEN
+             DELT(I) = COS(DEL)
+             ELSE
+             DELT(I) = SIN(DEL)
+             ENDIF
+         GO TO 102
+         ENDIF
+      IF (IBF .EQ. 0)  THEN
+          DELT(I) = DELT(I-1)*DEL
+      ELSE IF (IBF .EQ. 1)  THEN
+          RECIP = 1./FLOAT(I)
+          DELT(I) = (2.-RECIP)*DELT(I-1)*DEL - (1.-RECIP)*DELT(I-2)
+      ELSE IF (IBF .EQ. 2)  THEN
+           IF ((I/2)*2 .EQ. I)  THEN
+             IF (I .EQ. 2)  THEN
+                CT = COS(DEL)
+                DELT(I) = CT
+                ELSE
+                DELT(I) = DELT(I-2)*CT - DELT(I-3)*ST
+                ENDIF
+             ELSE
+             DELT(I) = DELT(I-2)*CT + DELT(I-1)*ST
+             ENDIF
+      ELSE IF (IBF .EQ. 3)  THEN
+          DELT(I) = COS(I*DEL)
+      ELSE IF (IBF .EQ. 4)  THEN
+          DELT(I) = SIN(I*DEL)
+      ELSE
+          GO TO 999
+      ENDIF
+  102 CONTINUE
+      incept = 0                                                              
+      if ((ibf.eq.2 .or. ibf.eq.3) .and. incept .eq. 1)  then
+c     change to intercept form of fourier series.
+          do i=2,lint,4-ibf
+          delt(i) = 1. - delt(i)
+          enddo
+          endif
+  103 X = 0.
+      Y = 0.
+      Z = 0.
+      IF (L .EQ. 2)  GO TO 106
+      IF (KINT .LT. 0)  GO TO 106
+      GTI = 0.
+      DO 105 I=1-IBO-JBO,LINT
+  105 GTI = GTI + BINT(0,0,I)*DELT(I)
+      Z = -AR*GTI
+      N =  0
+  106 COLAT = 90. - FLAT
+      DO 150 N=1,KMAX
+      IF (N .GT. 1)  GO TO 115
+      CL = COS(FLON*dfarg)
+      SL = SIN(FLON*dfarg)
+      CML(1) = CL
+      SML(1) = SL
+      GO TO 120
+  115 SML(N) = SL*CML(N-1) + CL*SML(N-1)
+      CML(N) = CL*CML(N-1) - SL*SML(N-1)
+  120 CONTINUE
+      DO 150 M=0,N
+      IF (IB .EQ. 2)  GO TO 121
+      NMM = N - M
+      IF ((NMM/2)*2 .NE. NMM)  GO TO 150
+  121 FFN = FN(N,M)
+      CALL LEGFUN (M,FFN,CONSTP(N,M),COLAT,P,DP,PMS,0)
+      IF (L .GE. 0)  THEN
+         AR = AOR**(FFN+2.)
+      ELSE
+         AR = 1.
+         FFN = -2.
+         DP = -DP
+         PMS = -PMS
+         END IF
+      IF (M .NE. 0)  GO TO 130
+      BT1 = 0.
+      BT3 = 0.
+      BT  = 0.
+      IF (L .EQ. 2)  GO TO 123
+      IF (N .GT. KINT)  GO TO 123
+      GTI = 0.
+      DO 122 I=1-IBO-JBO,LINT
+  122 GTI  = GTI  + BINT(N,M,I)*DELT(I)
+      BT1  = AR*GTI
+      BT3  = BT1
+  123 IF (L .LE. 1)  GO TO 125
+      IF (N .GT. KEXT)  GO TO 125
+      GTE = 0.
+      DO 124 I=1-IBO-JBO,LEXT
+  124 GTE = GTE + BEXT(N,M,I)*DELT(I)
+      BT  = AOR3/AR*GTE
+      BT1 = BT1 + BT
+  125 X = X + BT1*DP
+      Z = Z - (FFN*(BT3-BT)+BT3)*P
+      GO TO 150
+  130 BT1 = 0.
+      BT2 = 0.
+      BT3 = 0.
+      BT  = 0.
+      IF (L .EQ. 2)  GO TO 133
+      IF (N .GT. KINT)  GO TO 133
+      GTI = 0.
+      HTI = 0.
+      DO 132 I=1-IBO-JBO,LINT
+      GTI = GTI + BINT(N,M,I)*DELT(I)
+  132 HTI = HTI + BINT(M-1,N,I)*DELT(I)
+      BT1 = AR*(GTI*CML(M) + HTI*SML(M))
+      BT2 = AR*(GTI*SML(M) - HTI*CML(M))
+      BT3 = BT1
+  133 IF (L .LE. 1)  GO TO 135
+      IF (N .GT. KEXT)  GO TO 135
+      GTE = 0.
+      HTE = 0.
+      DO 134 I=1-IBO-JBO,LEXT
+      GTE = GTE + BEXT(N,M,I)*DELT(I)
+  134 HTE = HTE + BEXT(M-1,N,I)*DELT(I)
+      RA = AOR3/AR
+      BT = RA*(GTE*CML(M) + HTE*SML(M))
+      BT1 = BT1 + BT
+      BT2 = BT2 + RA*(GTE*SML(M) - HTE*CML(M))
+  135 X = X + BT1*DP
+      Y = Y + BT2*PMS
+      Z = Z - (FFN*(BT3-BT)+BT3)*P
+  150 CONTINUE
+      BN = X
+      BE = Y
+      BV = Z
+      RETURN
+  999 STOP
+      END
+C
+C
       SUBROUTINE  SHAB1D (FLAT,FLON,T,RZ,B)
 C-------------------------------------------------------------------
 C	COMPUTES THE HOURLY VALUES OF B1 FROM A SET OF SH COEFFICIENTS
@@ -6733,7 +7075,7 @@ C
       DIMENSION   BINT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM),
      *            BEXT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM)
       CHARACTER*1 IE       
-      COMMON/ATB/BINT,BEXT,RE,TZERO,IFIT,IB,KINT,LINT,KEXT,
+      COMMON/ATB1/BINT,BEXT,RE,TZERO,IFIT,IB,KINT,LINT,KEXT,
      *              LEXT,KMAX,FN
 
 	  DATA ALT /300./
@@ -6859,14 +7201,14 @@ C
 C     **********************************************************
 C     SYNTHESIZES THE VALUE OF B1 FROM THE MODEL	
 C     **********************************************************
-      CALL SCHNEVPD(RZ,FLAT,FLON,dum,T,L,dum,dum,B)
+      CALL SCHNEVPDB1(RZ,FLAT,FLON,dum,T,L,dum,dum,B)
 C
       RETURN
 9999  STOP
       END
 C
 C
-      SUBROUTINE SCHNEVPD (RZ,FLAT,FLON,R,T,L,BN,BE,BV)
+      SUBROUTINE SCHNEVPDB1 (RZ,FLAT,FLON,R,T,L,BN,BE,BV)
 C-------------------------------------------------------------------
 C     WHEN L IS POSITIVE:
 C     COMPUTES SPHERICAL CAP HARMONIC (GEOCENTRIC) FIELD COMPONENTS
@@ -6906,7 +7248,7 @@ C-------------------------------------------------------------------
       DIMENSION   BINT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM),
      *            BEXT(0:KDIM,0:KDIM,1-IBO-JBO:LDIM)
       COMMON	/CONST/dfarg,PI 
-     * 			/ATB/BINT,BEXT,RE,TZERO,IFIT,IB,KINT,LINT,KEXT,
+     * 			/ATB1/BINT,BEXT,RE,TZERO,IFIT,IB,KINT,LINT,KEXT,
      *              LEXT,KMAX,FN
       CHARACTER*1 IE,RESP
 C
@@ -8028,6 +8370,30 @@ C ------------------------------------------------------------ PEAK
         END
 c
 c
+      REAL FUNCTION BOOKER(H,N,AH,AV,D)
+c----------------------------------------------------------------
+C PROFILE BASED ON BOOKER APPROACH 
+C 	H		HEIGHT IN KM 
+C 	N		NUMBER OF PROFILE SECTIONS WITH CONSTANT GRADIENT
+C 	AH(N)	HEIGHTS MARKING BEGINNING AND END OF SECTIONS
+C 	AV(N) 	PARAMETER VALUES AT AH
+C	D(N-2)	THICKNESS OF TRANSITION REGION BETWEEN SECTIONS
+C	ST(N-1)	SECTION GRADIENTS
+c----------------------------------------------------------------
+      REAL AH(N),AV(N),ST(N-1),D(N-2)
+C
+      ST(1)=(AV(2)-AV(1))/(AH(2)-AH(1))
+      SUM=AV(1)+ST(1)*(H-AH(1))
+      DO 1 I=1,N-2
+        aa = eptr(h    ,d(i),ah(i+1))
+        bb = eptr(ah(i),d(i),ah(i+1))
+        ST(I+1)=(AV(I+2)-AV(I+1))/(AH(I+2)-AH(I+1))
+1        SUM=SUM+(ST(I+1)-ST(I))*(AA-BB)*D(I)                
+      BOOKER=SUM        
+      RETURN          
+      END             
+C
+C
         FUNCTION XE2TO5(H,HMF2,NL,HX,SC,AMP)
 C----------------------------------------------------------------------
 C NORMALIZED ELECTRON DENSITY (N/NMF2) FOR THE MIDDLE IONOSPHERE FROM 
@@ -8355,19 +8721,6 @@ C
             END
 c
 c
-           subroutine set_datapath(path)
-c----------------------------------------------------------------
-c set common data path for data files
-c----------------------------------------------------------------
-           CHARACTER path*200
-           common /path/datapath
-           character datapath*200
-           datapath=path
-           RETURN
-           END
-
-c
-c
            subroutine read_ig_rz 
 c----------------------------------------------------------------
 c Reads the Rz12 and IG12 indices file IG_RZ.DAT from I/O UNIT=12 
@@ -8416,12 +8769,11 @@ c----------------------------------------------------------------
 
            integer	iyst,iyend,iymst,iupd,iupm,iupy,imst,imend
            real		aig(806),arz(806)
-           character datapath*200
-           common /igrz/aig,arz,iymst,iymend
-           common /path/ datapath
-           open(unit=12,file=TRIM(ADJUSTL(datapath))//'ig_rz.dat',
-     *     FORM='FORMATTED',status='old')
            
+           common /igrz/aig,arz,iymst,iymend
+
+           open(unit=12,file='ig_rz.dat',FORM='FORMATTED',status='old')
+
 c-web- special for web version
 c            open(unit=12,file=
 c     *         '/var/www/omniweb/cgi/vitmo/IRI/ig_rz.dat',
@@ -8434,7 +8786,7 @@ c get number of data points to read.
             read(12,*) imst,iyst,imend,iyend
             iymst=iyst*100+imst
             iymend=iyend*100+imend
-c            print*,"found",iupd,iupm,iupy,"and",imst,iyst,imend,iyend
+     
 c inum_vals= 12-imst+1+(iyend-iyst-1)*12 +imend + 2
 c 1st year \ full years       \last y\ before & after
 
@@ -8443,8 +8795,13 @@ c 1st year \ full years       \last y\ before & after
 c read all the IG12 (ionoindx) and Rz12 (indrz) values
             read(12,*) (aig(i),i=1,inum_vals)
             read(12,*) (arz(i),i=1,inum_vals)
-c            do 1 jj=1,inum_vals
-c                rrr=arz(jj)
+
+c use scale factor 0.7 for new sunspot number starting from Jan 2014
+c and starting with ig_rz file for Oct 2016.
+            if(iupy*100+iupm.gt.201609) then
+            	inum_chan= 3-imst+(2014-iyst)*12 
+            	do 1 jj=inum_chan,inum_vals
+                	arz(jj)=arz(jj)*0.7
 c                ggg=aig(jj)
 c                if(rrr.lt.0.0) then
 c                    covr=abs(rrr)
@@ -8458,8 +8815,8 @@ c                    ggg=zi
 c                    endif
 c                arz(jj)=rrr
 c                aig(jj)=ggg    
-c1               continue
-
+1               	continue
+				endif
             close(unit=12)
 
             return
@@ -8495,8 +8852,6 @@ c----------------------------------------------------------------
            common	/igrz/ionoindx,indrz,iymst,iymend
 
         iytmp=yr*100+mm
-c MM: added call to read_ig_rz, seems to be forgotten?
-c        call read_ig_rz()
         if (iytmp.lt.iymst.or.iytmp.gt.iymend) then
                if(mess) write(konsol,8000) iytmp,iymst,iymend
 8000           format(1x,I10,'** OUT OF RANGE **'/,5x,
@@ -8557,9 +8912,8 @@ c               if((yr/4*4.eq.yr).and.(yr/100*100.ne.yr)) idd2=381
                 ig(3)=ig(2)+(ig(1)-ig(2))*rsn
 
 1927    nmonth=imm2
-c        print*,nmonth,mm,idd2,iyy2
-        return
-        end
+            return
+            end
 C
 C
 		subroutine readapf107
@@ -8596,12 +8950,9 @@ C-------------------------------------------------------------------------
 C
         INTEGER		aap(23000,9),iiap(8)
         DIMENSION 	af107(23000,3)
-        character datapath*200
         COMMON		/apfa/aap,af107,n
-        COMMON          /path/datapath
 
-        Open(13,FILE=TRIM(ADJUSTL(datapath))//'apf107.dat',
-     *   FORM='FORMATTED',STATUS='OLD')
+        Open(13,FILE='apf107.dat',FORM='FORMATTED',STATUS='OLD')
 c-web-sepcial vfor web version
 c      OPEN(13,FILE='/var/www/omniweb/cgi/vitmo/IRI/apf107.dat',
 c     *    FORM='FORMATTED',STATUS='OLD')
@@ -8651,7 +9002,7 @@ c-----------------------------------------------------------------------
         DIMENSION 	af107(23000,3)
         LOGICAL 	mess
         COMMON 		/iounit/konsol,mess	/apfa/aap,af107,nf107
-c       call readapf107()
+       
         do i=1,8
               iap(i)=-1
               enddo
@@ -8729,7 +9080,7 @@ c
         LOGICAL  	mess
 
         COMMON 		/iounit/konsol,mess	/apfa/aap,af107,nf107
-c        call readapf107()
+
         IS=ISDATE
 
         ihour=int(hour/3.)+1
@@ -8822,7 +9173,7 @@ c-----------------------------------------------------------------------
         common 		/iounit/konsol,mess /apfa/aap,af107,nf107
 
         DATA LM/31,28,31,30,31,30,31,31,30,31,30,31/
-c        call readapf107()
+
         IYBEG=1958
         if(iyyyy.lt.IYBEG) goto 21   ! APF107.DAT starts at Jan 1, 1958
 
@@ -10074,7 +10425,7 @@ C
 
          DO i=-7,-12,-1
             AEd7_12S=AE(iP+i)-130.0D0
-            IF (AEd7_12S.LE.0.0D0) AE7_12S=0.0D0
+            IF (AEd7_12S.LE.0.0D0) AEd7_12S=0.0D0
             AEd7_12=AEd7_12+AEd7_12S
          END DO
 

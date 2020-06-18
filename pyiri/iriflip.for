@@ -1,4 +1,4 @@
-C flipiri.for 
+C IRIFLIP.for 
 C
 C 2012.00 10/05/11 IRI-2012: bottomside B0 B1 model (SHAMDB0D, SHAB1D),
 C 2012.00 10/05/11    bottomside Ni model (iriflip.for), auroral foE
@@ -8,10 +8,13 @@ C 2012.00 10/05/11    NRLMSIS00 (cira.for), CGM coordinates, F10.7 daily
 C 2012.00 10/05/11    81-day 365-day indices (apf107.dat), ap->kp (ckp),
 C 2012.00 10/05/11    array size change jf(50) outf(20,1000), oarr(100).
 C 2012.01 12/12/11 Deleted ALT_RATES (not used)
-C 2012.01 01/04/12 Deleted FINDAP,READAP,CONV_DATE,GET_DATA,RATCHK (not used)
-C 2012.01 01/04/12 Deleted BRACE,ACTUAL_DAY,EPHEM SOLDEC,TFILE,RUN_ERROR (not used)
-C 2012.01 01/04/12 COP2D: 99 FOMRAT ',' missing; commented out all WRITEs
-C 2014.01 07/17/14 COP4S: NPLUS=0; PR(13)=0.0 ------------------------- A Shabanloui
+C 2012.02 01/04/12 Deleted FINDAP,READAP,CONV_DATE,GET_DATA,RATCHK (not used)
+C 2012.02 01/04/12 Deleted BRACE,ACTUAL_DAY,EPHEM SOLDEC,TFILE,RUN_ERROR (not used)
+C 2012.02 01/04/12 COP2D: 99 FOMRAT ',' missing; commented out all WRITEs
+C 2012.03 07/17/14 COP4S: NPLUS=0; PR(13)=0.0 ------------------------- A Shabanloui
+C 2012.04 04/16/18 Versioning now based on year of major releases
+C 2016.01 09/08/16 Main: NEWTON replaced by iteration procedure ------- B Gustavsson
+C 2016.02 05/07/18 Added array PRV11 to DATA statement ---------------- K. Knight
 C****************************************************************************************
 C subroutines for IDC model
 C
@@ -28,53 +31,52 @@ C turn on printout of intermediate quantities with JPRINT=1 also in PARAMS, PROB
 C PROBN2, YLDISS, and PROBO2 with ISW=1.
 C 
 C Richards, P. G., D. Bilitza, and D. Voglozin (2010), Ion density calculator (IDC): 
-C 	A new efficient model of ionospheric ion densities, Radio Sci., 45, RS5007, 
-C   doi:10.1029/2009RS004332.
+C    A new efficient model of ionospheric ion densities, Radio Sci., 45, RS5007, 
+C    doi:10.1029/2009RS004332.
+C
+C Fortran code written by Phil Richards, George Mason University, Fairfax, VA, USA
 C
 C****************************************************************************************
 C
 C
+C:::::::::::::::::::::::::::: CHEMION :::::::::::::::::::::::::::
+C..... This routine was written by Phil Richards April 2010. This version was
+C..... modified in April 2011. 
+C..... It takes the specified input electron density and returns O+, O2+, NO+,
+C..... N2+, N+, NO, and N(2D) densities. These densities generally agree well
+C..... with Atmosphere Explorer and FLIP model densities.
+C..... In this version all the densities except O+ are calculated from chemical
+C.....  equilibrium. The densities are normalized so that the total ion density 
+C..... matches the input electron density.
+C..... This version has two modes. If the variable USER_OPLUS is positive it is used
+C..... to specify the O+ density. If USER_OPLUS is negative, O+ is calculated from
+C..... chemical equilibrium. In both cases, all the ion densities are normalized
+C..... to the input electron density (Ne). Thus the O+ density may not match
+C..... exactly, USER_OPLUS.
+C..... N+ generally agrees well with AE-C data and the FLIP model during the day
+C..... up to ~500 km, but is inaccurate at night due to diffusion.
+C..... The NO densities can either be user specified or calculated by the model.
+C..... NO will be very good except below about 130 km where it will be 
+C..... underestimated due to neglect of diffusion. There is an artificial 
+C..... floor on the NO density to prevent it from getting too low below 130 km.
+C..... H+ and He+ are only good during the daytime below ~450 km.
+C..... The EUVAC model is used for solar EUV irradiances
       SUBROUTINE CHEMION(JPRINT,  !.. Input: Turn file output on or off
      >                      ALT,  !.. Input: Altitude(km)
      >               F107,F107A,  !.. Input: Solar activity indices
      >                 TE,TI,TN,  !.. Input: Electron, ion and neutral temperatures
-     >          OXN,O2N,N2N,HEN,  !.. Input: O, O2, N2, and He densities (cm-3)
+     >       OXN,O2N,N2N,HEN,HN,  !.. Input: O, O2, N2, He, and H densities (cm-3)
      >                  USER_NO,  !.. Input: User specified NO density (cm-3)
      >                      N4S,  !.. Input: N4S should be 0.5*MSIS N density (cm-3)
      >                       NE,  !.. Input: electron density (cm-3)
-     >               USER_NPLUS,  !.. Input: User specified N+ density (cm-3)
-     >                     SZAD,  !.. Input: solar zenith angle(D)
+     >               USER_OPLUS,  !.. Input: User specified O+ density (cm-3) -1.0=off
+     >                     SZAD,  !.. Input: LT(hrs), UT(sec) and solar zenith angle(D)
      >     OXPLUS,O2PLUS,NOPLUS,  !.. OUTPUT: O+, O2+, NO+ densities (cm-3)
      >             N2PLUS,NPLUS,  !.. OUTPUT: N2+ and N+ densities (cm-3)
      >                  NNO,N2D,  !.. OUTPUT: NO and N(2D) density (cm-3)
-     >                    INEWT)  !.. OUTPUT: Newton procedure fails if INEWT=0
-C-------------------------------------------------------------------------------------
-C... This routine was written by Phil Richards April 2010. 
-C... It takes the specified input electron density and returns O+, O2+, NO+,
-C... N2+, N+, NO, and N(2D) densities.These densities generally agree well
-C... with the FLIP model densities.
-C... All the densities except O+ are calculated from chemical equilibrium.
-C... O+ is calculated using a Newton iterative procedure so that the total 
-C... ion density matches the input electron density.
-C... N+ and NO densities can either be user specified or calculated by the model.
-C... N+ generally agrees well with AE-C data and the FLIP model during the day, 
-C... but is inaccurate at night due to lack of diffusion.
-C... NO will be very good except below about 130 km where it will be 
-C... underestimated due to neglect of diffusion. There is an artificial 
-C... floor on the NO density to prevent it from getting too low below 130 km.
-C... If the Newton procedure fails to converge, all ions including O+ are 
-C... calculated from chemical equilibrium and then normalized to reproduce 
-C... the input electron density. This generally works well.
-C... The Newton procedure usually works if the total calculated molecular ion 
-C... densities do not approach the input electron density. Difficulties are most   
-C... likely to happen below ~150 km and especially at night. A Newton solution is 
-C... usually found when the O+ density is not too much smaller than the modeled 
-C... molecular ion density.
-C... The EUVAC model is used for solar EUV irradiances
-C-------------------------------------------------------------------------------------
+     >                    ITERS)  !.. OUTPUT: # of iterations to converge
       IMPLICIT NONE
       INTEGER JPRINT        !.. Turns on printing of production and loss
-      INTEGER INEWT         !.. Signifies when the Newton procedure fails
       INTEGER I,J,K,ITERS   !.. loop control variables
       INTEGER IRATS         !.. Switch for different rates
       INTEGER ITS,JITER     !.. Variables for Newton procedure
@@ -82,9 +84,9 @@ C-------------------------------------------------------------------------------
       !.. Geophysical parameters
       REAL F107,F107A,ALT,SZAD
       !.. Measured H+, He+, O+, N2+, NO+, O2+, N+, RPA ion density
-      REAL HEPLUS,OXPLUS,N2PLUS,NOPLUS,O2PLUS,NPLUS,USER_NPLUS
+      REAL HEPLUS,OXPLUS,N2PLUS,NOPLUS,O2PLUS,NPLUS,USER_Oplus
       !.. O2,O,N2,NO,He,N4S, user specified NO
-      REAL O2N,OXN,N2N,NNO,HEN,N4S,USER_NO
+      REAL O2N,OXN,N2N,NNO,HEN,N4S,HN,USER_NO
       !.. Ne, N(2P),N(2D),O+(2P),O+(2D) densities
       REAL NE,N2P,N2D,OP2D,OP2P
       !.. Total (photon & photoel) production rates O+(4S),O+(2P),O+(2D),O2+
@@ -100,115 +102,114 @@ C-------------------------------------------------------------------------------
       REAL SUMIONS                  !.. Sum of the major ions
       REAL PNO,LNO,PDNOSR           !.. Production and loss of NO
       REAL N2A                      !.. N2(A) density    
-      REAL VCON                     !.. FLIP N2(v) factor. Not used here
       REAL DISN2D,UVDISN,PN2D,LN2D  !.. Production and loss of N(2D)
-      REAL ALTCHEM                  !.. altitude for chemistry calculation
       REAL N2APRD                   !.. PE production rate of N2(A)
-      REAL PN4S,LN4S,DISN4S
-      REAL OXPLUSAVE
+      REAL PN4S,LN4S,DISN4S         !.. Production and loss of N(4S)
+      REAL COXPLUS                  !.. Chemical equilibrium O+
       !.. various ionization and excitation rates by EUV and PE
-      REAL EUVION,PEXCIT,PEPION,OTHPR1,OTHPR2
+      REAL EUVION,PEXCIT,PEPION,OTHPR1,OTHPR2,PRHEP
+      REAL SUMSAVE                  !.. saved sum of ions for convergence
       COMMON/EUVPRD/EUVION(3,12),PEXCIT(3,12),PEPION(3,12),OTHPR1(6)
      >   ,OTHPR2(6)
 
       !.. initialize parameters
-      DATA VCON/1.0/K/0/
+      DATA K/0/
       DATA PNO,LNO,PDNOSR,PLYNOP,N2A/5*0.0/
       DATA DISN2D,UVDISN/0.0,0.0/
-      DATA HEPLUS/0.0/
 
-      ALTCHEM=150  !.. Initial altitude for O+ for imposing chemistry
       JITER=0      !.. Counts the number of Newton iterations
-      N2P=0.0      !.. N(2P) density
+      N2P=0.0      !.. N(2P) density, not calculated here
 
       CALL RATS(0,TE,TI,TN,RTS)  !.. Get the reaction rates
 
       !.. PRIMPR calculates solar EUV production rates. 
-c      print*,'ALT,OXN,N2N,O2N,HEN,SZAD*0.01745,TN,F107,F107A,N4S'
-c      print*,ALT,OXN,N2N,O2N,HEN,SZAD*0.01745,TN,F107,F107A,N4S
-      UVDISN=OTHPR1(1)
       CALL PRIMPR(1,ALT,OXN,N2N,O2N,HEN,SZAD*0.01745,TN,F107,F107A,N4S)
-      UVDISN=OTHPR1(1)
-      !.. Calculate secondary Production from photoelectrons
-      CALL SECIPRD(ALT,SZAD,F107,F107A,TE,TN,OXN,O2N,N2N,NE,N2APRD)
 
+      !.. Calculate secondary Production from photoelectrons
+      CALL SECIPRD(ALT,SZAD,F107,F107A,TE,TN,OXN,O2N,N2N,
+     >   NE,N2APRD)
+
+      UVDISN=OTHPR1(1)                   !.. EUV dissociation rate of N2
       DISNP= EUVION(3,4)+EUVION(3,5)+EUVION(3,6)
      >   +0.1*(PEPION(3,1)+PEPION(3,2)+PEPION(3,3))  !.. Rydberg diss       
      >   +PEPION(3,4)+PEPION(3,5)+PEPION(3,6)       
       DISN2D=2.0*PEPION(3,1)+OTHPR2(3)
       DISN4S=2.0*PEPION(3,1)+OTHPR2(3)
-   
-      !**********  Come back here if Newton fails
- 5    CONTINUE 
-        !.. initialize variables to avoid using left over values
-        HEPLUS=0.0
-        OXPLUS=0.0
-        N2PLUS=0.0
-        NOPLUS=0.0
-        O2PLUS=0.0
-        NPLUS=0.0
-        N2P=0.0
-        N2D=0.0
-        OP2D=0.0
-        OP2P=0.0
-        N2A=0.0
+      PRHEP=OTHPR1(2)                          !.. He+ photoionization 
 
-      !.. Iterate through chemistry twice in case O+ is chemical equilibrium
-      DO ITERS=1,3
-        !.. K counts number of iterations for printing headers in routines
-        K=K+1 
-        !.. Set initial value for electron density 
-        !.. O+(2P) Calculate and print densities, production, loss
-        PSEC=PEPION(1,3)           !.. Photoelectron production
-        TPROD3=EUVION(1,3)+PSEC    !.. Add EUV and photoelectrons
-        CALL COP2P(JPRINT,7,K,ALT,RTS,OXN,O2N,N2N,NE,OP2P,TPROD3,PSEC
+      !.. initialize variables to avoid using left over values
+      HEPLUS=0.0
+      OXPLUS=0.0
+      N2PLUS=0.0
+      NOPLUS=0.0
+      O2PLUS=0.0
+      N2P=0.0
+      N2D=0.0
+      OP2D=0.0
+      OP2P=0.0
+      N2A=0.0
+      SUMSAVE=0.0
+
+      K=K+1        !.. If K=1 print headers in files
+
+      !.. These species don't need to be iterated because they are at 
+      !.. the top of the food chain
+      !.. O+(2P) Calculate and print densities, production, loss
+      PSEC=PEPION(1,3)           !.. Photoelectron production
+      TPROD3=EUVION(1,3)+PSEC    !.. Add EUV and photoelectrons
+      CALL COP2P(JPRINT,7,K,ALT,RTS,OXN,O2N,N2N,NE,OP2P,TPROD3,PSEC
      >    ,HEPLUS,N4S,NNO,TE)
 
-        !.. O+(2D) Calculate and print densities, production, loss
-        PSEC=PEPION(1,2)           !.. Photoelectron production
-        TPROD2=EUVION(1,2)         !.. EUV
-        CALL COP2D(JPRINT,8,K,ALT,RTS,OXN,O2N,N2N,NE,OP2D,TPROD2,OP2P
+      !.. O+(2D) Calculate and print densities, production, loss
+      PSEC=PEPION(1,2)           !.. Photoelectron production
+      TPROD2=EUVION(1,2)         !.. EUV
+      CALL COP2D(JPRINT,8,K,ALT,RTS,OXN,O2N,N2N,NE,OP2D,TPROD2,OP2P
      >    ,HEPLUS,N4S,NNO,PSEC)
 
-        !.. O+(4S) Calculate and print densities, production, loss. 
-        TPROD1=EUVION(1,1)
-        PDISOP=EUVION(2,4)+EUVION(2,5)+PEPION(2,4)+PEPION(2,5)
-        CALL COP4S(JPRINT,4,K,ALT,RTS,OXN,O2N,N2N,NE,OXPLUS,TPROD1,OP2D
+      !.. O+(4S) Calculate and print densities, production, loss. 
+      TPROD1=EUVION(1,1)
+      PDISOP=EUVION(2,4)+EUVION(2,5)+PEPION(2,4)+PEPION(2,5)
+      CALL COP4S(JPRINT,4,K,ALT,RTS,OXN,O2N,N2N,NE,COXPLUS,TPROD1,OP2D
      >    ,OP2P,PEPION(1,1),PDISOP,N2PLUS,N2D,NNO,1.0,HEPLUS)
 
-        CALL CN2A(JPRINT,27,K,ALT,RTS,OXN,O2N,N2N,NE,N2A,N2APRD,0.0,
+      !.. Make sure chemical O+ is not greater than Ne
+      IF(COXPLUS.GT.NE) COXPLUS=NE 
+
+      !.. Choose either user specified or chemical O+
+      IF(USER_OPLUS.GT.0)  THEN
+        !.. This average smooths out bumps in the input O+
+        OXPLUS=(USER_OPLUS+COXPLUS)/2
+      ELSE
+        !.. Alternative chemical equilibrium O+ calculation
+        OXPLUS=COXPLUS  
+      ENDIF
+
+      !.. N2(A) is used in calculating NO density
+      CALL CN2A(JPRINT,27,K,ALT,RTS,OXN,O2N,N2N,NE,N2A,N2APRD,0.0,
      >     0.0,0.0)
 
-        !..CALL CN2P(JPRINT,0,K,ALT,RTS,OXN,O2N,N2N,NE,PN2P,LN2P
-        !..> ,N2P,P3X7,UVDISN,O2PLUS,NNO,N2PLUS)
+      !.. Iterate through chemistry to improve results
+      DO ITERS=1,5
+        !.. N2+ Calculate and print densities, production, loss. 
+        CALL CN2PLS(JPRINT,9,K,ALT,RTS,OXN,O2N,N2N,NE,N2PLUS,EUVION(3,1)
+     >   ,EUVION(3,2),EUVION(3,3),PEPION(3,1),PEPION(3,2),PEPION(3,3)
+     >   ,OP2D,OP2P,HEPLUS,NPLUS,NNO,N4S)
 
         !.. N(2D) Calculate and print densities, production, loss. 
         CALL CN2D(JPRINT,16,K,ALT,RTS,OXN,O2N,N2N,NOPLUS,NE,PN2D,LN2D
      >    ,N2PLUS,DISN2D,UVDISN,NPLUS,N2P,N2D,OXPLUS,NNO,N2A)
         N2D=PN2D/LN2D
 
-        !.. N2+ Calculate and print densities, production, loss. 
-        CALL CN2PLS(JPRINT,9,K,ALT,RTS,OXN,O2N,N2N,NE,N2PLUS,EUVION(3,1)
-     >   ,EUVION(3,2),EUVION(3,3),PEPION(3,1),PEPION(3,2),PEPION(3,3)
-     >   ,OP2D,OP2P,HEPLUS,NPLUS,NNO,N4S)
-
         !.. N+ Calculate and print densities, production, loss. 
-        !.. Note that N(2D) is turned off in N+ solution 
-        PHOTN=OTHPR2(3)  !.. N+ prod
+        PHOTN=OTHPR2(3)  !.. N+ photo production
         CALL CNPLS(JPRINT,10,K,ALT,RTS,OXN,O2N,N2N,NE,DISNP,NPLUS,
      >    OXPLUS,N2D,OP2P,HEPLUS,PHOTN,O2PLUS,N4S,OP2D,N2PLUS,NNO)
-        IF(USER_NPLUS.GT.0) NPLUS=USER_NPLUS  !.. User specified N+
-
-        CALL CN4S(JPRINT,28,K,ALT,RTS,OXN,O2N,N2N,NE,PN4S,LN4S,N4S,
-     >    DISN4S,N2D,N2P,OXPLUS,N2PLUS,UVDISN,NOPLUS,NPLUS,NNO,
-     >    O2PLUS,PDNOSR,1.0)
-          !..N4S=PN4S/LN4S
 
         !.. NO Calculate and print densities, production, loss.
         CALL CNO(JPRINT,15,K,ALT,RTS,OXN,O2N,N2N,NE,PNO,LNO
      >    ,N2D,N4S,N2P,NNO,O2PLUS,OXPLUS,OTHPR2(2),OTHPR2(1),N2A,NPLUS)
-        
         NNO=PNO/LNO     !.. NO chemical equilibrium density
+
         !.. Set a floor on NO density, which is needed below ~150 km at night 
         IF(NNO.LT.1.0E8*EXP((100-ALT)/20)) NNO=1.0E8*EXP((100-ALT)/20)
         IF(USER_NO.GT.1.0) NNO=USER_NO  !.. substitute user specified value
@@ -216,7 +217,7 @@ c      print*,ALT,OXN,N2N,O2N,HEN,SZAD*0.01745,TN,F107,F107A,N4S
 
         !.. NO+ Calculate and print densities, production, loss. 
         CALL CNOP(JPRINT,11,K,ALT,RTS,OXN,O2N,N2N,NE,TPNOP,NOPLUS,OXPLUS
-     >    ,N2PLUS,O2PLUS,N4S,NNO,NPLUS,N2P,PLYNOP,VCON,N2D,OP2D)
+     >    ,N2PLUS,O2PLUS,N4S,NNO,NPLUS,N2P,PLYNOP,1.0,N2D,OP2D)
 
         !.. O2+ Calculate and print densities, production, loss. 
         !.. EUV + PE production
@@ -224,102 +225,31 @@ c      print*,ALT,OXN,N2N,O2N,HEN,SZAD*0.01745,TN,F107,F107A,N4S
      >       PEPION(2,2)+PEPION(2,3)
         CALL CO2P(JPRINT,12,K,ALT,RTS,OXN,O2N,N2N,NE,O2PPROD
      >    ,O2PLUS,TPROD5,OXPLUS,OP2D,N2PLUS,NPLUS,N4S,NNO,OP2P)
+
+        SUMIONS=OXPLUS+NOPLUS+O2PLUS+NPLUS+N2PLUS
+
+        !.. Chemical equilibrium densities are normalized to the input NE 
+        !.. and return.
+        IF(ITERS.EQ.5.OR.ABS(SUMSAVE-SUMIONS)/SUMIONS.LT.0.01) THEN
+          OXPLUS=OXPLUS*NE/SUMIONS
+          NOPLUS=NOPLUS*NE/SUMIONS
+          O2PLUS=O2PLUS*NE/SUMIONS
+          N2PLUS=N2PLUS*NE/SUMIONS
+          NPLUS=NPLUS*NE/SUMIONS
+          RETURN
+        ENDIF
+        SUMSAVE=SUMIONS  
       ENDDO
 
-      !.. This section for chemical equilibrium densities for all species 
-      !.. including O+. It is used when the Newton procedure fails to get O+
-      !.. Don't bother if molecular ions greater than Ne/2
-      !.. It increments ALTCHEM to force this action. The ion densities are 
-      !.. normalized to the input NE. N+ is excluded in case it is user specified
-      INEWT=1
-      SUMIONS=OXPLUS+NOPLUS+O2PLUS+NPLUS
-      IF(ALT.LT.ALTCHEM.OR.NOPLUS+O2PLUS.GT.0.85*NE) THEN
-         OXPLUS=OXPLUS*NE/SUMIONS
-         NOPLUS=NOPLUS*NE/SUMIONS
-         O2PLUS=O2PLUS*NE/SUMIONS
-         NPLUS=NPLUS*NE/SUMIONS
-         INEWT=0
-         RETURN
-      ENDIF
-
-      !.. Newton solution for O+ density given the electron density (NE)
-      !.. Go through twice to set up the derivative (F(x+h)-F(x))/h
-      !.. First O+ guess for Newton. This is important for high altitudes
-      !.. because Newton may converge on first try.
-      OXPLUSAVE=OXPLUS
-      IF(NE-NOPLUS-O2PLUS.GT.100) OXPLUS=NE-NOPLUS-O2PLUS
-      !..IF(SZAD.GT.89) OXPLUS=NE  !.. first guess at night    
- 9    DO ITS=1,2
-        IF(ITS.EQ.1) H=OXPLUS*0.0001         !.. increment for dn/dt
-        IF(ITS.EQ.2) OXPLUS=OXPLUS+H       !.. increment N
-
-        !.. N+ Calculate and print densities, production, loss. 
-        CALL CNPLS(JPRINT,10,K,ALT,RTS,OXN,O2N,N2N,NE,DISNP,NPLUS,
-     >    OXPLUS,N2D,OP2P,HEPLUS,PHOTN,O2PLUS,N4S,OP2D,N2PLUS,NNO)
-        IF(USER_NPLUS.GT.0) NPLUS=USER_NPLUS  !.. User specified N+
-
-        !.. N2+ Calculate and print densities, production, loss. 
-        CALL CN2PLS(JPRINT,9,K,ALT,RTS,OXN,O2N,N2N,NE,N2PLUS,EUVION(3,1)
-     >    ,EUVION(3,2),EUVION(3,3),PEPION(3,1),PEPION(3,2),PEPION(3,3)
-     >    ,OP2D,OP2P,HEPLUS,NPLUS,NNO,N4S)
-
-        !.. NO+ Calculate and print densities, production, loss. 
-        CALL CNOP(JPRINT,11,K,ALT,RTS,OXN,O2N,N2N,NE,TPNOP,NOPLUS,OXPLUS
-     >   ,N2PLUS,O2PLUS,N4S,NNO,NPLUS,N2P,PLYNOP,VCON,N2D,OP2D)
-
-        !.. O2+ Calculate and print densities, production, loss. 
-        !.. EUV + PE production
-        TPROD5=EUVION(2,1)+EUVION(2,2)+EUVION(2,3)+PEPION(2,1)+
-     >     PEPION(2,2)+PEPION(2,3)
-        CALL CO2P(JPRINT,12,K,ALT,RTS,OXN,O2N,N2N,NE,O2PPROD
-     >    ,O2PLUS,TPROD5,OXPLUS,OP2D,N2PLUS,NPLUS,N4S,NNO,OP2P)
-
-        !.. N(2D) Calculate and print densities, production, loss. 
-        CALL CN2D(JPRINT,16,K,ALT,RTS,OXN,O2N,N2N,NOPLUS,NE,PN2D,LN2D
-     >     ,N2PLUS,DISN2D,UVDISN,NPLUS,N2P,N2D,OXPLUS,NNO,N2A)
-        N2D=PN2D/LN2D
-
-        !.. calculation of F(x) from the total ion concentration
-        FEX(ITS)=OXPLUS+NOPLUS+O2PLUS+N2PLUS+NPLUS-NE
-      ENDDO
-        
-      !.. Test for convergence and add increment to O+ if not
-      JITER=JITER+1          !.. for stopping the iterations
-      DEX=(FEX(2)-FEX(1))/H
-      OXPLUS=OXPLUS-H-FEX(1)/DEX
-
-      !.. If Newton fails, go back and calculate O+ chem equilibrium
-      IF(JITER.GT.6.OR.OXPLUS.LT.0.0.OR.OXPLUS.GT.1.0E7) THEN
-        ALTCHEM=ALT+1  !.. forces chemical equilibrium densities
-        GOTO 5         !.. Go back to chemical eqilibrium
-      ENDIF     
-
-      !.. Test for convergence
-      SUMIONS=OXPLUS+NOPLUS+O2PLUS+N2PLUS+NPLUS
-      IF(ABS((NE-SUMIONS)/NE).GT.0.05) GOTO 9
-
-      !.. Normalize ion densities to the input electron density
-      OXPLUS=OXPLUS*NE/SUMIONS
-      NOPLUS=NOPLUS*NE/SUMIONS
-      O2PLUS=O2PLUS*NE/SUMIONS
-      NPLUS=NPLUS*NE/SUMIONS
-
-      !.. If O+ a very minor ion, Newton solution may not be good, force  
-      !.. chemical equilibrium solution instead
-      IF(OXPLUS/SUMIONS.LT.0.1) THEN
-        ALTCHEM=ALT+1  !.. forces chemical equilibrium densities
-	  GOTO 5         !.. Go back to chemical eqilibrium
-      ENDIF
       RETURN
       END
 C
 C
-C.................... KEMPRN.FOR ......................................   
-C.. This file contains the chemistry routines for ions and neutrals
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::: KEMPRN.FOR ::::::::::::::::::::::::::::::::::::::::::::::::
+C..... This file contains the chemistry routines for ions and neutrals
+C..... First N(2D)
       SUBROUTINE CN2D(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NOP,NE,P1,L1
      > ,N2PLS,DISN2D,UVDISN,NPLUS,N2P,N2D,OPLS,NNO,N2A)
-C.......n(2d)
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=NOP*NE*RTS(50)
@@ -355,10 +285,9 @@ C...      EF=RTS(61)*0.76/L1
       RETURN
  7    FORMAT(F6.1,1P,22E8.1)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::::::::::: NO ::::::::::::::::::::::::::::::::::::::::
       SUBROUTINE CNO(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,P1,L1
      > ,N2D,N4S,N2P,NNO,O2P,OPLS,PDNOSR,PLYNOP,N2A,NPLUS)
-C........no
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=RTS(16)*O2N*N2D
@@ -384,10 +313,9 @@ C........no
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::: N(4S):::::::::::::::::::::::::::::::::::::::
       SUBROUTINE CN4S(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,P1,L1,N4S,DISN4S
      >   ,N2D,N2P,OPLS,N2PLS,UVDISN,NOP,NPLUS,NNO,O2P,PDNOSR,VCON)
-C........N(4S)
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=DISN4S
@@ -461,10 +389,9 @@ C..... in the (X,A,B states). PEN2P* same for p.e.s (X,A,B states)
       RETURN
  7    FORMAT(F6.1,1P,22E8.1)
       END
-C:::::::::::::::::::::::::::::: CNOP ::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::::::::::: NO+ ::::::::::::::::::::::::::::::::::
       SUBROUTINE CNOP(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,P1,NOP,OPLS
      >  ,N2PLS,O2P,N4S,NNO,NPLUS,N2P,PLYNOP,VCON,N2D,OP2D)
-C........no+
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=VCON*RTS(3)*N2N*OPLS
@@ -496,14 +423,12 @@ C........no+
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::: O2+ :::::::::::::::::::::::::::::::::::::::
       SUBROUTINE CO2P(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,P1
      > ,O2P,TPROD5,OPLS,OP2D,N2PLS,NPLUS,N4S,NNO,OP2P)
-C........o2+
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
-C......... TPROD5=euv @ p.e. production
-      PR(1)=TPROD5
+      PR(1)=TPROD5     !.. TPROD5=euv @ p.e. production
       PR(2)=RTS(4)*O2N*OPLS
       PR(3)=RTS(43)*OP2D*O2N
       PR(4)=RTS(17)*O2N*N2PLS
@@ -523,14 +448,12 @@ C......... TPROD5=euv @ p.e. production
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::::: O+(4S) :::::::::::::::::::::::::::::::::::::
       SUBROUTINE COP4S(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,OPLS,TPROD1,OP2D
      >  ,OP2P,PEPION,PDISOP,N2PLS,N2D,NNO,VCON,HEPLUS)
-C...........o+(4s)
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
-C.........pr(1)= euv production of o+(4s)
-      PR(1)=TPROD1
+      PR(1)=TPROD1     !.. PR(1)= euv production of o+(4s)
       PR(2)=OP2D*NE*RTS(12)
       PR(3)=OP2P*ON*RTS(26)
       PR(4)=PEPION
@@ -542,7 +465,6 @@ C.........pr(1)= euv production of o+(4s)
       PR(10)=RTS(85)*OP2P*O2N              !.. Fox
       PR(11)=HEPLUS*O2N*(RTS(91)+RTS(93))  !..Fox
       PR(12)=RTS(95)*NNO*HEPLUS            !..Fox
-C      PR(13)=RTS(22)*NPLUS*O2N             !..Fox
       PR(13)=0.0
       LR(1)=N2N*VCON*RTS(3)
       LR(2)=O2N*RTS(4)
@@ -563,17 +485,16 @@ C      PR(13)=RTS(22)*NPLUS*O2N             !..Fox
       RETURN
  7    FORMAT(F6.1,1P,22E8.1)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::::::: O+(2D) :::::::::::::::::::::::::::::::::::
       SUBROUTINE COP2D(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,OP2D,TPROD2,OP2P
      > ,HEPLUS,N4S,NNO,PSEC)
-C.......o+(2d)
       IMPLICIT REAL (A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=TPROD2                ! EUV  prod
       PR(2)=OP2P*NE*RTS(13)
       PR(3)=OP2P*0.171
       PR(4)=HEPLUS*O2N*RTS(76)     !..Fox
-	PR(5)=PSEC
+      PR(5)=PSEC
       LR(1)=RTS(19)*N2N
       LR(2)=7.7E-5                 !.. radiation at 3726 and 3729 A
       LR(3)=NE*RTS(12)
@@ -594,10 +515,9 @@ C.......o+(2d)
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::::::: O+(2P) :::::::::::::::::::::::::::::::::::
       SUBROUTINE COP2P(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,OP2P,TPROD3,PSEC
      > ,HEPLUS,N4S,NNO,TE)
-C.......o+(2p)
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=0.0
@@ -624,10 +544,9 @@ C.......o+(2p)
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::::::::::::::: N+ ::::::::::::::::::::::::::::::::::::
       SUBROUTINE CNPLS(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,DISNP
      > ,NPLUS,OPLS,N2D,OP2P,HEPLUS,PHOTN,O2P,N4S,OP2D,N2PLS,NNO)
-C........n+
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=DISNP
@@ -662,14 +581,13 @@ C........n+
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C::::::::::::::::::::::::::::::::: N2(A3sigma+LBH) :::::::::::::::::::::::::::::::::::::
       SUBROUTINE CN2A(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE
      > ,N2A,P3X1,P3X2,P3X3,P3X4)
-C........n2(a3sigma) and total LBH
       IMPLICIT REAL(A-H,L,N-Z)
       REAL P3X1,P3X2,P3X3,P3X4
       DIMENSION RTS(99),LR(22),PR(22)
-C....... pr(1,2,3)= electron impact excitation of n2(a,b,c) states
+      !... pr(1,2,3)= electron impact excitation of n2(a,b,c) states
       PR(1)=P3X1
       PR(2)=P3X2
       PR(3)=P3X3
@@ -687,11 +605,11 @@ C....... pr(1,2,3)= electron impact excitation of n2(a,b,c) states
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::::::::::::::: N(2P) ::::::::::::::::::::::::::::::::::::
+C..... The rates are from Zipf et al JGR, 1980 p687
+C..... 21-AUG-1992. Added N2+ recombination source
       SUBROUTINE CN2P(JPR,I,JPT,Z,RTS,ON,O2N,N2N,NE,P1,L1
      > ,N2P,P3X7,UVDISN,O2P,NNO,N2PLUS)
-C....... N(2P). the rates are from Zipf et al JGR, 1980 p687
-C.... 21-AUG-1992. Added N2+ recombination source
       IMPLICIT REAL(A-H,L,N-Z)
       DIMENSION RTS(99),LR(22),PR(22)
       PR(1)=P3X7
@@ -714,7 +632,7 @@ C.... 21-AUG-1992. Added N2+ recombination source
       RETURN
  7    FORMAT(F6.1,1P,22E9.2)
       END
-C:::::::::::::::::::::::::::::: CNOPV ::::::::::::::::::::::::::::::::::
+C:::::::::::::::::::::::::::::: NO+(v) ::::::::::::::::::::::::::::::::::
 C...... This routine calculates the vibrational distribution of no+
 C...... Uses AFRL report by Winick et al. AFGL-TR-87-0334, Environmental
 C...... Research papers, NO. 991, "An infrared spectral radiance code 
@@ -754,6 +672,7 @@ C...... Written by P. Richards in February 2004
       DATA PRV8/0,.05,.07,.09,.11,.13,.14,.17,.07,.01,.02,.06,.08,7*0/
       DATA PRV9/0,.05,.07,.09,.11,.13,.14,.17,.07,.01,.02,.06,.08,7*0/
       DATA PRV10/0,.05,.07,.09,.11,.13,.14,.17,.07,.01,.02,.06,.08,7*0/
+      DATA PRV11/0,.05,.07,.09,.11,.13,.14,.17,.07,.01,.02,.06,.08,7*0/
       DATA PRV12/0,.05,.07,.09,.11,.13,.14,.17,.07,.01,.02,.06,.08,7*0/
 
       DATA K_N2_Q/7.0E-12/  !.. Quenching rate coeff. by N2
@@ -1207,11 +1126,10 @@ C.... 2001, page 21,305. Rates different from Fox and Sung indicated by PGR
         END
 C
 C
-C.........................<PESIMP.FOR>......................3 APR 92
-C...... This test driver demonstrates how to call the model and 
-C...... how to calculate electron heating rate and 3371 excitation rate.
-      SUBROUTINE SECIPRD(ALT,SZADEG,F107,F107A,
-     >    TE,TN,OXN,O2N,N2N,XNE,N2APRD)
+C.........................<Photoelectron model>......................3 APR 92
+C..... Calculate secondary ion production, electron heating rate and 3371 excitation rate.
+      SUBROUTINE SECIPRD(ALT,SZADEG,F107,F107A,TE,TN,OXN,O2N,N2N,XNE,
+     >   N2APRD)
       INTEGER I,K,IK           !-- loop control variables
       INTEGER IDIM             !.. Array dimensions
       INTEGER IMAX             !.. Maximum PE energy
@@ -1223,8 +1141,7 @@ C...... how to calculate electron heating rate and 3371 excitation rate.
       REAL SZADEG              !-- solar zenith angle {0 -> 90 degrees}
       REAL F107, F107A         !-- F107 = Solar 10.7 cm flux
       REAL TE,TN               !-- electron, neutral temperatures (K)
-      REAL XN(3)
-      REAL OXN,O2N,N2N               !-- XN, O, O2, N2, neutral densities  (cm-3)
+      REAL XN(3),OXN,O2N,N2N   !-- XN, O, O2, N2, neutral densities  (cm-3)
       REAL XNE                 !-- electron density  (cm-3)
       REAL XN2D                !-- N(2D) density for N(2D) + e -> 2.5 eV
       REAL XOP2D               !-- O+(2D) density for O+(2D) + e -> 3.3 eV
@@ -1232,7 +1149,7 @@ C...... how to calculate electron heating rate and 3371 excitation rate.
       REAL SIGOX,SIGN2,SIGEE  !.. Total exciation cross sections for O, N2, O2
       REAL N2APRD             !.. Production of N2A
       REAL DE(IDIM),EV(IDIM)
-	!.. various ionization and excitation rates by EUV and PE
+      !.. various ionization and excitation rates by EUV and PE
       REAL EUVION,PEXCIT,PEPION,OTHPR1,OTHPR2
       COMMON/EUVPRD/EUVION(3,12),PEXCIT(3,12),PEPION(3,12),OTHPR1(6)
      >   ,OTHPR2(6)
@@ -1363,7 +1280,7 @@ c      COMMON/SOL/UVFAC(59),EUV
 
       !-- PE energy steps
       DATA DELTE/30*1.0,14*5.0,40*10/
-	DATA EMAX/286.0/          !..  Maximum PE energy
+      DATA EMAX/286.0/          !..  Maximum PE energy
 
       SZA = SZADEG/57.29578   !.. convert solar zenith angle to radians
 

@@ -53,17 +53,21 @@ C 2012.00 10/05/11    oval kp model (auroral_boundary), IGRF-11(igrf.for),
 C 2012.00 10/05/11    NRLMSIS00 (cira.for), CGM coordinates, F10.7 daily
 C 2012.00 10/05/11    81-day 365-day indices (apf107.dat), ap->kp (ckp),
 C 2012.00 10/05/11    array size change jf(50) outf(20,1000), oarr(100).
-C 2012.02 12/17/12 igrf_dip: Add magnetic declination as output parameter
-C 2014.01 07/20/14 igrf_dip,FTPRNT,RECALC: ASIN(x): abs(x)>1.0 x=sign(1.,x)
-C 2014.02 07/24/14 COMMON/iounit: added 'mess' 
-C 2015.01 02/10/15 Updating to IGRF-12 (2015)
-C 2015.01 07/12/15 use mess,konsol in IGRF and RECALC
-C 2015.02 08/23/15 initialization of Earth constants moved to IRI_SUB
-C 2015.03 10/14/15 CLCMLT,DPMTRX <--- IRIFUN.FOR
-C 2015.03 10/14/15 RECALC: update with IGRF-12 until 2020
-C 2015.03 10/14/15 IGRF_SUB,_DIP: move CALL FELDCOF to IRISUB.FOR
-C 2015.03 10/14/15 FELDCOF,SHELLG: DIMO to COMMON/IGRF1/
-C 2016.01 02/17/16 GEODIP: add PI to CONST
+C 2012.01 12/17/12 igrf_dip: Add magnetic declination as output parameter
+C 2012.02 07/20/14 igrf_dip,FTPRNT,RECALC: ASIN(x): abs(x)>1.0 x=sign(1.,x)
+C 2012.03 07/24/14 COMMON/iounit: added 'mess' 
+C 2012.04 02/10/15 Updating to IGRF-12 (2015)
+C 2012.05 07/12/15 use mess,konsol in IGRF and RECALC
+C 2012.06 04/16/18 Versioning now based on year of major releases
+C 2016.01 08/23/15 initialization of Earth constants moved to IRI_SUB
+C 2016.02 10/14/15 CLCMLT,DPMTRX <--- IRIFUN.FOR
+C 2016.02 10/14/15 RECALC: update with IGRF-12 until 2020
+C 2016.02 10/14/15 IGRF_SUB,_DIP: move CALL FELDCOF to IRISUB.FOR
+C 2016.02 10/14/15 FELDCOF,SHELLG: DIMO to COMMON/IGRF1/
+C 2016.03 02/17/16 GEODIP: add PI to CONST
+C 2016.04 07/07/17 IGRF: updated with newest 2010, 2015, 2015s coeff.
+C 2016.05 03/25/19 GEODIP,SPHCAR,GEOMAG: improved COMMENTS
+C 2016.06 03/05/20 Updating to IGRF-13 (2020)
 c-----------------------------------------------------------------------        
 C 
         subroutine igrf_sub(xlat,xlong,year,height,
@@ -596,30 +600,29 @@ C 07/22/2009 NMAX=13 for DGRF00 and IGRF05; H/G-arrays(195)
 C 02/26/2010 update to IGRF-11 (2010) (###)  
 C 10/05/2011 added COMMON/DIPOL/ for MLT computation in DPMTRX (IRIFUN)
 C 02/10/2015 update to IGRF-12 (2015) (###)
+C 03/05/2020 update to IGRF-13 (2020) (###)
 c-----------------------------------------------------------------------        
         CHARACTER*13    FILMOD, FIL1, FIL2           
 C ### FILMOD, DTEMOD array-size is number of IGRF maps
-        DIMENSION       GH1(196),GH2(196),GHA(196),FILMOD(16)
-        DIMENSION		DTEMOD(16)
+        DIMENSION       GH1(196),GH2(196),GHA(196),FILMOD(17)
+        DIMENSION		DTEMOD(17)
         DOUBLE PRECISION X,F0,F 
         COMMON/MODEL/   NMAX,TIME,GH1,FIL1
         COMMON/IGRF1/   ERAD,AQUAD,BQUAD,DIMO /CONST/UMR,PI
         COMMON/DIPOL/	GHI1,GHI2,GHI3
-        COMMON/path/ datapath
-        CHARACTER datapath*200 
 C ### updated coefficient file names and corresponding years
         DATA  FILMOD   / 'dgrf1945.dat','dgrf1950.dat','dgrf1955.dat',           
      1    'dgrf1960.dat','dgrf1965.dat','dgrf1970.dat','dgrf1975.dat',
      2    'dgrf1980.dat','dgrf1985.dat','dgrf1990.dat','dgrf1995.dat',
-     3    'dgrf2000.dat','dgrf2005.dat','dgrf2010.dat','igrf2015.dat',
-     4    'igrf2015s.dat'/
+     3    'dgrf2000.dat','dgrf2005.dat','dgrf2010.dat','dgrf2015.dat',
+     4    'igrf2020.dat','igrf2020s.dat'/
         DATA  DTEMOD / 1945., 1950., 1955., 1960., 1965.,           
      1   1970., 1975., 1980., 1985., 1990., 1995., 2000.,2005.,
-     2   2010., 2015., 2020./      
+     2   2010., 2015., 2020., 2025./      
 C
 C ### numye is number of IGRF coefficient files minus 1
 C
-        NUMYE=15
+        NUMYE=16
 C
 C  IS=0 FOR SCHMIDT NORMALIZATION   IS=1 GAUSS NORMALIZATION
 C  IU  IS INPUT UNIT NUMBER FOR IGRF COEFFICIENT SETS
@@ -637,11 +640,9 @@ C-- DETERMINE IGRF-YEARS FOR INPUT-YEAR
         DTE2 = DTEMOD(L+1) 
         FIL2 = FILMOD(L+1) 
 C-- GET IGRF COEFFICIENTS FOR THE BOUNDARY YEARS
-        CALL GETSHC (IU, TRIM(ADJUSTL(datapath))//FIL1, NMAX1, ERAD, GH1
-     &  , IER)  
+        CALL GETSHC (IU, FIL1, NMAX1, ERAD, GH1, IER)  
             IF (IER .NE. 0) STOP                           
-        CALL GETSHC (IU, TRIM(ADJUSTL(datapath))//FIL2, NMAX2, ERAD, GH2
-     &  , IER)  
+        CALL GETSHC (IU, FIL2, NMAX2, ERAD, GH2, IER)  
             IF (IER .NE. 0) STOP
 C-- DETERMINE IGRF COEFFICIENTS FOR YEAR
         IF (L .LE. NUMYE-1) THEN                        
@@ -706,7 +707,7 @@ C                                 = -2, records out of order
 C                                 = FORTRAN run-time error number    
 C ===============================================================               
                                                                                 
-        CHARACTER  FSPEC*(*), FOUT*213                                    
+        CHARACTER  FSPEC*(*), FOUT*80                                    
         DIMENSION       GH(196)
         LOGICAL		mess 
         COMMON/iounit/konsol,mess        
@@ -718,11 +719,10 @@ C       Open coefficient file. Read past first header record.
 C       Read degree and order of model and Earth's radius.           
 C ---------------------------------------------------------------               
         WRITE(FOUT,667) FSPEC
- 667    FORMAT(A213)
+ 667    FORMAT(A13)
 c-web-for webversion
 c 667    FORMAT('/var/www/omniweb/cgi/vitmo/IRI/',A13)
-        OPEN (IU, FILE=TRIM(ADJUSTL(FOUT)), STATUS='OLD', IOSTAT=IER,
-     &   ERR=999)     
+        OPEN (IU, FILE=FOUT, STATUS='OLD', IOSTAT=IER, ERR=999)     
         READ (IU, *, IOSTAT=IER, ERR=999)                            
         READ (IU, *, IOSTAT=IER, ERR=999) NMAX, ERAD, XMYEAR 
         nm=nmax*(nmax+2)                
@@ -730,7 +730,7 @@ c 667    FORMAT('/var/www/omniweb/cgi/vitmo/IRI/',A13)
         goto 888 
                
 999     if (mess) write(konsol,100) FOUT
-100     FORMAT('Error while reading ',A213)
+100     FORMAT('Error while reading ',A13)
 
 888     CLOSE (IU)                                                                                                                                   
         RETURN                                                       
@@ -805,12 +805,9 @@ C ---------------------------------------------------------------
 C
 C
         SUBROUTINE EXTRASHC (DATE, DTE1, NMAX1, GH1, NMAX2,           
-     1                        GH2, NMAX, GH)                           
-                                                                                
-C ===============================================================               
-C                                                                               
-C       Version 1.01                                                   
-C                                                                               
+     1                        GH2, NMAX, GH)                                                                                                           
+C ===============================================================               C                                                                               
+C       Version 1.01                                                   C                                                                               
 C       Extrapolates linearly a spherical harmonic model with a        
 C       rate-of-change model.                                          
 C                                                                               
@@ -872,10 +869,10 @@ C ---------------------------------------------------------------
 C
 C
       SUBROUTINE GEODIP(IYR,SLA,SLO,DLA,DLO,J)
-
-C  Calculates dipole geomagnetic coordinates from geocentric coordinates
-C  or vice versa.
-
+C ===============================================================               
+C  Calculates geomagnetic dipole latitude/longitude (DLA/DLO) from 
+C  geocentric latitude/longitude (SLA/SLO) for J=0 and vice versa  
+C  for J=1.
 C                     J=0           J=1
 C		INPUT:     J,SLA,SLO     J,DLA,DLO
 C		OUTPUT:     DLA,DLO       SLA,SLO
@@ -883,6 +880,7 @@ C		OUTPUT:     DLA,DLO       SLA,SLO
 C  Last revision: November 2005 (Vladimir Papitashvili)
 C  The code is modifed from GEOCOR written by V.Popov and V.Papitashvili
 C  in mid-1980s. 
+C ===============================================================               
 
          COMMON /CONST/UMR,PI 
 
@@ -934,6 +932,9 @@ C
 C
       SUBROUTINE GEOCGM01(ICOR,IYEAR,HI,DAT,PLA,PLO)
 C  *********************************************************************
+C  Converts geocentric latitude/longitude into corrected geomagnetic
+C  (CGM) latitude/longitude using IGRF model.
+C
 C  Version 2011 for GEO-CGM.FOR    (good through 2015)      January 2011
 C  Version 2005 for GEO-CGM.FOR    (good through 2010)     November 2005
 C  Nov 11, 2005  IGRF and RECALC are is modified to the IGRF-10 model 
@@ -1868,147 +1869,144 @@ C  across the 360/0 boundary - April 11, 2001)
 
 C  Finding the CGM equator at SLO on the sphere with radius RH
 
-            NOBM = 0
-         do ihem = ih,3
-              RM = RH
+        NOBM = 0
+        do ihem = ih,3
+           RM = RH
 
 C  Defining the real equator point from the Northern Hemisphere
 
-         if(ihem.eq.1) then
-             CLA = rnlat
-             SLA = 90. - (jcn - 1.)
-            SLAN = SLA
-         endif
+           if(ihem.eq.1) then
+              CLA = rnlat
+              SLA = 90. - (jcn - 1.)
+              SLAN = SLA
+              endif
 
 C  Defining the real equator point from the Southern Hemisphere
 
-         if(ihem.eq.2) then
-             CLA = rslat
-             SLA = 90. - (jcs - 1)
-            SLAS = SLA
-         endif
+           if(ihem.eq.2) then
+              CLA = rslat
+              SLA = 90. - (jcs - 1)
+              SLAS = SLA
+              endif
 
 C  Defining the apex of the current magnetic field line
 
-         if(ihem.eq.3) then
-               CLA = 0.
-               SLA = SLAR
-           endif
+           if(ihem.eq.3) then
+              CLA = 0.
+              SLA = SLAR
+              endif
 
 C  Here CLA is used only to calculate FRAC
 
-        COL = (90. - CLA)*0.017453293
-        SLM = (90. - SLA)*0.017453293
-        SLL = SLO*0.017453293
-        CALL IGRF(IYR,NM,RM,SLM,SLL,BR,BT,BF)
-          SZ = -BR
-        CALL SPHCAR(RM,SLM,SLL,XGEO,YGEO,ZGEO,1)
-          BM = SQRT(BR*BR + BT*BT + BF*BF)
-         XBM = XGEO
-         YBM = YGEO
-         ZBM = ZGEO
+           COL = (90. - CLA)*0.017453293
+           SLM = (90. - SLA)*0.017453293
+           SLL = SLO*0.017453293
+           CALL IGRF(IYR,NM,RM,SLM,SLL,BR,BT,BF)
+           SZ = -BR
+           CALL SPHCAR(RM,SLM,SLL,XGEO,YGEO,ZGEO,1)
+           BM = SQRT(BR*BR + BT*BT + BF*BF)
+           XBM = XGEO
+           YBM = YGEO
+           ZBM = ZGEO
 
-          RL = 1./(SIN(COL))**2
-        FRAC = 0.03/(1. + 3./(RL - 0.6))
-        IF(SZ.LE.0.) FRAC = -FRAC
-         DSD = RL*FRAC
-          DS = DSD
+           RL = 1./(SIN(COL))**2
+           FRAC = 0.03/(1. + 3./(RL - 0.6))
+           IF(SZ.LE.0.) FRAC = -FRAC
+           DSD = RL*FRAC
+           DS = DSD
 
-    5   CONTINUE
+    5      CONTINUE
 
 C  Keep two consequently computed points to define B-min
 
-        DO 7 I = 1,2
-            DD = DS
-          CALL SHAG(XGEO,YGEO,ZGEO,DD)
-   11     IF(I.NE.1) GOTO 9
-            XBM1 = XGEO
-            YBM1 = YGEO
-            ZBM1 = ZGEO
-            RBM1 = SQRT(XBM1**2 + YBM1**2 + ZBM1**2)
-    9     CONTINUE
-
-        CALL SPHCAR(RM,SLM,SLL,XGEO,YGEO,ZGEO,-1)
-        CALL IGRF(IYR,NM,RM,SLM,SLL,BR,BT,BF)
+           DO 7 I = 1,2
+              DD = DS
+              CALL SHAG(XGEO,YGEO,ZGEO,DD)
+   11         IF(I.NE.1) GOTO 9
+              XBM1 = XGEO
+              YBM1 = YGEO
+              ZBM1 = ZGEO
+              RBM1 = SQRT(XBM1**2 + YBM1**2 + ZBM1**2)
+    9         CONTINUE
+              CALL SPHCAR(RM,SLM,SLL,XGEO,YGEO,ZGEO,-1)
+              CALL IGRF(IYR,NM,RM,SLM,SLL,BR,BT,BF)
 
 C  Go and compute the conjugate point if no B-min was found at this
 C  magnetic field line (could happen at very near geomagnetic equator)
 
-          if(RM.LT.RH) then
-            NOBM = 1
-            GOTO 77
-          endif
+              if(RM.LT.RH) then
+                 NOBM = 1
+                 GOTO 77
+                 endif
+              BC(I) = SQRT(BR*BR + BT*BT + BF*BF)
+    7      CONTINUE
 
-         BC(I) = SQRT(BR*BR + BT*BT + BF*BF)
-    7  CONTINUE
+           B2 = BC(1)
+           B3 = BC(2)
+           IF(BM.GT.B2.AND.B2.LT.B3) GO TO 15
+           IF(BM.GE.B2.AND.B2.LT.B3) GO TO 17
+           IF(BM.GT.B2.AND.B2.LE.B3) GO TO 17
+           BM = BC(1)
+           XGEO = XBM1
+           YGEO = YBM1
+           ZGEO = ZBM1
+           XBM = XBM1
+           YBM = YBM1
+           ZBM = ZBM1
+           GOTO 5
+   15      BB3 = ABS(B3 - B2)
+           BB2 = ABS(BM - B2)
+           IF(BB2.LT.DHH.AND.BB3.LT.DHH) GO TO 21
+   17      BM = BM
+           XGEO = XBM
+           YGEO = YBM
+           ZGEO = ZBM
+           DS = DS/2.
+           GOTO 5
 
-         B2 = BC(1)
-         B3 = BC(2)
-        IF(BM.GT.B2.AND.B2.LT.B3) GO TO 15
-        IF(BM.GE.B2.AND.B2.LT.B3) GO TO 17
-        IF(BM.GT.B2.AND.B2.LE.B3) GO TO 17
-         BM = BC(1)
-       XGEO = XBM1
-       YGEO = YBM1
-       ZGEO = ZBM1
-        XBM = XBM1
-        YBM = YBM1
-        ZBM = ZBM1
-        GOTO 5
-   15   BB3 = ABS(B3 - B2)
-        BB2 = ABS(BM - B2)
-        IF(BB2.LT.DHH.AND.BB3.LT.DHH) GO TO 21
-   17    BM = BM
-       XGEO = XBM
-       YGEO = YBM
-       ZGEO = ZBM
-         DS = DS/2.
-        GOTO 5
+   21      CONTINUE
 
-   21  CONTINUE
+           CALL SPHCAR(RBM1,RLA,RLO,XBM1,YBM1,ZBM1,-1)
+           RLA = 90. - RLA*57.2957751
+           RLO = RLO*57.2957751
 
-        CALL SPHCAR(RBM1,RLA,RLO,XBM1,YBM1,ZBM1,-1)
-         RLA = 90. - RLA*57.2957751
-         RLO = RLO*57.2957751
-
-        if(ihem.eq.1) rlan = rla
-        if(ihem.eq.2) rlas = rla
+           if(ihem.eq.1) rlan = rla
+           if(ihem.eq.2) rlas = rla
 
 C  Computation of the magnetically conjugate point at low latitudes
 
-   54  continue
-        if(ihem.eq.3) then
-           RBM = RBM1
-            RM = RBM
-            DS = DSD
-   55  continue
-           CALL SHAG(XBM1,YBM1,ZBM1,DS)
-           RR = SQRT(XBM1**2 + YBM1**2 + ZBM1**2)
-           IF (RR.GT.RH) THEN
-                R1 = RR
-                X1 = XBM1
-                Y1 = YBM1
-                Z1 = ZBM1
-                GOTO 55
-                         ELSE
-            DR1 = ABS(RH - R1)
-            DR0 = ABS(RH - RR)
-           DR10 = DR1 + DR0
-              IF(DR10.NE.0.) THEN
-                DS = DS*(DR1/DR10)
-                RM = R1
-                CALL SHAG(X1,Y1,Z1,DS)
+   54      continue
+           if(ihem.eq.3) then
+              RBM = RBM1
+              RM = RBM
+              DS = DSD
+   55         continue
+              CALL SHAG(XBM1,YBM1,ZBM1,DS)
+              RR = SQRT(XBM1**2 + YBM1**2 + ZBM1**2)
+              IF (RR.GT.RH) THEN
+                 R1 = RR
+                 X1 = XBM1
+                 Y1 = YBM1
+                 Z1 = ZBM1
+                 GOTO 55
+              ELSE
+                 DR1 = ABS(RH - R1)
+                 DR0 = ABS(RH - RR)
+                 DR10 = DR1 + DR0
+                 IF(DR10.NE.0.) THEN
+                    DS = DS*(DR1/DR10)
+                    RM = R1
+                    CALL SHAG(X1,Y1,Z1,DS)
+                    ENDIF
+                 CALL SPHCAR(RR,SLAC,SLOC,X1,Y1,Z1,-1)
+                 SLAC = 90. - SLAC*57.2957751
+                 SLOC = SLOC*57.2957751
               ENDIF
-
-         CALL SPHCAR(RR,SLAC,SLOC,X1,Y1,Z1,-1)
-         SLAC = 90. - SLAC*57.2957751
-         SLOC = SLOC*57.2957751
-           ENDIF
-        endif
+           endif
 
 C  End of loop IHEM
-   77 continue
-       enddo
+   77      continue
+        enddo
 
          if (n999.eq.0) goto 91
 
@@ -2404,6 +2402,8 @@ C     BY V. PAPITASHVILI, NOVEMBER 2005
 C     MODIFIED TO IGRF-11 WITH YEARS THROUGH 2015
 C     BY V. PAPITASHVILI, January 2011
 C
+C     MODIFIED TO IGRF-12 WITH YEARS THROUGH 2020
+C     BY D. Bilitza, July 2017
 C  *********************************************************************
 
       SAVE MA,IYR,G,H,REC
@@ -2412,11 +2412,11 @@ C  *********************************************************************
      * G1900(66),G1905(66),G1910(66),G1915(66),G1920(66),G1925(66),
      * G1930(66),G1935(66),G1940(66),G1945(66),G1950(66),G1955(66),
      * G1960(66),G1965(66),G1970(66),G1975(66),G1980(66),G1985(66),
-     * G1990(66),G1995(66),G2000(66),G2005(66),G2010(66),
+     * G1990(66),G1995(66),G2000(66),G2005(66),G2010(66),G2015(66),
      * H1900(66),H1905(66),H1910(66),H1915(66),H1920(66),H1925(66),
      * H1930(66),H1935(66),H1940(66),H1945(66),H1950(66),H1955(66),
      * H1960(66),H1965(66),H1970(66),H1975(66),H1980(66),H1985(66),
-     * H1990(66),H1995(66),H2000(66),H2005(66),H2010(66)
+     * H1990(66),H1995(66),H2000(66),H2005(66),H2010(66),H2015(66)
 
       logical	mess
            
@@ -2973,49 +2973,75 @@ C  *********************************************************************
 
 
       DATA G2010/
-     *      0.0,-29496.5, -1585.9,  -2396.6,  3026.0,  1668.6,  1339.7,
-     *  -2326.3,  1231.7,   634.2,    912.6,   809.0,   166.6,  -357.1,
-     *     89.7,  -231.1,   357.2,    200.3,  -141.2,  -163.1,    -7.7,
-     *     72.8,    68.6,    76.0,   -141.4,   -22.9,    13.1,   -77.9,
-     *     80.4,   -75.0,    -4.7,     45.3,    14.0,    10.4,     1.6,
-     *      4.9,    24.3,     8.2,    -14.5,    -5.7,   -19.3,    11.6,
-     *     10.9,   -14.1,    -3.7,      5.4,     9.4,     3.4,    -5.3, 
-     *      3.1,   -12.4,    -0.8,      8.4,    -8.4,   -10.1,    -2.0,
-     *     -6.3,     0.9,    -1.1,     -0.2,     2.5,    -0.3,     2.2,
+     *      0.0,-29496.6, -1586.4,  -2396.1,  3026.3,  1668.2,  1339.8,
+     *  -2326.5,  1232.1,   633.7,    912.7,   809.0,   166.6,  -356.8,
+     *     89.4,  -230.9,   357.3,    200.3,  -141.1,  -163.2,    -8.0,
+     *     72.8,    68.7,    75.9,   -141.4,   -22.8,    13.1,   -78.1,
+     *     80.4,   -75.0,    -4.6,     45.2,    14.0,    10.5,     1.6,
+     *      4.9,    24.4,     8.2,    -14.5,    -5.6,   -19.3,    11.6,
+     *     10.9,   -14.1,    -3.5,      5.5,     9.4,     3.5,    -5.3,
+     *      3.1,   -12.4,    -0.8,      8.4,    -8.4,   -10.1,    -1.9,
+     *     -6.2,     0.9,    -1.1,     -0.2,     2.5,    -0.3,     2.1,
      *      3.1,    -1.0,    -2.8/
   
 
       DATA H2010/
-     *      0.0,     0.0,  4945.1,      0.0, -2707.7,  -575.4,     0.0,
-     *   -160.5,   251.7,  -536.8,      0.0,   286.4,  -211.2,   164.4,
-     *   -309.2,     0.0,    44.7,    188.9,  -118.1,     0.1,   100.9,
-     *      0.0,   -20.8,    44.2,     61.5,   -66.3,     3.1,    54.9,
-     *      0.0,   -57.8,   -21.2,      6.6,    24.9,     7.0,   -27.7,
-     *     -3.4,     0.0,    10.9,    -20.0,    11.9,   -17.4,    16.7,
-     *      7.1,   -10.8,     1.7,      0.0,   -20.5,    11.6,    12.8,
-     *     -7.2,    -7.4,     8.0,      2.2,    -6.1,     7.0,     0.0,
-     *      2.8,    -0.1,     4.7,      4.4,    -7.2,    -1.0,    -4.0,
+     *      0.0,     0.0,  4944.3,      0.0, -2708.5,  -575.7,     0.0,
+     *   -160.4,   251.8,  -537.0,      0.0,   286.5,  -211.0,   164.5,
+     *   -309.7,     0.0,    44.6,    189.0,  -118.1,     0.0,   101.0,
+     *      0.0,   -20.9,    44.2,     61.5,   -66.3,     3.0,    55.4,
+     *      0.0,   -57.8,   -21.2,      6.5,    25.0,     7.0,   -27.6,
+     *     -3.3,     0.0,    10.8,    -20.0,    11.8,   -17.4,    16.7,
+     *      7.0,   -10.7,     1.6,      0.0,   -20.5,    11.5,    12.8,
+     *     -7.1,    -7.4,     8.0,      2.1,    -6.1,     7.0,     0.0,
+     *      2.7,    -0.1,     4.7,      4.4,    -7.2,    -1.0,    -4.0,
      *     -2.0,    -2.0,    -8.3/
 
 
+      DATA G2015/
+     *      0.0,-29442.0, -1501.0,  -2445.1,  3012.9,  1676.7,  1350.7,
+     *  -2352.3,  1225.6,   582.0,    907.6,   813.7,   120.4,  -334.9,
+     *     70.4,  -232.6,   360.1,    192.4,  -140.9,  -157.5,     4.1,
+     *     70.0,    67.7,    72.7,   -129.9,   -28.9,    13.2,   -70.9,
+     *     81.6,   -76.1,    -6.8,     51.8,    15.0,     9.4,    -2.8,
+     *      6.8,    24.2,     8.8,    -16.9,    -3.2,   -20.6,    13.4,
+     *     11.7,   -15.9,    -2.0,      5.4,     8.8,     3.1,    -3.3,
+     *      0.7,   -13.3,    -0.1,      8.7,    -9.1,   -10.5,    -1.9,
+     *     -6.3,     0.1,     0.5,     -0.5,     1.8,    -0.7,     2.1,
+     *      2.4,    -1.8,    -3.6/
+  
+
+      DATA H2015/
+     *      0.0,     0.0,  4797.1,      0.0, -2845.6,  -641.9,     0.0,
+     *   -115.3,   244.9,  -538.4,      0.0,   283.3,  -188.7,   180.9,
+     *   -329.5,     0.0,    47.3,    197.0,  -119.3,    16.0,   100.2,
+     *      0.0,   -20.8,    33.2,     58.9,   -66.7,     7.3,    62.6,
+     *      0.0,   -54.1,   -19.5,      5.7,    24.4,     3.4,   -27.4,
+     *     -2.2,     0.0,    10.1,    -18.3,    13.3,   -14.6,    16.2,
+     *      5.7,    -9.1,     2.1,      0.0,   -21.6,    10.8,    11.8,
+     *     -6.8,    -6.9,     7.8,      1.0,    -4.0,     8.4,     0.0,
+     *      3.2,    -0.4,     4.6,      4.4,    -7.9,    -0.6,    -4.2,
+     *     -2.8,    -1.2,    -8.7/
+
+
       DATA DG/
-     *      0.0,    11.4,    16.7,    -11.3,    -3.9,     2.7,     1.3,
-     *     -3.9,    -2.9,    -8.1,     -1.4,     2.0,    -8.9,     4.4,
-     *     -2.3,    -0.5,     0.5,     -1.5,    -0.7,     1.3,     1.4,
-     *     -0.3,    -0.3,    -0.3,      1.9,    -1.6,    -0.2,     1.8, 
-     *      0.2,    -0.1,    -0.6,      1.4,     0.3,     0.1,    -0.8,
-     *      0.4,    -0.1,     0.1,     -0.5,     0.3,    -0.3,     0.3,
-     *      0.2,    -0.5,     0.2/
+     *      0.0,    10.3,    18.1,     -8.7,    -3.3,     2.1,     3.4,
+     *     -5.5,    -0.7,   -10.1,     -0.7,     0.2,    -9.1,     4.1,
+     *     -4.3,    -0.2,     0.5,     -1.3,    -0.1,     1.4,     3.9,
+     *     -0.3,    -0.1,    -0.7,      2.1,    -1.2,     0.3,     1.6,
+     *      0.3,    -0.2,    -0.5,      1.3,     0.1,    -0.6,    -0.8,
+     *      0.2,     0.2,     0.0,     -0.6,     0.5,    -0.2,     0.4,
+     *      0.1,    -0.4,     0.3/
 
 
       DATA DH/
-     *      0.0,     0.0,   -28.8,      0.0,   -23.0,   -12.9,     0.0,
-     *      8.6,    -2.9,    -2.1,      0.0,     0.4,     3.2,     3.6,
-     *     -0.8,     0.0,     0.5,      1.5,     0.9,     3.7,    -0.6,
-     *      0.0,    -0.1,    -2.1,     -0.4,    -0.5,     0.8,     0.5,
-     *      0.0,     0.6,     0.3,     -0.2,    -0.1,    -0.8,    -0.3,
-     *      0.2,     0.0,     0.0,      0.2,     0.5,     0.4,     0.1,
-     *     -0.1,     0.4,     0.4/
+     *      0.0,     0.0,   -26.6,      0.0,   -27.4,   -14.1,     0.0,
+     *      8.2,    -0.4,     1.8,      0.0,    -1.3,     5.3,     2.9,
+     *     -5.2,     0.0,     0.6,      1.7,    -1.2,     3.4,     0.0,
+     *      0.0,     0.0,    -2.1,     -0.7,     0.2,     0.9,     1.0,
+     *      0.0,     0.8,     0.4,     -0.2,    -0.3,    -0.6,     0.1,
+     *     -0.2,     0.0,    -0.3,      0.3,     0.1,     0.5,    -0.2,
+     *     -0.3,     0.3,     0.0/
 
 c
 c
@@ -3035,7 +3061,7 @@ C
 C
 30    IYR=IY
       IF (IYR.LT.1900) IYR=1900
-      IF (IYR.GT.2015) IYR=2015
+      IF (IYR.GT.2020) IYR=2020
       IF (IY.NE.IYR.AND.mess) WRITE (konsol,999)IY,IYR
 
 c	include 'igrf_goto.h'
@@ -3061,13 +3087,14 @@ c	include 'igrf_goto.h'
       IF (IYR .LT. 2000) GOTO 1995      !INTERPOLATE BETWEEN 1995 - 2000
       IF (IYR .LT. 2005) GOTO 2000      !INTERPOLATE BETWEEN 2000 - 2005
       IF (IYR .LT. 2010) GOTO 2005      !INTERPOLATE BETWEEN 2005 - 2010
+      IF (IYR .LT. 2015) GOTO 2010      !INTERPOLATE BETWEEN 2010 - 2015
 C
-C       EXTRAPOLATE BEYOND 2010:
+C       EXTRAPOLATE BEYOND 2015:
 C
-      DT=FLOAT(IYR)-2010.
+      DT=FLOAT(IYR)-2015.
       DO 40 N=1,66
-         G(N)=G2010(N)
-         H(N)=H2010(N)
+         G(N)=G2015(N)
+         H(N)=H2015(N)
          IF (N.GT.45) GOTO 40
          G(N)=G(N)+DG(N)*DT
          H(N)=H(N)+DH(N)*DT
@@ -3274,6 +3301,15 @@ C INTERPOLATE BETWEEN 2005 - 2010:
       ENDDO
       GOTO 300
 
+C INTERPOLATE BETWEEN 2010 - 2015:
+2010  F2=(IYR-2010)/5.
+      F1=1.-F2
+      DO N=1,66
+         G(N)=G2010(N)*F1+G2015(N)*F2
+         H(N)=H2010(N)*F1+H2015(N)*F2
+      ENDDO
+      GOTO 300
+
 C   COEFFICIENTS FOR A GIVEN YEAR HAVE BEEN CALCULATED; NOW MULTIPLY
 C   THEM BY SCHMIDT NORMALIZATION FACTORS:
 
@@ -3441,7 +3477,8 @@ C  IYE AND IDE ARE THE CURRENT VALUES OF YEAR AND DAY NUMBER
       IDE=IDAY
       IF(IY.LT.1900) IY=1900
 c      IF(IY.GT.2015) IY=2015
-      IF(IY.GT.2020) IY=2020
+c      IF(IY.GT.2020) IY=2020
+      IF(IY.GT.2025) IY=2025
 
 C  WE ARE RESTRICTED BY THE INTERVAL 1900-2015, FOR WHICH THE DGRF & IGRF-11
 C  COEFFICIENTS ARE KNOWN; IF IYR IS OUTSIDE THIS INTERVAL, THE
@@ -3588,14 +3625,20 @@ C  VALUES FOR THE NEAREST EPOCHS:
         ELSEIF (IY.LT.2015) THEN                        !2010-2015
            F2=(FLOAT(IY)+FLOAT(IDAY)/365.-2010.)/5.
            F1=1.D0-F2
-           G10=29496.57*F1+29442.0*F2
-           G11=-1586.42*F1-1501.0*F2
-           H11= 4944.26*F1+4797.1*F2
+           G10=29496.57*F1+29441.46*F2
+           G11=-1586.42*F1-1501.77*F2
+           H11= 4944.26*F1+4795.99*F2
+        ELSEIF (IY.LT.2020) THEN                        !2015-2020
+           F2=(FLOAT(IY)+FLOAT(IDAY)/365.-2010.)/5.
+           F1=1.D0-F2
+           G10=29441.46*F1+29404.8*F2
+           G11=-1501.77*F1-1450.9*F2
+           H11= 4795.99*F1+4652.5*F2
         ELSE                                            !2015-2020
            DT=FLOAT(IY)+FLOAT(IDAY)/365.-2015.
-           G10=29442.0-10.3*DT
-           G11=-1501.0+18.1*DT
-           H11= 4797.1-26.6*DT
+           G10=29404.8-5.7*DT
+           G11=-1450.9+7.4*DT
+           H11= 4652.5-25.9*DT
         ENDIF
 
 C  NOW CALCULATE THE COMPONENTS OF THE UNIT VECTOR EzMAG IN GEO COORD
@@ -3750,16 +3793,17 @@ C  AND  THEREFORE:
 C
 C
       SUBROUTINE SPHCAR(R,TETA,PHI,X,Y,Z,J)
-C  *********************************************************************
-C   CONVERTS SPHERICAL COORDS INTO CARTESIAN ONES AND VICA VERSA
-C    (TETA AND PHI IN RADIANS).
+C ===============================================================               
+C  CONVERTS GEOCENTRIC CARTESIAN COORDINATES OF a LOCATION INTO 
+C  THE TOPOCENTRIC COORDINATES (TETA, PHI, R) At that LOCATION
+C  FOR J<0 AND VICA VERSA FOR J>0 (TETA AND PHI IN RADIANS).
 C                  J>0            J<0
 C-----INPUT:   J,R,TETA,PHI     J,X,Y,Z
 C----OUTPUT:      X,Y,Z        R,TETA,PHI
-C  AUTHOR: NIKOLAI A. TSYGANENKO, INSTITUTE OF PHYSICS, ST.-PETERSBURG
-C      STATE UNIVERSITY, STARY PETERGOF 198904, ST.-PETERSBURG, RUSSIA
-C      (now the NASA Goddard Space Fligth Center, Greenbelt, Maryland)
-C  *********************************************************************
+C  AUTHOR: NIKOLAI A. TSYGANENKO, INSTITUTE OF PHYSICS, ST.-
+C  PETERSBURG STATE UNIVERSITY, STARY PETERGOF 198904, ST.-
+C  PETERSBURG, RUSSIA.
+C ===============================================================               
 
         IMPLICIT NONE
 
@@ -3819,18 +3863,19 @@ C  *********************************************************************
 C
 C
       SUBROUTINE GEOMAG(XGEO,YGEO,ZGEO,XMAG,YMAG,ZMAG,J,IYR)
-C  *********************************************************************
-C CONVERTS GEOCENTRIC (GEO) TO DIPOLE (MAG) COORDINATES OR VICA VERSA.
-C IYR IS YEAR NUMBER (FOUR DIGITS).
-
+C ===============================================================               
+C CONVERTS GEOCENTRIC CARTESIAN COORDINATES (XGEO,YGEO,ZGEO) TO 
+C MAGNETIC DIPOLE CARTESIAN COORDINATES (XMAG,YMAG,ZMAG) FOR J>0
+C OR VICA VERSA FOR J<0. IYR IS YEAR NUMBER (FOUR DIGITS).
+C
 C                           J>0                J<0
 C-----INPUT:  J,XGEO,YGEO,ZGEO,IYR   J,XMAG,YMAG,ZMAG,IYR
 C-----OUTPUT:    XMAG,YMAG,ZMAG        XGEO,YGEO,ZGEO
-
-C  AUTHOR: NIKOLAI A. TSYGANENKO, INSTITUTE OF PHYSICS, ST.-PETERSBURG
-C      STATE UNIVERSITY, STARY PETERGOF 198904, ST.-PETERSBURG, RUSSIA
-C      (now the NASA Goddard Space Fligth Center, Greenbelt, Maryland)
-C  *********************************************************************
+C
+C AUTHOR: NIKOLAI A. TSYGANENKO, INSTITUTE OF PHYSICS, ST.-
+C PETERSBURG STATE UNIVERSITY, STARY PETERGOF 198904, ST.-PETERS-
+C BURG, RUSSIA.
+C ===============================================================               
 
         IMPLICIT NONE
 
