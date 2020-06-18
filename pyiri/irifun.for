@@ -8721,6 +8721,19 @@ C
             END
 c
 c
+           subroutine set_datapath(path)
+c----------------------------------------------------------------
+c set common data path for data files
+c----------------------------------------------------------------
+           CHARACTER path*200
+           common /path/datapath
+           character datapath*200
+           datapath=path
+           RETURN
+           END
+
+c
+c
            subroutine read_ig_rz 
 c----------------------------------------------------------------
 c Reads the Rz12 and IG12 indices file IG_RZ.DAT from I/O UNIT=12 
@@ -8769,10 +8782,12 @@ c----------------------------------------------------------------
 
            integer	iyst,iyend,iymst,iupd,iupm,iupy,imst,imend
            real		aig(806),arz(806)
+           character datapath*200
            
            common /igrz/aig,arz,iymst,iymend
-
-           open(unit=12,file='ig_rz.dat',FORM='FORMATTED',status='old')
+           common /path/ datapath
+           open(unit=12,file=TRIM(ADJUSTL(datapath))//'ig_rz.dat',
+     *     FORM='FORMATTED',status='old')
 
 c-web- special for web version
 c            open(unit=12,file=
@@ -8950,9 +8965,13 @@ C-------------------------------------------------------------------------
 C
         INTEGER		aap(23000,9),iiap(8)
         DIMENSION 	af107(23000,3)
+        character datapath*200
         COMMON		/apfa/aap,af107,n
+        COMMON          /path/datapath
 
-        Open(13,FILE='apf107.dat',FORM='FORMATTED',STATUS='OLD')
+
+        Open(13,FILE=TRIM(ADJUSTL(datapath))//'apf107.dat',
+     *  FORM='FORMATTED',STATUS='OLD')
 c-web-sepcial vfor web version
 c      OPEN(13,FILE='/var/www/omniweb/cgi/vitmo/IRI/apf107.dat',
 c     *    FORM='FORMATTED',STATUS='OLD')

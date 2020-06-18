@@ -610,6 +610,8 @@ C ### FILMOD, DTEMOD array-size is number of IGRF maps
         COMMON/MODEL/   NMAX,TIME,GH1,FIL1
         COMMON/IGRF1/   ERAD,AQUAD,BQUAD,DIMO /CONST/UMR,PI
         COMMON/DIPOL/	GHI1,GHI2,GHI3
+        COMMON/path/ datapath
+        CHARACTER datapath*200 
 C ### updated coefficient file names and corresponding years
         DATA  FILMOD   / 'dgrf1945.dat','dgrf1950.dat','dgrf1955.dat',           
      1    'dgrf1960.dat','dgrf1965.dat','dgrf1970.dat','dgrf1975.dat',
@@ -640,9 +642,11 @@ C-- DETERMINE IGRF-YEARS FOR INPUT-YEAR
         DTE2 = DTEMOD(L+1) 
         FIL2 = FILMOD(L+1) 
 C-- GET IGRF COEFFICIENTS FOR THE BOUNDARY YEARS
-        CALL GETSHC (IU, FIL1, NMAX1, ERAD, GH1, IER)  
+        CALL GETSHC (IU, TRIM(ADJUSTL(datapath))//FIL1,
+     &  NMAX1, ERAD, GH1, IER)  
             IF (IER .NE. 0) STOP                           
-        CALL GETSHC (IU, FIL2, NMAX2, ERAD, GH2, IER)  
+        CALL GETSHC (IU, TRIM(ADJUSTL(datapath))//FIL2,
+     &  NMAX2, ERAD, GH2, IER)  
             IF (IER .NE. 0) STOP
 C-- DETERMINE IGRF COEFFICIENTS FOR YEAR
         IF (L .LE. NUMYE-1) THEN                        
@@ -707,7 +711,7 @@ C                                 = -2, records out of order
 C                                 = FORTRAN run-time error number    
 C ===============================================================               
                                                                                 
-        CHARACTER  FSPEC*(*), FOUT*80                                    
+        CHARACTER  FSPEC*(*), FOUT*213                                    
         DIMENSION       GH(196)
         LOGICAL		mess 
         COMMON/iounit/konsol,mess        
@@ -719,10 +723,11 @@ C       Open coefficient file. Read past first header record.
 C       Read degree and order of model and Earth's radius.           
 C ---------------------------------------------------------------               
         WRITE(FOUT,667) FSPEC
- 667    FORMAT(A13)
+ 667    FORMAT(A213)
 c-web-for webversion
 c 667    FORMAT('/var/www/omniweb/cgi/vitmo/IRI/',A13)
-        OPEN (IU, FILE=FOUT, STATUS='OLD', IOSTAT=IER, ERR=999)     
+        OPEN (IU, FILE=TRIM(ADJUSTL(FOUT)), STATUS='OLD', IOSTAT=IER,
+     &   ERR=999)     
         READ (IU, *, IOSTAT=IER, ERR=999)                            
         READ (IU, *, IOSTAT=IER, ERR=999) NMAX, ERAD, XMYEAR 
         nm=nmax*(nmax+2)                

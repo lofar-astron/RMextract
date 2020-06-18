@@ -425,6 +425,8 @@ c     &   /BLO11/B2TOP,TC3,itopn,alg10,hcor1,tcor2
      &   /BLO11/B2TOP,itopn,tcor       
      &   /iounit/konsol,mess     /CSW/SW(25),ISW,SWC(25)
      &   /QTOP/Y05,H05TOP,QF,XNETOP,XM3000,HHALF,TAU
+      COMMON /path/datapath
+      character datapath*200
 
       EXTERNAL          XE1,XE2,XE3_1,XE4_1,XE5,XE6,FMODIP
 
@@ -1170,8 +1172,8 @@ C
 104         FORMAT('ccir',I2,'.asc')
 c-web-for webversion
 c104     FORMAT('/var/www/omniweb/cgi/vitmo/IRI/ccir',I2,'.asc')
-        OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
-     &          FORM='FORMATTED')
+        OPEN(IUCCIR,FILE=TRIM(ADJUSTL(datapath))//FILNAM,STATUS='OLD',
+     &       ERR=8448,FORM='FORMATTED')
         READ(IUCCIR,4689) F2,FM3
 4689    FORMAT(1X,4E15.8)
         CLOSE(IUCCIR)
@@ -1183,8 +1185,8 @@ C
 1144          FORMAT('ursi',I2,'.asc')
 c-web-for webversion
 c1144    FORMAT('/var/www/omniweb/cgi/vitmo/IRI/ursi',I2,'.asc')
-          OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
-     &         FORM='FORMATTED')
+          OPEN(IUCCIR,FILE=TRIM(ADJUSTL(datapath))//FILNAM,STATUS='OLD',
+     &     ERR=8448,FORM='FORMATTED')
           READ(IUCCIR,4689) F2
           CLOSE(IUCCIR)
         endif
@@ -1201,8 +1203,8 @@ c first CCIR ..............................................
 c
 
         WRITE(FILNAM,104) NMONTH+10
-        OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
-     &          FORM='FORMATTED')
+        OPEN(IUCCIR,FILE=TRIM(ADJUSTL(datapath))//FILNAM,STATUS='OLD',
+     &  ERR=8448,FORM='FORMATTED')
         READ(IUCCIR,4689) F2N,FM3N
         CLOSE(IUCCIR)
 
@@ -1211,8 +1213,8 @@ C then URSI if chosen .....................................
 C
         if(URSIF2) then
           WRITE(FILNAM,1144) NMONTH+10
-          OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
-     &         FORM='FORMATTED')
+          OPEN(IUCCIR,FILE=TRIM(ADJUSTL(datapath))//FILNAM,STATUS='OLD',
+     &     ERR=8448,FORM='FORMATTED')
           READ(IUCCIR,4689) F2N
           CLOSE(IUCCIR)
           endif
