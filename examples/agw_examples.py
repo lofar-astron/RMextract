@@ -91,12 +91,12 @@ k = 0
 for key in result['station_names']:
     seq_no = 0
     log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
-    log.write ('seq  rel_time time_width El (deg)    Az (deg)    STEC (TEC u)    RM (rad/m2)   VTEC factor  \n')
+    log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
     for i in range (timegrid.shape[0]):
        el = math.degrees(result['elev'][key][i])
        az = math.degrees(result['azimuth'][key][i])
-       stec =result['STEC'][key][i]
-       rm = result['RM'][key][i]
+       stec =result['STEC'][key][i][0]
+       rm = result['RM'][key][i][0]
        vtec_factor = 1.0 / result['AirMass'][key][i]
        rel_time = timegrid[i] - reference_time
        if i  == 0:
