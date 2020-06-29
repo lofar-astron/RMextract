@@ -57,7 +57,7 @@ MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
 
 ra_rad, dec_rad = ac.radec_str_to_rad2(RA, DEC)
 pointing=np.array([ra_rad, dec_rad])
-print 'pointing', pointing
+print('pointing', pointing)
 upington_position =  [[ 5233099.76611549, 2035838.60712339, -3016689.89007898]]
 #result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=TIME_STEP,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
 
