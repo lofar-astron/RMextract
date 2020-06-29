@@ -3,6 +3,7 @@ import RMextract.PosTools as PosTools
 import Albus_Coordinates as ac
 import numpy as np
 import os
+import math
 
 OBJECT="EoR0"
 OBJECT="eor_2456967_MWA_BrightLoqRM"
@@ -90,10 +91,10 @@ k = 0
 for key in result['station_names']:
     seq_no = 0
     log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
-    log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
+    log.write ('seq  rel_time time_width El (deg)    Az (deg)    STEC (TEC u)    RM (rad/m2)   VTEC factor  \n')
     for i in range (timegrid.shape[0]):
-       el = result['elev'][key][i]
-       az = result['azimuth'][key][i]
+       el = math.degrees(result['elev'][key][i])
+       az = math.degrees(result['azimuth'][key][i])
        stec =result['STEC'][key][i]
        rm = result['RM'][key][i]
        vtec_factor = 1.0 / result['AirMass'][key][i]
