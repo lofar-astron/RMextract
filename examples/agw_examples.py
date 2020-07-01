@@ -3,6 +3,7 @@ import RMextract.PosTools as PosTools
 import Albus_Coordinates as ac
 import numpy as np
 import os
+import math
 
 OBJECT="EoR0"
 OBJECT="eor_2456967_MWA_BrightLoqRM"
@@ -57,7 +58,7 @@ MWA_antennas = np.array([[-2559314.23084924,5095535.90961438,-2848889.57667157],
 
 ra_rad, dec_rad = ac.radec_str_to_rad2(RA, DEC)
 pointing=np.array([ra_rad, dec_rad])
-print 'pointing', pointing
+print('pointing', pointing)
 upington_position =  [[ 5233099.76611549, 2035838.60712339, -3016689.89007898]]
 #result = getRM(use_azel=True,start_time=START_TIME,end_time=END_TIME, timestep=TIME_STEP,stat_positions= MWA_antennas,useEMM=True,TIME_OFFSET=TIME_OFFSET)
 
@@ -92,10 +93,10 @@ for key in result['station_names']:
     log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
     log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
     for i in range (timegrid.shape[0]):
-       el = result['elev'][key][i]
-       az = result['azimuth'][key][i]
-       stec =result['STEC'][key][i]
-       rm = result['RM'][key][i]
+       el = math.degrees(result['elev'][key][i])
+       az = math.degrees(result['azimuth'][key][i])
+       stec =result['STEC'][key][i][0]
+       rm = result['RM'][key][i][0]
        vtec_factor = 1.0 / result['AirMass'][key][i]
        rel_time = timegrid[i] - reference_time
        if i  == 0:
