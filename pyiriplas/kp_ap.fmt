@@ -1,0 +1,112 @@
+
+The National Geophysical Data Center provides the observations here with no re-
+strictions on their use.  Please contact us at the address below with your com-
+ments and questions about the form and the content of this information product
+or about the measurements themselves.
+
+NATIONAL GEOPHYSICAL DATA CENTER
+325 Broadway     Mail Code E/GC2
+Boulder, Colorado 80303-3328 USA
+
+Telephone: (303) 497-6135   Telex: 592811 NOAA MASC BDR
+FAX:       (303) 497-6513
+
+
+-------------------------------------------------------------------------------
+SELECTED GEOMAGNETIC AND SOLAR ACTIVITY INDICES
+-------------------------------------------------------------------------------
+
+
+WORLDWIDE INDICES--------------------------------------------------------------
+The subscript "p" means planetary and designates a global magnetic activity in-
+dex.  The following 13 observatories, which lie between 46 and 63 degrees north
+and south geomagnetic latitude, now contribute to the planetary indices: Ler-
+wick (UK), Eskdalemuir (UK), Hartland (UK), Ottawa (Canada), Fredericksburg
+(USA), Meannook (Canada), Sitka (USA), Eyrewell (New Zealand), Canberra (Aus-
+tralia), Lovo (Sweden), Brorfelde (Denmark), Wingst (Germany), and Niemegk
+(Germany).
+
+
+THREE-HOUR-RANGE INDEX K-------------------------------------------------------
+K indices isolate solar particle effects on the earth's magnetic field; over a
+3-hour period, they classify into disturbance levels the range of variation of
+the more unsettled horizontal field component.  Each activity level relates al-
+most logarithmically to its corresponding disturbance amplitude.  Three-hour
+indices discriminate conservatively between true magnetic field perturbations
+and the quiet-day variations produced by ionospheric currents.
+
+K indices range in 28 steps from 0 (quiet) to 9 (greatly disturbed) with frac-
+tional parts expressed in thirds of a unit.  A K-value equal to 27, for exam-
+ple, means 2 and 2/3 or 3-; a K-value equal to 30 means 3 and 0/3 or 3 exactly;
+and a K-value equal to 33 means 3 and 1/3 or 3+.  The arithmetic mean of the K
+values scaled at the 13 observatories listed above gives Kp.
+
+
+EQUIVALENT AMPLITUDE-----------------------------------------------------------
+The a-index ranges from 0 to 400 and represents a K-value converted to a linear
+scale in gammas (nanoTeslas)--a scale that measures equivalent disturbance am-
+plitude of a station at which K=9 has a lower limit of 400 gammas.
+
+
+
+FORMAT FOR RECORDS OF SELECTED GEOMAGNETIC AND SOLAR ACTIVITY INDICES
+-------------------------------------------------------------------------------
+COLUMNS   FMT   DESCRIPTION
+-------------------------------------------------------------------------------
+ 1- 2     I2    YEAR
+ 3- 4     I2    MONTH
+ 5- 6     I2    DAY
+
+ 7-10     I4    BARTELS SOLAR ROTATION NUMBER--a sequence of 27-day intervals
+                  counted continuously from February 8, 1832.
+11-12     I2    NUMBER OF DAY within the Bartels 27-day cycle.
+
+13-14     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 0000 - 0300 UT.
+15-16     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 0300 - 0600 UT.
+17-18     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 0600 - 0900 UT.
+19-20     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 0900 - 1200 UT.
+21-22     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 1200 - 1500 UT.
+23-24     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 1500 - 1800 UT.
+25-26     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 1800 - 2100 UT.
+27-28     I2    Kp or PLANETARY 3-HOUR RANGE INDEX for 2100 - 2400 UT.
+29-31     I3    SUM of the eight Kp indices for the day expressed to the near-
+                  est third of a unit.
+
+32-34     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 0000 - 0300 UT.
+35-37     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 0300 - 0600 UT.
+38-40     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 0600 - 0900 UT.
+41-43     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 0900 - 1200 UT.
+44-46     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 1200 - 1500 UT.
+47-49     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 1500 - 1800 UT.
+50-52     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 1800 - 2100 UT.
+53-55     I3    ap or PLANETARY EQUIVALENT AMPLITUDE for 2100 - 2400 UT.
+56-58     I3    Ap or PLANETARY EQUIVALENT DAILY AMPLITUDE--the arithmetic mean
+                  of the day's eight ap values.
+
+59-61     F3.1  Cp or PLANETARY DAILY CHARACTER FIGURE--a qualitative estimate
+                  of overall level of magnetic activity for the day determined
+                  from the sum of the eight ap amplitudes.  Cp ranges, in steps
+                  of one-tenth, from 0 (quiet) to 2.5 (highly disturbed).
+
+62-62     I1    C9--a conversion of the 0-to-2.5 range of the Cp index to one
+                  digit between 0 and 9.
+
+63-65     I3    INTERNATIONAL SUNSPOT NUMBER.  Records contain the Zurich num-
+                   ber through December 31, 1980, and the International Brus-
+                   sels number thereafter.
+
+66-70     F5.1  OTTAWA 10.7-CM SOLAR RADIO FLUX ADJUSTED TO 1 AU--measured at
+                  1700 UT daily and expressed in units of 10 to the -22 Watts/
+                  meter sq/hertz.  Observations began on February 14, 1947. 
+                  From that date through December 31, 1973, the fluxes given
+                  here don't reflect the revisions Ottawa made in 1966. NOTE: 
+                  If a solar radio burst is in progress during the observation
+                  the pre-noon or afternoon value is used (as indicated by a
+                  flux qualifier value of 1 in column 71.
+
+71-71     I1    FLUX QUALIFIER.  "0" indicates flux required no adjustment; 
+                  "1" indicates flux required adjustment for burst in progress
+                  at time of measurement; "2" indicates a flux approximated by
+                  either interpolation or extrapolation; and "3" indicates no
+                  observation.
+-------------------------------------------------------------------------------

@@ -1,0 +1,3 @@
+#iriplas.pyf generated with :
+f2py -m iriplas -h iriplas.pyf only: iri_plas_main : iriplas_main.for Iris2017.for irif2019.for indx2017.for igrf-12.for 
+# remove all unnecessary declaration and add intent(out) for outf
