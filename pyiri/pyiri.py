@@ -15,7 +15,7 @@ class pyiri:
         self.hour=hour
         self.flags=np.ones(50,dtype=bool)  #to do, check which flags to set
         self.jmag=0 #geographic (0) or geomagnetic (1) coordinates
-        self.datapath=resource_filename(__name__,'if_rz.dat').replace('if_rz.dat','')
+        self.datapath=resource_filename(__name__,'ig_rz.dat').replace('ig_rz.dat','')
         
 
     def get_profile(self,hstart,hend,hstep):
