@@ -8,3 +8,6 @@ NCEI Geomagnetic Modeling Team and British Geological Survey. 2019. World Magnet
 
 IRI model:
 D. Bilitza, IRI the International Standard for the Ionosphere, Adv. Radio Sci., 16, 1-11, https://doi.org/10.5194/ars-16-1-2018, 2018. 
+
+IRIPlas model:
+T. Gulyaeva and D. Bilitza, "Towards ISO standard earth ionosphere and plasmasphere model," in New Developments in the Standard Model R. Larsen, Ed. Hauppauge, New York: NOVA, 2012, pp. 1-48.
