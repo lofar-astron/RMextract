@@ -184,8 +184,8 @@ def _compute_index_and_weights(maparray, mapvalues):
     idx2[idx2 >= maparray.shape[0]] = maparray.shape[0] - 1
     _steps = np.absolute(maparray[idx2] - maparray[idx1])
     weights = np.absolute(mapvalues - maparray[idx1])
-    _steps[_steps == 0] = weights[_steps == 0]
-    weights = weights / _steps
+    weights[_steps == 0] = 1.
+    weights[_steps!=0] = weights [_steps!=0]/ _steps[_steps!=0]
     return idx1, idx2, weights
 
 
