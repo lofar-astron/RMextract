@@ -13,5 +13,5 @@ times=RMdict['times']
 RM = RMdict['RM']['st1']
 
 print ("TIME(mjd)     RM (rad/m^2)")
-for tm,rm in zip(tm,RM):
+for tm,rm in zip(times,RM):
     print ("%5.2f        %1.3f"%(tm/(3600*24.),rm))
