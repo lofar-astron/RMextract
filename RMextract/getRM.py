@@ -14,7 +14,7 @@ import math
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
 def getRM(MS=None,
-           server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+           server="ftp://ftp.aiub.unibe.ch/CODE/",
            prefix='codg',
            ionexPath="IONEXdata/",
            earth_rot=0,

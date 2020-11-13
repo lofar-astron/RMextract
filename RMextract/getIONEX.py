@@ -423,11 +423,11 @@ def _store_files(ftp, filenames, outpath, overwrite=False):
 
 
 def _get_IONEX_file(time="2012/03/23/02:20:10.01",
-                    server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+                    server="ftp://ftp.aiub.unibe.ch/CODE/",
                     prefix="codg",
                     outpath='./',
                     overwrite=False,
-                    backupserver="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/"):
+                    backupserver="ftp://ftp.aiub.unibe.ch/CODE/"):
     """Get IONEX file with prefix from server for a given day
 
     Downloads files with given prefix from the ftp server, unzips and stores
@@ -567,11 +567,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         return nfilenames[0]
 
 def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
-                    server="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+                    server="ftp://ftp.aiub.unibe.ch/CODE/",
                     prefix="codg",
                     outpath='./',
                     overwrite=False,
-                    backupserver="ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/",
+                    backupserver="ftp://ftp.aiub.unibe.ch/CODE/",
                     proxy_server=None,
                     proxy_type=None,
                     proxy_port=None,
@@ -686,7 +686,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     return fname
 
 def getIONEXfile(time="2012/03/23/02:20:10.01",
-                 server="ftp://cddis.gsfc.nasa.gov/gnss/productsionex/",
+                 server="ftp://ftp.aiub.unibe.ch/CODE/",
                  prefix="codg",
                  outpath='./',
                  overwrite=False):
