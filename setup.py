@@ -26,6 +26,7 @@ if "--add-iri" in sys.argv:
 setup(name='RMextract',
 version='0.4',
       ext_modules=ext,
+      install_requires=['numpy', 'scipy', 'python-casacore'],
       packages= packages,
       package_data={'EMM':['*COF'],
                     'pyiri':['*dat','*asc'],
