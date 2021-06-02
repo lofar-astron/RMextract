@@ -7,6 +7,8 @@ Extract RM values for a LOFAR observation. Fill h5parm
 Created on Tue Aug 7 11:46:57 2018
 
 @author: mevius
+
+Changes for prefactor included by Alexander Drabent (02 June 2021)
 """
 from losoto.h5parm import h5parm
 from RMextract import getRM
@@ -41,9 +43,7 @@ def makesolset(MS, data, solset_name):
     sourceTable.append([('pointing',pointing)])
 
 
-
-
-def main(MSfiles, h5parmdb, solset_name = "sol000",timestepRM=300,
+def main(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,timestepRM=300,
                 ionex_server="ftp://ftp.aiub.unibe.ch/CODE/",
                 ionex_prefix='CODG',ionexPath="./",earth_rot=0,proxyServer=None,proxyPort=None,proxyType=None,proxyUser=None,proxyPass=None):
     '''Add rotation measure to existing h5parmdb
@@ -53,12 +53,19 @@ def main(MSfiles, h5parmdb, solset_name = "sol000",timestepRM=300,
         h5parmdb (string) : name of existing h5parm
         solset_name (string) : optional name of solset in h5parmdb, 
                             if not set, first one will be chosen
+        all_stations (bool) : optional calculate RM values for all stations in the MS,'
+                            default only for position of CS002LBA 
         timestep (float) : timestep in seconds
         ionex_server (string) : ftp server for IONEX files
         ionex_prefix (string) : prefix of IONEX files
         ionexPath (string) : location where IONEX files are stored
         earth_rot (float) : parameter to determine how much earth rotation is taken \
         into account when interpolating IONEX data. (0 is none, 1 is full)
+        proxyserver (str): Name of a proxy server to use
+        proxyport (int): Port of the proxy server to use
+        proxytype (str): Type of the proxy server to use
+        proxyuser (str): Username of the proxy server to use
+        proxypass (str): Password of the proxy server to use
     '''
     
     try:
@@ -178,14 +185,20 @@ def main(MSfiles, h5parmdb, solset_name = "sol000",timestepRM=300,
             raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
         
     logging.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
-    if type(list(station_names)[0]) != str:
-        rm_vals = np.array([rmdict["RM"][stat.decode()].flatten() for stat in station_names])
+    if all_stations:
+        if type(list(station_names)[0]) != str:
+            rm_vals = np.array([rmdict["RM"][stat.decode()].flatten() for stat in station_names])
+        else:
+            rm_vals = np.array([rmdict["RM"][stat].flatten() for stat in station_names])
     else:
-        rm_vals = np.array([rmdict["RM"][stat].flatten() for stat in station_names])
+        rm_vals  = np.ones((len(station_names),rmdict['RM']['st0'].shape[0]),dtype=float)
+        rm_vals += rmdict['RM']['st0'].flatten()[np.newaxis]
+        
     new_soltab = solset.makeSoltab(soltype='rotationmeasure', soltabName='RMextract',
                                    axesNames=['ant', 'time'], axesVals=[station_names, rmdict['times']],
                                    vals=rm_vals,
                                    weights=np.ones_like(rm_vals, dtype=np.float16))
+
     
     return(0)
 
@@ -209,6 +222,9 @@ if __name__ == '__main__':
                         help='Directory where to store the IONEX files. (default: \"./\")')
     parser.add_argument('--solsetName', '--solset', type=str, default='sol000',
                         help='Name of the h5parm solution set (default: sol000)')
+    parser.add_argument('--all','-a', help=
+                        'calculate RM per station (default calculates only for CS002LBA)',
+                        action='store_true',dest="allStations")
     parser.add_argument('-t','--timestep', help=
                         'timestep in seconds. for values <=0 (default) the timegrid of the MS is used ',
                         dest="timestep",type=float, default=300.)
@@ -235,7 +251,8 @@ if __name__ == '__main__':
     h5parmdb = args.h5parm
     logging.info("Working on: %s %s" % (MS, h5parmdb))
     main(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
-                 ionexPath=args.ionexpath, solset_name=args.solsetName, 
-                 timestepRM=args.timestep, earth_rot=args.earth_rot, proxyServer=args.proxyserver,
-                 proxyPort=args.proxyport,proxyType=args.proxytype,proxyUser=args.proxyuser,proxyPass=args.proxypass)
+                 ionexPath=args.ionexpath, solset_name=args.solsetName,
+                 all_stations=args.allStations, timestepRM=args.timestep,
+                 earth_rot=args.earth_rot, proxyServer=args.proxyserver, proxyPort=args.proxyport,
+                 proxyType=args.proxytype,proxyUser=args.proxyuser,proxyPass=args.proxypass)
     
