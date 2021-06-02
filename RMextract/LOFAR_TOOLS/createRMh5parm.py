@@ -222,9 +222,9 @@ if __name__ == '__main__':
                         help='Directory where to store the IONEX files. (default: \"./\")')
     parser.add_argument('--solsetName', '--solset', type=str, default='sol000',
                         help='Name of the h5parm solution set (default: sol000)')
-    parser.add_argument('--all','-a', help=
-                        'calculate RM per station (default calculates only for CS002LBA)',
-                        action='store_true',dest="allStations")
+    parser.add_argument('--single','-s', help=
+                        'calculate RM only for CS002LBA (default calculate for all stations in the MS)',
+                        action='store_false',dest="allStations")
     parser.add_argument('-t','--timestep', help=
                         'timestep in seconds. for values <=0 (default) the timegrid of the MS is used ',
                         dest="timestep",type=float, default=300.)
