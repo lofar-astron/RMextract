@@ -1,7 +1,7 @@
-from numpy.distutils.core import setup
-from numpy.distutils.core import Extension
+# import sys
+import setuptools
 import numpy
-import sys
+from numpy.distutils.core import setup, Extension
 
 packages = ['RMextract', 'EMM']
 # scripts = ['RMextract/URL_download.py']
@@ -11,14 +11,14 @@ ext = [Extension('_EMM_Model',
                  extra_compile_args=['-Wno-format-security'])
        ]
 
-if "--add-lofar-utils" in sys.argv:
+if False: #"--add-lofar-utils" in sys.argv:
     packages.append("RMextract/LOFAR_TOOLS")
     scripts.append("RMextract/LOFAR_TOOLS/createRMParmdb")
     scripts.append("RMextract/LOFAR_TOOLS/createRMh5parm.py")
     scripts.append("RMextract/LOFAR_TOOLS/download_IONEX.py")
-    sys.argv.remove("--add-lofar-utils")
+    # sys.argv.remove("--add-lofar-utils")
 
-if "--add-iri" in sys.argv:
+if True: #"--add-iri" in sys.argv:
     packages.append("pyiri")
     ext.append(Extension('_iri',
                          sources=['pyiri/iri.pyf', 'pyiri/cira.for', 'pyiri/igrf.for', 'pyiri/iridreg.for',
@@ -33,7 +33,7 @@ if "--add-iri" in sys.argv:
                                   'pyiriplas/indx2017.for'],
                          include_dirs=[numpy.get_include()])
                )
-    sys.argv.remove("--add-iri")
+    # sys.argv.remove("--add-iri")
 
 setup(name='RMextract',
       version='0.4',
