@@ -37,6 +37,9 @@ if True: #"--add-iri" in sys.argv:
 
 setup(name='RMextract',
       version='0.4',
+      author='Maaike Mevius',
+      author_email='mevius@astron.nl',
+      url='https://github.com/lofar-astron/RMextract',
       ext_modules=ext,
       packages=packages,
       install_requires=['numpy', 'scipy', 'python-casacore'],
