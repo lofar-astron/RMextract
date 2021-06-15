@@ -3,22 +3,23 @@ import setuptools
 import numpy
 from numpy.distutils.core import setup, Extension
 
-packages = ['RMextract', 'EMM']
+packages = ['RMextract', 'RMextract.EMM']  # , 'EMM']
 # scripts = ['RMextract/URL_download.py']
 scripts = []
 ext = [Extension('_EMM_Model',
-                 ['EMM/EMM_Model.cc', 'EMM/GeomagnetismLibrary.c', 'EMM/EMM_Model_wrap.cc'],
+                 ['RMextract/EMM/EMM_Model.cc', 'RMextract/EMM/GeomagnetismLibrary.c',
+                  'RMextract/EMM/EMM_Model_wrap.cc'],
                  extra_compile_args=['-Wno-format-security'])
        ]
 
-if False: #"--add-lofar-utils" in sys.argv:
+if False:  # "--add-lofar-utils" in sys.argv:
     packages.append("RMextract/LOFAR_TOOLS")
     scripts.append("RMextract/LOFAR_TOOLS/createRMParmdb")
     scripts.append("RMextract/LOFAR_TOOLS/createRMh5parm.py")
     scripts.append("RMextract/LOFAR_TOOLS/download_IONEX.py")
     # sys.argv.remove("--add-lofar-utils")
 
-if True: #"--add-iri" in sys.argv:
+if True:  # "--add-iri" in sys.argv:
     packages.append("pyiri")
     ext.append(Extension('_iri',
                          sources=['pyiri/iri.pyf', 'pyiri/cira.for', 'pyiri/igrf.for', 'pyiri/iridreg.for',

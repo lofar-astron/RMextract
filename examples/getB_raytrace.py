@@ -1,4 +1,4 @@
-import EMM.EMM as EMM
+from RMextract.EMM import EMM as EMM
 import RMextract.PosTools as PosTools
 import numpy as np
 import RMextract.getIONEX as ionex
@@ -19,7 +19,7 @@ def getBarray(pointing,time,position,height_array):
     pp,am=getPParray(pointing,time,position,height_array)
     year, month, day, myfrac =  PosTools.obtain_observation_year_month_day_fraction(time)
     dayofyear = date(year,month,day).timetuple().tm_yday
-    emm=EMM.WMM(date=year+float(dayofyear)/365.)
+    emm= EMM.WMM(date=year + float(dayofyear) / 365.)
     BField=emm.getProjectedFieldArray(np.degrees(pp[:,0]),np.degrees(pp[:,1]),pp[:,2]/1e3,los_dir)
     return pp,am,BField
 

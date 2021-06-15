@@ -3,13 +3,9 @@ from RMextract import PosTools
 from RMextract import getIONEX as ionex;
 import os
 import numpy as np
-from math import *
 from datetime import date
 
-
-import EMM.EMM as EMM
-import math
-
+from RMextract.EMM import EMM as EMM
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
@@ -104,9 +100,9 @@ def getRM(MS=None,
         
     if useEMM:
         #print ("USING EMM for EarthMagnetic Field")
-        emm=EMM.EMM()
+        emm= EMM.EMM()
     else:
-        emm=EMM.WMM()
+        emm= EMM.WMM()
     
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
     if len(times[-1])==0 or times[-1][-1]<timerange[1]:
