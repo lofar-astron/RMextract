@@ -20,18 +20,18 @@ if False:  # "--add-lofar-utils" in sys.argv:
     # sys.argv.remove("--add-lofar-utils")
 
 if True:  # "--add-iri" in sys.argv:
-    packages.append("pyiri")
+    packages.append("RMextract/pyiri")
     ext.append(Extension('_iri',
-                         sources=['pyiri/iri.pyf', 'pyiri/cira.for', 'pyiri/igrf.for', 'pyiri/iridreg.for',
-                                  'pyiri/iriflip.for', 'pyiri/irifun.for', 'pyiri/irisub.for',
-                                  'pyiri/iritec.for', 'pyiri/iriget.for'],
+                         sources=['RMextract/pyiri/iri.pyf', 'RMextract/pyiri/cira.for', 'RMextract/pyiri/igrf.for', 'RMextract/pyiri/iridreg.for',
+                                  'RMextract/pyiri/iriflip.for', 'RMextract/pyiri/irifun.for', 'RMextract/pyiri/irisub.for',
+                                  'RMextract/pyiri/iritec.for', 'RMextract/pyiri/iriget.for'],
                          include_dirs=[numpy.get_include()])
                )
-    packages.append("pyiriplas")
+    packages.append("RMextract/pyiriplas")
     ext.append(Extension('_iriplas',
-                         sources=['pyiriplas/iriplas.pyf', 'pyiriplas/igrf.for', 'pyiriplas/irif2019.for',
-                                  'pyiriplas/iriplas_main.for', 'pyiriplas/Iris2017.for',
-                                  'pyiriplas/indx2017.for'],
+                         sources=['RMextract/pyiriplas/iriplas.pyf', 'RMextract/pyiriplas/igrf.for', 'RMextract/pyiriplas/irif2019.for',
+                                  'RMextract/pyiriplas/iriplas_main.for', 'RMextract/pyiriplas/Iris2017.for',
+                                  'RMextract/pyiriplas/indx2017.for'],
                          include_dirs=[numpy.get_include()])
                )
     # sys.argv.remove("--add-iri")
