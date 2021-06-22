@@ -44,8 +44,8 @@ setup(name='RMextract',
       ext_modules=ext,
       packages=packages,
       install_requires=['numpy', 'scipy', 'python-casacore'],
-      package_data={'EMM': ['*COF'],
-                    'pyiri': ['*dat', '*asc'],
-                    'pyiriplas': ['*dat', '*asc', 'kp*', '*ASC']},
+      package_data={'RMextract.EMM': ['*COF'],
+                    'RMextract.pyiri': ['*dat', '*asc'],
+                    'RMextract.pyiriplas': ['*dat', '*asc', 'kp*', '*ASC']},
       scripts=scripts
       )
