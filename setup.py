@@ -1,9 +1,11 @@
 # import sys
-import setuptools
+from setuptools import find_packages
 import numpy
 from numpy.distutils.core import setup, Extension
 
 packages = ['RMextract', 'RMextract.EMM']  # , 'EMM']
+packages = find_packages(exclude=['RMextract/LOFAR_TOOLS'])
+
 # scripts = ['RMextract/URL_download.py']
 scripts = []
 ext = [Extension('_EMM_Model',
@@ -44,8 +46,8 @@ setup(name='RMextract',
       ext_modules=ext,
       packages=packages,
       install_requires=['numpy', 'scipy', 'python-casacore'],
-      package_data={'RMextract.EMM': ['*COF'],
-                    'RMextract.pyiri': ['*dat', '*asc'],
-                    'RMextract.pyiriplas': ['*dat', '*asc', 'kp*', '*ASC']},
+      package_data={'RMextract/EMM': ['*COF'],
+                    'RMextract/pyiri': ['*dat', '*asc'],
+                    'RMextract/pyiriplas': ['*dat', '*asc', 'kp*', '*ASC']},
       scripts=scripts
       )
