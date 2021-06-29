@@ -3,6 +3,16 @@ from setuptools import find_packages
 import numpy
 from numpy.distutils.core import setup, Extension
 
+
+# Function read() was copied from setup.py in Pip package.
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    # intentionally *not* adding an encoding option to open, See:
+    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+    with open(os.path.join(here, rel_path), "r") as fp:
+        return fp.read()
+
+
 packages = find_packages(exclude=["RMextract.LOFAR_TOOLS"])
 
 ext_modules = []
@@ -71,7 +81,19 @@ setup(
     version="0.4",
     author="Maaike Mevius",
     author_email="mevius@astron.nl",
+    description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations",
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
     url="https://github.com/lofar-astron/RMextract",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Topic :: Scientific/Engineering :: Astronomy",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
     ext_modules=ext_modules,
     packages=packages,
     install_requires=["numpy", "scipy", "python-casacore"],
