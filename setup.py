@@ -79,12 +79,13 @@ if "RMextract.LOFAR_TOOLS" in packages:
 setup(
     name="RMextract",
     version="0.4",
+    url="https://github.com/lofar-astron/RMextract",
+    project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaike Mevius",
     author_email="mevius@astron.nl",
     description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    url="https://github.com/lofar-astron/RMextract",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
