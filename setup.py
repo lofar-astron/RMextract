@@ -1,52 +1,84 @@
-# import sys
+import os
 from setuptools import find_packages
 import numpy
 from numpy.distutils.core import setup, Extension
 
-packages = find_packages(exclude=['RMextract.LOFAR_TOOLS'])
+packages = find_packages(exclude=["RMextract.LOFAR_TOOLS"])
 
-# scripts = ['RMextract/URL_download.py']
+ext_modules = []
 scripts = []
-ext = [Extension('RMextract.EMM._EMM_Model',
-                 ['RMextract/EMM/EMM_Model.cc', 'RMextract/EMM/GeomagnetismLibrary.c',
-                  'RMextract/EMM/EMM_Model_wrap.cc'],
-                 extra_compile_args=['-Wno-format-security'])
-       ]
 
-if False:  # "--add-lofar-utils" in sys.argv:
-    packages.append("RMextract/LOFAR_TOOLS")
-    scripts.append("RMextract/LOFAR_TOOLS/createRMParmdb")
-    scripts.append("RMextract/LOFAR_TOOLS/createRMh5parm.py")
-    scripts.append("RMextract/LOFAR_TOOLS/download_IONEX.py")
-    # sys.argv.remove("--add-lofar-utils")
+ext_modules.append(
+    Extension(
+        "RMextract.EMM._EMM_Model",
+        sources=[
+            os.path.join("RMextract", "EMM", f)
+            for f in ("EMM_Model.cc", "GeomagnetismLibrary.c", "EMM_Model_wrap.cc")
+        ],
+        extra_compile_args=["-Wno-format-security"],
+    )
+)
 
-if True:  # "--add-iri" in sys.argv:
-    # packages.append("RMextract/pyiri")
-    ext.append(Extension('RMextract.pyiri._iri',
-                         sources=['RMextract/pyiri/iri.pyf', 'RMextract/pyiri/cira.for', 'RMextract/pyiri/igrf.for', 'RMextract/pyiri/iridreg.for',
-                                  'RMextract/pyiri/iriflip.for', 'RMextract/pyiri/irifun.for', 'RMextract/pyiri/irisub.for',
-                                  'RMextract/pyiri/iritec.for', 'RMextract/pyiri/iriget.for'],
-                         include_dirs=[numpy.get_include()])
-               )
-    # packages.append("RMextract/pyiriplas")
-    ext.append(Extension('RMextract.pyiriplas._iriplas',
-                         sources=['RMextract/pyiriplas/iriplas.pyf', 'RMextract/pyiriplas/igrf.for', 'RMextract/pyiriplas/irif2019.for',
-                                  'RMextract/pyiriplas/iriplas_main.for', 'RMextract/pyiriplas/Iris2017.for',
-                                  'RMextract/pyiriplas/indx2017.for'],
-                         include_dirs=[numpy.get_include()])
-               )
-    # sys.argv.remove("--add-iri")
+ext_modules.append(
+    Extension(
+        "RMextract.pyiri._iri",
+        sources=[
+            os.path.join("RMextract", "pyiri", f)
+            for f in (
+                "iri.pyf",
+                "cira.for",
+                "igrf.for",
+                "iridreg.for",
+                "iriflip.for",
+                "irifun.for",
+                "irisub.for",
+                "iritec.for",
+                "iriget.for",
+            )
+        ],
+        include_dirs=[numpy.get_include()],
+    )
+)
 
-setup(name='RMextract',
-      version='0.4',
-      author='Maaike Mevius',
-      author_email='mevius@astron.nl',
-      url='https://github.com/lofar-astron/RMextract',
-      ext_modules=ext,
-      packages=packages,
-      install_requires=['numpy', 'scipy', 'python-casacore'],
-      package_data={'RMextract.EMM': ['*.COF'],
-                    'RMextract.pyiri': ['*.dat', '*.asc'],
-                    'RMextract.pyiriplas': ['*.dat', '*.asc', 'kp*', '*.ASC']},
-      scripts=scripts
-      )
+ext_modules.append(
+    Extension(
+        "RMextract.pyiriplas._iriplas",
+        sources=[
+            os.path.join("RMextract", "pyiriplas", f)
+            for f in (
+                "iriplas.pyf",
+                "igrf.for",
+                "irif2019.for",
+                "iriplas_main.for",
+                "Iris2017.for",
+                "indx2017.for",
+            )
+        ],
+        include_dirs=[numpy.get_include()],
+    )
+)
+
+if "RMextract.LOFAR_TOOLS" in packages:
+    scripts.extend(
+        [
+            os.path.join("RMextract", "LOFAR_TOOLS", f)
+            for f in ("createRMParmdb", "createRMh5parm.py", "download_IONEX.py")
+        ]
+    )
+
+setup(
+    name="RMextract",
+    version="0.4",
+    author="Maaike Mevius",
+    author_email="mevius@astron.nl",
+    url="https://github.com/lofar-astron/RMextract",
+    ext_modules=ext_modules,
+    packages=packages,
+    install_requires=["numpy", "scipy", "python-casacore"],
+    package_data={
+        "RMextract.EMM": ["*.COF"],
+        "RMextract.pyiri": ["*.dat", "*.asc"],
+        "RMextract.pyiriplas": ["*.dat", "*.asc", "kp*", "*.ASC"],
+    },
+    scripts=scripts,
+)
