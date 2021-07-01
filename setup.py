@@ -17,27 +17,28 @@ def read(rel_path):
 
 class build_src(np_build_src):
     """
-    Override `build_src` class in `numpy.distutils.command.build_src`.
-    This is necessary, because, when using `pip` (i.e. `setuptools`) to install from a source distribution,
-    the files `fortranobject.h` and `fortranobject.` are not copied to the build source tree. However, these
-    files are needed to build extension modules from Fortran sources. So we need to take care of that here,
-    by overriding the `run` method in `build_src`.
+    Override `build_src` class in `numpy.distutils.command.build_src`. This is necessary,
+    because, when using `pip` (i.e. `setuptools`) to install from a source distribution,
+    the files `fortranobject.h` and `fortranobject.` are not copied to the build source tree.
+    However, these files are needed to build extension modules from Fortran sources. So we need
+    to take care of that here, by overriding the `run` method in `build_src`.
     """
 
     def run(self):
-        # Assume that `fortranobject.h` and `fortranobject.c` are in the directory `numpy/f2py/src`.
-        srcdir = os.path.join(os.path.dirname(numpy.__file__), 'f2py', 'src')
+        # Assume f2py source directory is `numpy/f2py/src`.
+        srcdir = os.path.join(os.path.dirname(numpy.__file__), "f2py", "src")
         for ext in self.extensions:
-            # If the extension contains Fortran sources, we need to copy `fortranobject.h` and `fortranobject.c`
-            # from the f2py source directory to the extension's build directory.
+            # If the extension contains Fortran sources, we need to copy `fortranobject.h` and
+            # `fortranobject.c` from the f2py source directory to the extension's build directory.
             if has_f_sources(ext.sources):
-                # The build source tree must have the same structure as the source tree. So the name of the destination
-                # directory is the concatenation of the name of the build source tree and the name of the directory
-                # containing the Fortran source files. Here we assume that all the Fortran source files are in the same
-                # directory, so we simply take the first one in the list to determine the source directory.
+                # The build source tree must have the same structure as the source tree. So the
+                # name of the destination directory is the concatenation of the name of the build
+                # source tree and the name of the directory containing the Fortran source files.
+                # Here we assume that all the Fortran source files are in the same directory,
+                # so we simply take the first one in the list to determine the source directory.
                 destdir = os.path.join(self.build_src, os.path.dirname(ext.sources[0]))
                 os.makedirs(destdir, exist_ok=True)
-                for fn in ('fortranobject.h', 'fortranobject.c'):
+                for fn in ("fortranobject.h", "fortranobject.c"):
                     self.copy_file(os.path.join(srcdir, fn), os.path.join(destdir, fn))
         # Call the `run()` method of the parent
         super().run()
@@ -112,7 +113,8 @@ setup(
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaike Mevius",
     author_email="mevius@astron.nl",
-    description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations",
+    description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
+    "and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     classifiers=[
@@ -124,7 +126,7 @@ setup(
         "Topic :: Scientific/Engineering :: Astronomy",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    cmdclass={'build_src': build_src},
+    cmdclass={"build_src": build_src},
     ext_modules=ext_modules,
     packages=packages,
     install_requires=["numpy", "scipy", "python-casacore"],
