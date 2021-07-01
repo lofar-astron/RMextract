@@ -108,7 +108,7 @@ if "RMextract.LOFAR_TOOLS" in packages:
 
 setup(
     name="RMextract",
-    version="0.4a1",
+    version="0.4.1",
     url="https://github.com/lofar-astron/RMextract",
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaike Mevius",
