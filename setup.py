@@ -37,11 +37,12 @@ class build_src(np_build_src):
                 # Here we assume that all the Fortran source files are in the same directory,
                 # so we simply take the first one in the list to determine the source directory.
                 destdir = os.path.join(self.build_src, os.path.dirname(ext.sources[0]))
-                os.makedirs(destdir, exist_ok=True)
+                if not os.path.exists(destdir):
+                    os.makedirs(destdir)
                 for fn in ("fortranobject.h", "fortranobject.c"):
                     self.copy_file(os.path.join(srcdir, fn), os.path.join(destdir, fn))
         # Call the `run()` method of the parent
-        super().run()
+        np_build_src.run(self)
 
 
 packages = find_packages(exclude=["RMextract.LOFAR_TOOLS"])
