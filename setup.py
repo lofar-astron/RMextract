@@ -86,6 +86,8 @@ setup(
                 "and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
+    maintainer="Marcel Loose",
+    maintainer_email="loose@astron.nl",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
