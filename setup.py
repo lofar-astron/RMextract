@@ -80,7 +80,7 @@ setup(
     version="0.4.1",
     url="https://github.com/lofar-astron/RMextract",
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
-    author="Maaike Mevius",
+    author="Maaijke Mevius",
     author_email="mevius@astron.nl",
     description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
                 "and WMM data for radio interferometry observations",
