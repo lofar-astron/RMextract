@@ -1,5 +1,5 @@
-import PosTools
-import getIONEX as ionex
+import RMextract.PosTools
+import RMextract.getIONEX as ionex
 import os
 import numpy as np
 from math import *
