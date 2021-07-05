@@ -2,7 +2,7 @@ from RMextract.EMM import EMM as EMM
 import RMextract.PosTools as PosTools
 import numpy as np
 import RMextract.getIONEX as ionex
-import pyiri.pyiri as pyiri
+import RMextract.pyiri.pyiri as pyiri
 from datetime import date
 
 def getPParray(pointing,time,position,height_array):
