@@ -21,12 +21,17 @@ from math import *
 import math
 import os
 import numpy as np
+import astropy.units as u
+from astropy.time import Time
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz,Angle,ITRS,FK5
+from scipy import interpolate
 
 # height of thin layer ionosphere
 ION_HEIGHT=450.e3;
 
 
 R_earth=6364.62e3;
+R_earthkm=6364.62;
 earth_ellipsoid_a = 6378137.0;
 earth_ellipsoid_a2 = earth_ellipsoid_a*earth_ellipsoid_a;
 earth_ellipsoid_b = 6356752.3142;
@@ -493,8 +498,78 @@ def getlonlatheight(az,el,position,h=ION_HEIGHT):
       return -1,-1,-1
     return latpp, lonpp, height,lon,lat,am1
 
+def far_to_near(altaz_far, distance, obstime=None):
+    """Add distance to AltAz instance"""
+    if obstime is None:
+        obstime = altaz_far.obstime
+    return AltAz(
+        location=altaz_far.location,
+        obstime=obstime,
+        az=altaz_far.az,
+        alt=altaz_far.alt,
+        distance=distance,
+    )
 
+def distance_from_height(obs_altaz, height_start=50., height_end = 20200., height_unit = u.km ):
+    """From an AltAz pointing, find the distance to where it crosses a plane 100 km above Earth"""
+    try_distances = np.linspace(height_start*0.7,2*obs_altaz.secz*height_end) * height_unit
+    dummytime = Time.now()
+    try_altaz = far_to_near(obs_altaz, try_distances, obstime=dummytime)
+    try_heights = EarthLocation(
+        *(try_altaz.transform_to(ITRS(obstime=dummytime)).cartesian.xyz)
+    )
+    f_height_to_distance = interpolate.interp1d(
+        try_heights.height.to(u.km), try_distances.to(u.km)
+    )
+    f_dist_to_latpp = interpolate.interp1d(
+        try_distances.to(u.km), try_heights.lat.to(u.deg)
+    )
+    f_dist_to_lonpp = interpolate.interp1d(
+        try_distances.to(u.km), try_heights.lon.to(u.deg)
+    )
+    f_dist_to_Rlocal = interpolate.interp1d(
+        try_distances.to(u.km), try_heights.to(u.km).itrs.cartesian.norm()
+    )
+    return f_height_to_distance,f_dist_to_latpp,f_dist_to_lonpp, f_dist_to_Rlocal
 
+def getProfile(source_pos, stat_pos, time, h = np.arange(60,20200,10)*u.km):
+  '''Get profile of piercepoints through the atmosphere, given a station and source direction
+  
+  Args: 
+  source_pos : SkyCoord or list(2) Ra,Dec J200
+  stat_pos : EarthLocation or array(3) in m
+  time : Time or float (mjd) (can be an array)
+  h : array of heights
+
+  Returns:
+  Tuple[ np.array, np.array, np.array, float, float, np.array ]:
+  
+
+  '''
+  # first calculate Az,El
+  if not type(stat_pos) is EarthLocation:
+    stat_pos = EarthLocation.from_geocentric(*list(stat_pos),unit=u.m)
+  if not type(source_pos) is SkyCoord:
+    source_pos = SkyCoord(source_pos[0],source_pos[1],unit=(u.hourangle,u.deg),frame = FK5)
+  if not type(time) is Time:
+    time = Time(time,format = 'mjd')
+  aa = AltAz(location = stat_pos, obstime = time)
+  azel = source_pos.transform_to(aa)
+  direction = azel.transform_to(ITRS)
+  londir = np.arctan2(direction.y.value,direction.x.value)
+  latdir = np.arcsin(direction.z.value)
+  
+  fh,flat,flon,fRloc = distance_from_height(azel,h[0].to(u.km).value,h[-1].to(u.km).value, u.km)
+  hdist = fh(h.to(u.km))
+  latpp = flat(hdist)
+  lonpp = flon(hdist)
+  R_local = stat_pos.to(u.km).itrs.cartesian.norm().value
+  Rpp = fRloc(hdist)
+  #am = 1./((R_earthkm**2-hdist**2-(R_earthkm+h.to(u.km).value)**2)/(-2.*hdist*(R_earthkm+h.to(u.km).value)))
+  am = 1./((R_local**2-hdist**2-Rpp**2)/(-2.*hdist*Rpp))
+  return latpp, lonpp, latdir, londir, am
+  
+  
 
 def getAzEl(pointing,time,position,ha_limit=-1000):
 
