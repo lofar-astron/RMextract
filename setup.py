@@ -77,7 +77,7 @@ if "RMextract.LOFAR_TOOLS" in packages:
 
 setup(
     name="RMextract",
-    version="0.4.1",
+    version="0.4.2",
     url="https://github.com/lofar-astron/RMextract",
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaijke Mevius",
@@ -99,7 +99,7 @@ setup(
     ],
     ext_modules=ext_modules,
     packages=packages,
-    install_requires=["numpy", "scipy", "python-casacore"],
+    install_requires=["numpy", "scipy", "astropy", "python-casacore"],
     package_data={
         "RMextract.EMM": ["*.COF"],
         # Add *.pyf files. These files are _not_ treated as source files by Numpy's setup(),
