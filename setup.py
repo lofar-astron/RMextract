@@ -15,9 +15,8 @@ def read(rel_path):
         return fp.read()
 
 
-packages = find_packages(exclude=["RMextract.LOFAR_TOOLS"])
+packages = find_packages()  # exclude=["RMextract.LOFAR_TOOLS"])
 ext_modules = []
-scripts = []
 
 ext_modules.append(
     Extension(
@@ -79,13 +78,13 @@ if "--add-lofar-utils" in sys.argv:
         "Use 'pip install RMextract[lofar-utils]' instead."
     )
 
-if "RMextract.LOFAR_TOOLS" in packages:
-    scripts.extend(
-        [
-            os.path.join("RMextract", "LOFAR_TOOLS", f)
-            for f in ("createRMParmdb", "createRMh5parm.py", "download_IONEX.py")
-        ]
-    )
+# if "RMextract.LOFAR_TOOLS" in packages:
+#    scripts.extend(
+#        [
+#            os.path.join("RMextract", "LOFAR_TOOLS", f)
+#            for f in ("createRMParmdb", "createRMh5parm.py", "download_IONEX.py")
+#        ]
+#    )
 
 setup(
     name="RMextract",
@@ -95,7 +94,7 @@ setup(
     author="Maaijke Mevius",
     author_email="mevius@astron.nl",
     description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
-                "and WMM data for radio interferometry observations",
+    "and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     maintainer="Marcel Loose",
@@ -112,6 +111,18 @@ setup(
     ext_modules=ext_modules,
     packages=packages,
     install_requires=["numpy", "scipy", "astropy", "python-casacore"],
+    extras_require={
+        # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
+        # Since these have never been published on PyPI, we cannot specify this dependency.
+        "lofar-utils": ["losoto"]
+    },
+    entry_points={
+        "console_scripts": [
+            "createRMParmdb = RMextract.LOFAR_TOOLS.createRMParmdb:main [lofar-utils]",
+            "createRMh5parm.py = RMextract.LOFAR_TOOLS.createRMh5parm:main [lofar-utils]",
+            "download_IONEX.py = RMextract.LOFAR_TOOLS.download_IONEX:main [lofar-utils]",
+        ]
+    },
     package_data={
         "RMextract.EMM": ["*.COF"],
         # Add *.pyf files. These files are _not_ treated as source files by Numpy's setup(),
@@ -121,5 +132,4 @@ setup(
         "RMextract.pyiri": ["iri.pyf", "*.dat", "*.asc"],
         "RMextract.pyiriplas": ["iriplas.pyf", "*.dat", "*.asc", "kp*", "*.ASC"],
     },
-    scripts=scripts,
 )

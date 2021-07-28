@@ -1,27 +1,23 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import sys
 import RMextract.getIONEX as ionex
 from RMextract import PosTools
 import numpy as np
 import logging
 import argparse
-parser = argparse.ArgumentParser(description='Downloads relevant IONEX files for a given MS')
-
-parser.add_argument('MSfiles', type=str,
-                        help='MS for which the parmdb should be created.')
-parser.add_argument('--server', type=str, default='ftp://ftp.aiub.unibe.ch/CODE/',
-                        help='URL of the server to use. (default: ftp://ftp.aiub.unibe.ch/CODE/)')
-parser.add_argument('--prefix', type=str, default='CODG',
-                        help='Prefix of the IONEX files. (default: \"CODG\")')
-parser.add_argument('--ionexpath', '--path', type=str, default='IONEXdata/',
-                        help='Directory where to store the IONEX files. (default: \"IONEXdata/\")')
 
 
+def main():
+    parser = argparse.ArgumentParser(description='Downloads relevant IONEX files for a given MS')
+    parser.add_argument('MSfiles', type=str,
+                            help='MS for which the parmdb should be created.')
+    parser.add_argument('--server', type=str, default='ftp://ftp.aiub.unibe.ch/CODE/',
+                            help='URL of the server to use. (default: ftp://ftp.aiub.unibe.ch/CODE/)')
+    parser.add_argument('--prefix', type=str, default='CODG',
+                            help='Prefix of the IONEX files. (default: \"CODG\")')
+    parser.add_argument('--ionexpath', '--path', type=str, default='IONEXdata/',
+                            help='Directory where to store the IONEX files. (default: \"IONEXdata/\")')
+    args = parser.parse_args()
 
-
-def main(argv):
-    args = parser.parse_args(argv)
     MS=args.MSfiles
     server=args.server
     prefix=args.prefix
@@ -56,6 +52,3 @@ def main(argv):
         
     return True
 
-    
-if __name__ == '__main__':
-    main(sys.argv[1:])
