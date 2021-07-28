@@ -1,4 +1,6 @@
 import os
+import sys
+import warnings
 from setuptools import find_packages
 import numpy
 from numpy.distutils.core import setup, Extension
@@ -66,6 +68,16 @@ ext_modules.append(
         include_dirs=[numpy.get_include()],
     )
 )
+
+# For backward compatibility for those who (still) use `python setup.py` to
+# install the optional LOFAR utilities.
+if "--add-lofar-utils" in sys.argv:
+    packages.append("RMextract.LOFAR_TOOLS")
+    sys.argv.remove("--add-lofar-utils")
+    warnings.warn(
+        "Use of 'python setup.py install --add-lofar-utils' is deprecated. "
+        "Use 'pip install RMextract[lofar-utils]' instead."
+    )
 
 if "RMextract.LOFAR_TOOLS" in packages:
     scripts.extend(
