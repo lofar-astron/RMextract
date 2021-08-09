@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Extract RM values for a LOFAR observation. Fill h5parm
 
