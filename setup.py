@@ -78,14 +78,6 @@ if "--add-lofar-utils" in sys.argv:
         "Use 'pip install RMextract[lofar-utils]' instead."
     )
 
-# if "RMextract.LOFAR_TOOLS" in packages:
-#    scripts.extend(
-#        [
-#            os.path.join("RMextract", "LOFAR_TOOLS", f)
-#            for f in ("createRMParmdb", "createRMh5parm.py", "download_IONEX.py")
-#        ]
-#    )
-
 setup(
     name="RMextract",
     version="0.4.2",
@@ -94,7 +86,7 @@ setup(
     author="Maaijke Mevius",
     author_email="mevius@astron.nl",
     description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
-    "and WMM data for radio interferometry observations",
+                "and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     maintainer="Marcel Loose",
