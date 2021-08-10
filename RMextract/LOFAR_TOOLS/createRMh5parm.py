@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Extract RM values for a LOFAR observation. Fill h5parm
 
@@ -19,6 +16,7 @@ import os
 import numpy as np
 import sys
 import logging
+import argparse
 
 
 def makesolset(MS, data, solset_name):
@@ -43,7 +41,7 @@ def makesolset(MS, data, solset_name):
     sourceTable.append([('pointing',pointing)])
 
 
-def main(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,timestepRM=300,
+def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,timestepRM=300,
                 ionex_server="ftp://ftp.aiub.unibe.ch/CODE/",
                 ionex_prefix='CODG',ionexPath="./",earth_rot=0,proxyServer=None,proxyPort=None,proxyType=None,proxyUser=None,proxyPass=None):
     '''Add rotation measure to existing h5parmdb
@@ -206,8 +204,7 @@ def main(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,timestepRM=
 
     
     ########################################################################
-if __name__ == '__main__':
-    import argparse
+def main():
     parser = argparse.ArgumentParser(description='Adds CommonRotationAngle to an H5parm from RMextract.')
 
     parser.add_argument('MSfiles', type=str, nargs='+',
@@ -250,7 +247,7 @@ if __name__ == '__main__':
     MS = args.MSfiles
     h5parmdb = args.h5parm
     logging.info("Working on: %s %s" % (MS, h5parmdb))
-    main(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
+    createRMh5parm(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
                  ionexPath=args.ionexpath, solset_name=args.solsetName,
                  all_stations=args.allStations, timestepRM=args.timestep,
                  earth_rot=args.earth_rot, proxyServer=args.proxyserver, proxyPort=args.proxyport,

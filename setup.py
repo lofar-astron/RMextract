@@ -1,4 +1,6 @@
 import os
+import sys
+import warnings
 from setuptools import find_packages
 import numpy
 from numpy.distutils.core import setup, Extension
@@ -13,9 +15,8 @@ def read(rel_path):
         return fp.read()
 
 
-packages = find_packages(exclude=["RMextract.LOFAR_TOOLS"])
+packages = find_packages()  # exclude=["RMextract.LOFAR_TOOLS"])
 ext_modules = []
-scripts = []
 
 ext_modules.append(
     Extension(
@@ -67,17 +68,19 @@ ext_modules.append(
     )
 )
 
-if "RMextract.LOFAR_TOOLS" in packages:
-    scripts.extend(
-        [
-            os.path.join("RMextract", "LOFAR_TOOLS", f)
-            for f in ("createRMParmdb", "createRMh5parm.py", "download_IONEX.py")
-        ]
+# For backward compatibility for those who (still) use `python setup.py` to
+# install the optional LOFAR utilities.
+if "--add-lofar-utils" in sys.argv:
+    packages.append("RMextract.LOFAR_TOOLS")
+    sys.argv.remove("--add-lofar-utils")
+    warnings.warn(
+        "Use of 'python setup.py install --add-lofar-utils' is deprecated. "
+        "Use 'pip install RMextract[lofar-utils]' instead."
     )
 
 setup(
     name="RMextract",
-    version="0.4.2",
+    version="0.4.3",
     url="https://github.com/lofar-astron/RMextract",
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaijke Mevius",
@@ -100,6 +103,18 @@ setup(
     ext_modules=ext_modules,
     packages=packages,
     install_requires=["numpy", "scipy", "astropy", "python-casacore"],
+    extras_require={
+        # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
+        # Since these have never been published on PyPI, we cannot specify this dependency.
+        "lofar-utils": ["losoto"]
+    },
+    entry_points={
+        "console_scripts": [
+            "createRMParmdb = RMextract.LOFAR_TOOLS.createRMParmdb:main [lofar-utils]",
+            "createRMh5parm.py = RMextract.LOFAR_TOOLS.createRMh5parm:main [lofar-utils]",
+            "download_IONEX.py = RMextract.LOFAR_TOOLS.download_IONEX:main [lofar-utils]",
+        ]
+    },
     package_data={
         "RMextract.EMM": ["*.COF"],
         # Add *.pyf files. These files are _not_ treated as source files by Numpy's setup(),
@@ -109,5 +124,4 @@ setup(
         "RMextract.pyiri": ["iri.pyf", "*.dat", "*.asc"],
         "RMextract.pyiriplas": ["iriplas.pyf", "*.dat", "*.asc", "kp*", "*.ASC"],
     },
-    scripts=scripts,
 )
