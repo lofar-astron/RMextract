@@ -80,7 +80,7 @@ if "--add-lofar-utils" in sys.argv:
 
 setup(
     name="RMextract",
-    version="0.4.3",
+    version="0.4.4",
     url="https://github.com/lofar-astron/RMextract",
     project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
     author="Maaijke Mevius",
