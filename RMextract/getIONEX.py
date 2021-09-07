@@ -632,7 +632,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     #If proxy url is given, enable proxy using pysocks
     try:
         from urllib import request
-    except:
+    except ImportError:
         import urllib2 as request
     if proxy_server and ("None" not in proxy_server):
         import socket
