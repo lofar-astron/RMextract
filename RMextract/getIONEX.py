@@ -328,11 +328,11 @@ def getTECinterpol(time, lat, lon, tecinfo, apply_earth_rotation=0):
                                 apply_earth_rotation)
 
 
-def _combine_ionex(outpath, filenames, newfilename):
+def _combine_ionex(outpath, filenames, newfilename, overwrite = False):
     """Helper function to combine separate IONEXfiles into 1 single file
     (needed for 15min ROBR data)"""
 
-    if os.path.isfile(outpath + newfilename):
+    if not overwrite and os.path.isfile(outpath + newfilename):
         logging.info("FILE exists: " + outpath + newfilename)
         return outpath + newfilename
     newf = open(outpath + newfilename, 'w')
@@ -558,7 +558,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         nfilenames = _store_files(ftp, nfilenames, outpath, overwrite)
         filenames += nfilenames
         _combine_ionex(outpath, filenames,
-                       prefix + "%03d0.%sI" % (dayofyear, yy))
+                       prefix + "%03d0.%sI" % (dayofyear, yy), overwrite = overwrite)
         ftp.quit()
         return os.path.join(outpath, prefix + "%03d0.%sI" % (dayofyear, yy))
     else:
@@ -567,11 +567,11 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         return nfilenames[0]
 
 def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
-                    server="ftp://ftp.aiub.unibe.ch/CODE/",
+                    server="http://ftp.aiub.unibe.ch/CODE/",
                     prefix="codg",
                     outpath='./',
                     overwrite=False,
-                    backupserver="ftp://ftp.aiub.unibe.ch/CODE/",
+                    backupserver="http://ftp.aiub.unibe.ch/CODE/",
                     proxy_server=None,
                     proxy_type=None,
                     proxy_port=None,
@@ -630,7 +630,10 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     serverfound=False
     backupfound=False    
     #If proxy url is given, enable proxy using pysocks
-    import urllib2
+    try:
+        from urllib import request
+    except:
+        import urllib2 as request
     if proxy_server and ("None" not in proxy_server):
         import socket
         import socks
@@ -646,26 +649,26 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     #try primary url
 
     try:
-        primary = urllib2.urlopen(server,timeout=30)
+        primary = request.urlopen(server,timeout=30)
         serverfound = True
     except:
             try:
-                secondary = urllib2.urlopen(backupserver,timeout=30)
+                secondary = request.urlopen(backupserver,timeout=30)
                 backupfound = True
                 server=backupserver
             except:
                 logging.error('Primary and Backup Server not responding') #enable in lover environment
-    if "ftp://ftp.aiub.unibe.ch" in server:
-        url = "ftp://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
-    elif "ftp://cddis.gsfc.nasa.gov" in server:
-        url = "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
+    if "http://ftp.aiub.unibe.ch" in server:
+        url = "http://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
+    elif "http://cddis.gsfc.nasa.gov" in server:
+        url = "http://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
     elif "igsiono.uwm.edu.pl" in server:
         url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
 
     # Download IONEX file, make sure it is always uppercase
     fname = outpath+'/'+(url.split('/')[-1]).upper()
     try:
-        site = urllib2.urlopen(url,timeout=30)
+        site = request.urlopen(url,timeout=30)
     except:
         logging.info("No files found on %s for %s",server,fname)
         return -1

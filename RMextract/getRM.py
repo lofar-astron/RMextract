@@ -28,6 +28,7 @@ def getRM(MS=None,
     use_mean = True if you only want report for mean of station positions
     use_filter =standard deviation,or list of standard deviations (time,long, lat) to gaussian filter TEC data 
     TIME_OFFSET = float, offset time at start and end to ensure all needed values are calculated,
+    overwrite = boolean, if True overwrite existing IONEX files and download them again,
     Returns the (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN '''
 
@@ -43,6 +44,7 @@ def getRM(MS=None,
     out_file=''
     stat_pos=[PosTools.posCS002]
     use_proxy = False
+    overwrite = False
     #stat_names=['LOFAR_CS002']
     if not (MS is None):
 
@@ -84,6 +86,8 @@ def getRM(MS=None,
             proxy_port=kwargs["proxy_port"]
             proxy_user=kwargs["proxy_user"]
             proxy_pass=kwargs["proxy_pass"]
+        if key=="overwrite":
+            overwrite = kwargs[key]
       
     if timerange != 0:
       start_time = timerange[0]
@@ -156,11 +160,11 @@ def getRM(MS=None,
         #get relevant ionex file
         if not use_proxy:
             if not "http" in server: #ftp server use ftplib
-                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
+                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite)
             else:
-                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite)
         else:
-                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass)
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite)
 
         assert (ionexf!=-1),"error getting ionex data"
            
