@@ -422,9 +422,25 @@ def _store_files(ftp, filenames, outpath, overwrite=False):
     return nfilenames
 
 
-def _get_IONEX_file(time="2012/03/23/02:20:10.01",
+def _prepare_IONEX_filename(time="2012/03/23/02:20:10.01",
                     server="ftp://ftp.aiub.unibe.ch/CODE/",
-                    prefix="codg",
+                    prefix="codg"):
+    """Get IONEX filename using new naming scheme with prefix from server for a given day
+    Args:
+        time (string or list) : date of the observation
+        server (string) : ftp server + path to the ionex directories
+        prefix (string) : prefix of the IONEX files (case insensitive)
+    """   
+    PPP = ['MGX','OPS','R01','RNN','TGA']
+    TTT = ['FIN','NRT','RAP','RTS','SNX','ULT']
+    CNT = ['ION','GIM']
+    FMT = ['IOX','ION']
+    
+    
+
+def _get_IONEX_file(time="2012/03/23/02:20:10.01",
+                    server="ftp://gssc.esa.int/gnss/products/ionex/",
+                    prefix="UQRG",
                     outpath='./',
                     overwrite=False,
                     backupserver="ftp://ftp.aiub.unibe.ch/CODE/"):
