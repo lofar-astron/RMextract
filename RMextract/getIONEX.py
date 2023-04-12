@@ -426,6 +426,7 @@ def _prepare_IONEX_filename(time="2012/03/23/02:20:10.01",
                     server="ftp://ftp.aiub.unibe.ch/CODE/",
                     prefix="codg"):
     """Get IONEX filename using new naming scheme with prefix from server for a given day
+    Broken , because there seem to be inconsitencies in the filenames
     Args:
         time (string or list) : date of the observation
         server (string) : ftp server + path to the ionex directories
