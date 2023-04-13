@@ -16,9 +16,22 @@ import os
 import ftplib
 import socket
 
-
-logging.basicConfig(level=logging.ERROR)
-
+def setup_logging():
+    ctrl = os.environ.get('RMEXT_LOGLEVEL', "ERROR")
+    notunderstand = False
+    if ctrl == "ERROR":
+        level = logging.ERROR
+    elif ctrl == "WARNING":
+        level = logging.WARNING
+    elif ctrl == "INFO":
+        level = logging.INFO
+    else:
+        notunderstand = True
+        level = logging.ERROR
+    logging.basicConfig(level=level)
+    if notunderstand:
+        logging.error(f"Logging level {ctrl} not understood. Can be 'ERROR', 'WARNING', 'INFO'")
+setup_logging()
 
 def _read_ionex_header(filep):
     """reads header from ionex file. returns data shape and position of first
@@ -517,6 +530,8 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
                         else:
                             server=backupserver
                             tried_backup=True
+                            logging.warning(f"Primary IONEX host '{server}' resolution "
+                                            f"failure. Trying backup at '{backupserver}'")
             except socket.gaierror:
                 try_again=True
                 nr_tries += 1
@@ -526,6 +541,10 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
                     else:
                         server=backupserver
                         tried_backup=True
+                        logging.warning(f"Primary IONEX host '{server}' resolution "
+                                            f"failure. Trying backup at '{backupserver}'")
+    if serverfound:
+        logging.info(f"Successfully contacted IONEX host '{server}'")
     ftp.cwd(ftppath)
     totpath = ftppath
     myl = []
@@ -673,6 +692,8 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                 secondary = request.urlopen(backupserver,timeout=30)
                 backupfound = True
                 server=backupserver
+                logging.warning(f"Primary IONEX host '{server}' resolution "
+                                            f"failure. Trying backup at '{backupserver}'")
             except:
                 logging.error('Primary and Backup Server not responding') #enable in lover environment
     if "http://ftp.aiub.unibe.ch" in server:
