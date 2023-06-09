@@ -15,6 +15,30 @@ import logging
 import os
 import ftplib
 import socket
+from typing import Callable, Optional
+
+# Url of the primary server has the syntax 
+# "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" 
+# where DOY is the day of the year, padded with 
+# leading zero if <100, and YY is the last two digits of year.
+
+# Url of the backup server has the syntax 
+# "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/YYYY/DOY/codgDOY.YYi.Z"
+# where DOY is the day of the year, padded with 
+# leading zero if <100, and YY is the last two digits of year.
+
+KNOWN_FORMATTERS = {
+    "ftp.aiub.unibe.ch": 
+        lambda server, year, dayofyear, prefix, yy: 
+            f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}I.Z",
+    "cddis.gsfc.nasa.gov": 
+        lambda server, year, dayofyear, prefix, yy: 
+            f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix}{dayofyear:03d}0.{yy:02d}i.Z",
+    "igsiono.uwm.edu.pl":
+        lambda server, year, dayofyear, prefix, yy: 
+            f"{server}/data/ilt/{year:4d}/igrg{dayofyear:03d}0.{yy:02d}i",
+}
+
 
 def setup_logging():
     ctrl = os.environ.get('RMEXT_LOGLEVEL', "ERROR")
@@ -608,6 +632,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                     outpath='./',
                     overwrite=False,
                     backupserver="http://ftp.aiub.unibe.ch/CODE/",
+                    formatter: Optional[Callable]=None,
                     proxy_server=None,
                     proxy_type=None,
                     proxy_port=None,
@@ -626,6 +651,10 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         prefix (string) : prefix of the IONEX files (case insensitive)
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
+        formatter (Optional, Callable): function to format the url to download the files
+                    Must have the following signature:
+                        formatter(server,prefix,year,dayofyear,yy) -> str
+                    If not given, the function will try to guess the formatter based on the server
         proxy_server (string): address of proxyserver, either url or ip address
         proxy_type (string): socks4 or socks5
         proxy_port (int): port of proxy server
@@ -680,10 +709,8 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
             ProxyType = socks.SOCKS5
         s.set_proxy(ProxyType, proxy_server, proxy_port, rdns=True, username=proxy_user, password=proxy_pass)
 
-    # Url of the primary server has the syntax "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
-    # Url of the backup server has the syntax "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/YYYY/DOY/codgDOY.YYi.Z where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
+   
     #try primary url
-
     try:
         primary = request.urlopen(server,timeout=30)
         serverfound = True
@@ -696,12 +723,17 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                                             f"failure. Trying backup at '{backupserver}'")
             except:
                 logging.error('Primary and Backup Server not responding') #enable in lover environment
-    if "http://ftp.aiub.unibe.ch" in server:
-        url = "http://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
-    elif "http://cddis.gsfc.nasa.gov" in server:
-        url = "http://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
-    elif "igsiono.uwm.edu.pl" in server:
-        url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
+    
+    if not formatter:
+        # Check known servers
+        for known_server in KNOWN_FORMATTERS.keys():
+            if known_server in server:
+                formatter = KNOWN_FORMATTERS.get(known_server)
+                break
+        if not formatter:
+            raise ValueError(f"Unknown server {server} - please provide a formatter")
+    
+    url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear, yy=yy)
 
     # Download IONEX file, make sure it is always uppercase
     fname = outpath+'/'+(url.split('/')[-1]).upper()
