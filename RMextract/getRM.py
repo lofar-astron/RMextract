@@ -17,6 +17,7 @@ def getRM(MS=None,
            earth_rot=0,
            timerange=0,
            use_azel = False,ha_limit=-1000,use_filter=None,
+           use_urlib = False,
            formatter: Optional[Callable]=None,
            **kwargs):
     '''optional arguments are:
@@ -31,6 +32,8 @@ def getRM(MS=None,
     use_filter =standard deviation,or list of standard deviations (time,long, lat) to gaussian filter TEC data 
     TIME_OFFSET = float, offset time at start and end to ensure all needed values are calculated,
     overwrite = boolean, if True overwrite existing IONEX files and download them again,
+    use_urlib = boolean, if True use urllib to download IONEX files (will also occur if 'http' is in server), 
+                otherwise use ftplib
     formatter = Callable, function to format the url to download the files
                 Must have the following signature:
                     formatter(server,prefix,year,dayofyear,yy) -> str
@@ -165,10 +168,11 @@ def getRM(MS=None,
         emm.date=date_parms[0]+float(dayofyear)/365.
         #get relevant ionex file
         if not use_proxy:
-            if not "http" in server: #ftp server use ftplib
-                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite)
-            else:
+            if use_urlib or "http" in server:
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite, formatter=formatter)
+            else: #ftp server use ftplib
+                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite)
+
         else:
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
 
