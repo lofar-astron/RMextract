@@ -5,7 +5,7 @@ from RMextract import getIONEX as ionex
 import os
 import numpy as np
 from datetime import date
-from typing import Callable, Optional, List, Iterable, Tuple, Union
+from typing import Callable, Optional, List, Iterable, Tuple, Union, Literal
 
 from RMextract.EMM import EMM as EMM
 
@@ -17,7 +17,7 @@ def getRM(
     prefix='codg',
     ionexPath="IONEXdata/",
     earth_rot: float=0,
-    timerange: Union[List[float], int]=0,
+    timerange: Union[List[float], Literal[0]]=0,
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
     pointing: Iterable[float] = [0.,0.5*np.pi],
@@ -86,12 +86,13 @@ def getRM(
     Returns: The (timegrid,timestep,TEC) where TEC is a dictionary containing 1 enumpyarray per station in stat_names. 
     If stat_names is not given, the station names will either be extracted from the MS or st1...stN
 
-    """ 
+    """   
+
     if MS:
         (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
-
+    
     if use_mean is not None:
-        stat_pos_mean = False
+       stat_pos_mean = False
 
     if radec:
         logging.info("Using radec instead of pointing")
@@ -104,7 +105,7 @@ def getRM(
 
     if not stat_names:
         stat_names =['st%d'%(i+1) for i in range(len(stat_pos))]
-        
+      
     if timerange != 0:
         start_time = timerange[0]
         end_time = timerange[1]
@@ -119,7 +120,7 @@ def getRM(
         return
         
     emm = EMM.EMM() if useEMM else EMM.WMM()
-
+    
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
     if len(times[-1])==0 or times[-1][-1]<timerange[1]:
         timestmp=list(times[-1])
@@ -137,20 +138,20 @@ def getRM(
     if len(out_file) and len(object):
         out_file = out_file + '_' + object
     else:
-        if len(object):
+      if len(object):
         out_file = 'RMextract_report_' + object
 
     if len(out_file):
-        if os.path.exists(out_file):
-            os.remove(out_file)
-        log = open(out_file, 'a')
-        log.write ('Observing %s\n' % object)
-        if not (MS is None):
-            log.write ('Using measurement set %s\n' % MS)
-        if use_azel:
-            log.write ('observing at a fixed azimuth and elevation \n')
-        log.write ('station_positions %s \n' % stat_pos)
-        log.write ('\n')
+       if os.path.exists(out_file):
+         os.remove(out_file)
+       log = open(out_file, 'a')
+       log.write ('Observing %s\n' % object)
+       if not (MS is None):
+           log.write ('Using measurement set %s\n' % MS)
+       if use_azel:
+         log.write ('observing at a fixed azimuth and elevation \n')
+       log.write ('station_positions %s \n' % stat_pos)
+       log.write ('\n')
 
     for st in stat_names:
         azimuth[st] = []
@@ -180,41 +181,41 @@ def getRM(
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
 
         assert (ionexf!=-1),"error getting ionex data"
-            
+           
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
-            if not stat_pos_mean:
+          if not stat_pos_mean:
             stn_mean = stat_pos.mean(0)
             stat_pos = []
             stat_pos.append(stn_mean)
             stat_pos_mean = True
             #print ('stat_pos.mean', stn_mean)
         for station,position in  zip(stat_names,stat_pos):
-            #print ('generating data for station ', station)
-
-            
-            for time in time_array:
+          #print ('generating data for station ', station)
+ 
+          
+          for time in time_array:
             result =  PosTools.obtain_observation_year_month_day_fraction(time)
             part_of_day= result[3] * 24
             if use_azel:
-                az = pointing[0]
-                el = pointing[1]
-                flags[station].append(1)   
+              az = pointing[0]
+              el = pointing[1]
+              flags[station].append(1)   
             else:
-                az,el = PosTools.getAzEl(pointing,time,position,ha_limit)
-                if az==-1 and el==-1:
-                    return
-                if az==999 and el==999:
+               az,el = PosTools.getAzEl(pointing,time,position,ha_limit)
+               if az==-1 and el==-1:
+                  return
+               if az==999 and el==999:
                     #outsite hadec range
-                    air_mass[station].append(-999)
-                    azimuth[station].append(-999)
-                    elevation[station].append(-999)
-                    Bs[station].append([-999,-999,-999])
-                    Bpars[station].append(-999)
-                    RMs[station].append(-999)
-                    TECs[station].append(-999)  #sTEC value
-                    flags[station].append(0)
-                    continue
+                  air_mass[station].append(-999)
+                  azimuth[station].append(-999)
+                  elevation[station].append(-999)
+                  Bs[station].append([-999,-999,-999])
+                  Bpars[station].append(-999)
+                  RMs[station].append(-999)
+                  TECs[station].append(-999)  #sTEC value
+                  flags[station].append(0)
+                  continue
             flags[station].append(1)   
             latpp,lonpp,height,lon,lat,am1=PosTools.getlonlatheight(az,el,position)
 
@@ -242,7 +243,7 @@ def getRM(
 
             
         timegrid=np.concatenate((timegrid,time_array))
-
+    
     for st in stat_names:
         air_mass[station] = np.array(air_mass[st])
         azimuth[station] = np.array(azimuth[st])
@@ -253,8 +254,8 @@ def getRM(
         RMs[st]=np.array(RMs[st]) 
         flags[st]=np.array(flags[st])
         if use_mean:
-        break
-        
+            break
+       
     big_dict={}
     big_dict['STEC']=TECs
     big_dict['Bpar']=Bpars
@@ -271,50 +272,50 @@ def getRM(
     big_dict['reference_time'] = reference_time 
     # finish writing computed data to report
     if len(out_file):
-        time_range=[big_dict['times'][0],big_dict['times'][-1]]
-        log.write ('start and end times %s %s \n' % (time_range[0], time_range[1]))
-        log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
-        if use_azel:
-            log.write ('observing at azimuth and elevation %s %s \n' % (pointing[0], pointing[1]))
-        else:
-            log.write ('observation direction %s %s \n' % (pointing[0], pointing[1]))
-        log.write ('\n')
-        k = 0
-        for key in big_dict['station_names']:
-            seq_no = 0
-            if use_mean:
-            log.write ('data for station mean position at %s\n' % (stat_pos[k]))
-            else:
-            log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
-            log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
-            for i in range (timegrid.shape[0]):
-            el = big_dict['elev'][key][i]
-            if el < 0 :
-                ok = 1
-                stec = 0.0
-                rm = 0.0
-                vtec_factor = 1.0
-            else:
-                ok = 0
-                stec =big_dict['STEC'][key][i]
-                rm = big_dict['RM'][key][i]
-                vtec_factor = 1.0 / big_dict['AirMass'][key][i]
-            az = big_dict['azimuth'][key][i]
-            rel_time = timegrid[i] - reference_time
-            if i  == 0:
-                time_width = reference_time - timegrid[i] 
-            else:
-                time_width = timegrid[i] - timegrid[i-1]
-            log.write("%s : %s %s %s %s %s %s %s %s\n" % (seq_no, ok, rel_time, time_width, el, az, stec, rm, vtec_factor))
-            seq_no = seq_no + 1
-            k = k + 1
-            if use_mean:
-            break
-            log.write (' \n')
-        log.close()
-        print ('****** finished ionosphere predictions report: ', out_file)
+       time_range=[big_dict['times'][0],big_dict['times'][-1]]
+       log.write ('start and end times %s %s \n' % (time_range[0], time_range[1]))
+       log.write ('reference time for rel_time=0: year month day hr min sec %s %s %s %s %s %s \n' % str_start_time)
+       if use_azel:
+         log.write ('observing at azimuth and elevation %s %s \n' % (pointing[0], pointing[1]))
+       else:
+         log.write ('observation direction %s %s \n' % (pointing[0], pointing[1]))
+       log.write ('\n')
+       k = 0
+       for key in big_dict['station_names']:
+         seq_no = 0
+         if use_mean:
+           log.write ('data for station mean position at %s\n' % (stat_pos[k]))
+         else:
+           log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
+         log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
+         for i in range (timegrid.shape[0]):
+           el = big_dict['elev'][key][i]
+           if el < 0 :
+             ok = 1
+             stec = 0.0
+             rm = 0.0
+             vtec_factor = 1.0
+           else:
+             ok = 0
+             stec =big_dict['STEC'][key][i]
+             rm = big_dict['RM'][key][i]
+             vtec_factor = 1.0 / big_dict['AirMass'][key][i]
+           az = big_dict['azimuth'][key][i]
+           rel_time = timegrid[i] - reference_time
+           if i  == 0:
+             time_width = reference_time - timegrid[i] 
+           else:
+             time_width = timegrid[i] - timegrid[i-1]
+           log.write("%s : %s %s %s %s %s %s %s %s\n" % (seq_no, ok, rel_time, time_width, el, az, stec, rm, vtec_factor))
+           seq_no = seq_no + 1
+         k = k + 1
+         if use_mean:
+           break
+         log.write (' \n')
+       log.close()
+       print ('****** finished ionosphere predictions report: ', out_file)
     else:
-        print ('*********** finished ionosphere predictions ***************')
+      print ('*********** finished ionosphere predictions ***************')
 
 
     return big_dict
