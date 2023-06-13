@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import logging
 import os
 from datetime import date
 from typing import Callable, List, Literal, Optional, Tuple, Union
@@ -12,6 +11,9 @@ from RMextract.EMM import EMM as EMM
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
+
+ionex.setup_logging()
+
 def getRM(
     MS: Optional[str]=None,
     server="ftp://ftp.aiub.unibe.ch/CODE/",
