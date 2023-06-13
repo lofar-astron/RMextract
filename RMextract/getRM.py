@@ -2,7 +2,7 @@
 import logging
 import os
 from datetime import date
-from typing import Callable, Iterable, List, Literal, Optional, Tuple, Union
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 
@@ -21,8 +21,8 @@ def getRM(
     timerange: Union[List[float], Literal[0]]=0,
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
-    pointing: Iterable[float] = [0.,0.5*np.pi],
-    radec: Optional[Union[Tuple[float,float], List[float]]] = None,
+    pointing: List[float] = [0.,0.5*np.pi],
+    radec: Optional[List[float]] = None,
     use_azel = False,
     ha_limit=-1000,
     use_filter: Optional[Union[float, List[float]]] = None,
@@ -54,8 +54,8 @@ def getRM(
         timerange (int, optional): [start, end]in MJD seconds, or 0 to use start_time and end_time. Defaults to 0.
         start_time (Optional[str], optional): casa timestring,eg. 2012/11/21/12:00:00 or 56252.5d, NEEDS PYRAP! Defaults to None.
         end_time (Optional[str], optional): casa timestring,eg. 2012/11/21/12:00:00 or 56252.5d, NEEDS PYRAP! Defaults to None.
-        pointing (Iterable[float], optional): [ra,dec] in radians, or if use_azel =True, az + el in radians. Defaults to [0.,0.5*np.pi].
-        radec (Optional[Union[Tuple[float,float], List[float]]], optional): Overides pointing. Defaults to None.
+        pointing (List[float], optional): [ra,dec] in radians, or if use_azel =True, az + el in radians. Defaults to [0.,0.5*np.pi].
+        radec (Optional[List[float]], optional): Overides pointing. Defaults to None.
         use_azel (bool, optional): Pointing is in az/el. Defaults to False.
         ha_limit (int, optional): _description_. Defaults to -1000.
         use_filter (Optional[Union[float, List[float]]], optional): standard deviation,or list of standard deviations (time,long, lat) to gaussian filter TEC data. Defaults to None.
