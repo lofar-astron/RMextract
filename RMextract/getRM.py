@@ -41,7 +41,7 @@ def getRM(
     use_proxy = False,
     proxy_server: Optional[str] = None,
     proxy_type: Optional[str] = None,
-    proxy_port: Optional[str] = None,
+    proxy_port: Optional[int] = None,
     proxy_user: Optional[str] = None,
     proxy_pass: Optional[str] = None,
     overwrite = False,
@@ -70,16 +70,16 @@ def getRM(
         use_mean (Optional[bool], optional): True if you only want report for mean of station positions. Defaults to None.
         stat_names (list, optional): list of strings per station. Defaults to [].
         useEMM (bool, optional): use EMM for Earth magnetic field, otherwise WMM cooefficients will be used.. Defaults to False.
-        object (str, optional): _description_. Defaults to ''.
-        timestep (int, optional): _description_. Defaults to 60.
+        object (str, optional): Object of interest to get position. Defaults to ''.
+        timestep (int, optional): Timestep to use in s. Defaults to 60.
         out_file (str, optional): if given the data points will be written to a text file. Defaults to ''.
         stat_pos (list, optional): list of length 3 numpy arrays, containing station_position in ITRF meters. Defaults to [PosTools.posCS002].
-        use_proxy (bool, optional): _description_. Defaults to False.
-        proxy_server (Optional[str], optional): _description_. Defaults to None.
-        proxy_type (Optional[str], optional): _description_. Defaults to None.
-        proxy_port (Optional[str], optional): _description_. Defaults to None.
-        proxy_user (Optional[str], optional): _description_. Defaults to None.
-        proxy_pass (Optional[str], optional): _description_. Defaults to None.
+        use_proxy (bool, optional): Use a proxy server (see proxy_ args). Can only be used with urllib. Defaults to False.
+        proxy_server (Optional[str], optional): Proxy server name. Defaults to None.
+        proxy_type (Optional[str], optional): socks4 or socks5. Defaults to None.
+        proxy_port (Optional[str], optional): port of proxy server. Defaults to None.
+        proxy_user (Optional[str], optional): username for proxyserver. Defaults to None.
+        proxy_pass (Optional[str], optional): password for proxyserver. Defaults to None.
         overwrite (bool, optional): if True overwrite existing IONEX files and download them again. Defaults to False.
 
         TIME_OFFSET (Optional[float], optional): _description_. Defaults to None.
