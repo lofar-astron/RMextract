@@ -17,6 +17,8 @@ import ftplib
 import socket
 from typing import Callable, Optional
 
+from RMextract import PosTools
+
 # Url of the primary server has the syntax 
 # "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" 
 # where DOY is the day of the year, padded with 
@@ -805,8 +807,8 @@ def get_TEC_data(times, lonlatpp, server, prefix, outpath, use_filter=None,earth
     '''
     
     date_parms = PosTools.obtain_observation_year_month_day_fraction(times[0])
-    ionexf=get_IONEX_file(time=date_parms,server=server,prefix=prefix,outpath=outpath)
-    tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
+    ionexf=getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=outpath)
+    tecinfo=readTEC(ionexf,use_filter=use_filter)
     latpp = lonlatpp[:, 1]
     lonpp = lonlatpp[:, 0]
     if latpp.shape == times.shape:
