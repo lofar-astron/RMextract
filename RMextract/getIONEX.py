@@ -8,14 +8,15 @@ Created on Tue Apr 24 11:46:57 2018
 
 @author: mevius
 """
-import numpy as np
 import datetime
-import scipy.ndimage.filters as myfilter
+import ftplib
 import logging
 import os
-import ftplib
 import socket
 from typing import Callable, Optional
+
+import numpy as np
+import scipy.ndimage.filters as myfilter
 
 from RMextract import PosTools
 
@@ -703,6 +704,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         import urllib2 as request
     if proxy_server and ("None" not in proxy_server):
         import socket
+
         import socks
         s = socks.socksocket()
         if proxy_type=="socks4":
