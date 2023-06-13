@@ -724,6 +724,9 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
             except:
                 logging.error('Primary and Backup Server not responding') #enable in lover environment
     
+    # else:
+    #     url = server + "%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
+    
     if not formatter:
         # Check known servers
         for known_server in KNOWN_FORMATTERS.keys():
@@ -735,28 +738,45 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     
     url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear, yy=yy)
 
+    logging.info(f"Constructed {url=}.")
+
+
     # Download IONEX file, make sure it is always uppercase
     fname = outpath+'/'+(url.split('/')[-1]).upper()
-    try:
-        site = request.urlopen(url,timeout=30)
-    except:
-        logging.info("No files found on %s for %s",server,fname)
-        return -1
+    out_fname = fname[:-2] if fname[-2:].upper() == '.Z' else fname    
+    
+    # First, if the final file already exists, simply return
+    if os.path.exists(out_fname):
+        return out_fname
+  
+    # Here we actually download the file. Lets make sure though that this
+    # file is not downloaded by another task first
+    if not os.path.exists(fname):
+        logging.info(f"Downloading to {fname=}.")
+        try:
+            site = request.urlopen(url,timeout=30)
+        except:
+            logging.info("No files found on %s for %s",server,fname)
+            return -1
 
-    output=open(fname,'wb')
-    output.write(site.read())
-    output.close()
-    ###### gunzip files
-    if fname[-2:].upper()==".Z":
-        command = "gunzip -dc %s > %s" % (fname, fname[:-2])
-        retcode = os.system(command)
-        if retcode:
-            raise RuntimeError("Could not run '%s'" % command)
-        else:
-            os.remove(fname)
-        fname=fname[:-2]
+        output=open(fname,'wb')
+        output.write(site.read())
+        output.close()
+        ###### gunzip files
+        
+        # Now if the fname and out_fname are different we need to extract. 
+        # Make sure that the out_fname does not already exist. 
+        if fname != out_fname and not os.path.exists(out_fname):
+            logging.info(f"Extracting to {out_fname}.")
+            command = "gunzip -dc %s > %s" % (fname, out_fname)
+            retcode = os.system(command)
+            if retcode:
+                raise RuntimeError("Could not run '%s'" % command)
+            else:
+                os.remove(fname)
+            
     #returns filename of uncompressed file
-    return fname
+    return out_fname
 
 def getIONEXfile(time="2012/03/23/02:20:10.01",
                  server="ftp://ftp.aiub.unibe.ch/CODE/",
