@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import logging
+import os
+from datetime import date
+from typing import Callable, Iterable, List, Literal, Optional, Tuple, Union
+
+import numpy as np
+
 from RMextract import PosTools
 from RMextract import getIONEX as ionex
-import os
-import numpy as np
-from datetime import date
-from typing import Callable, Optional, List, Iterable, Tuple, Union, Literal
-
 from RMextract.EMM import EMM as EMM
 
 ION_HEIGHT=PosTools.ION_HEIGHT
