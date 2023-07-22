@@ -37,7 +37,7 @@ def getRM(
     object = '',
     timestep=60,
     out_file='',
-    stat_pos=[PosTools.posCS002],
+    stat_positions=[PosTools.posCS002],
     use_proxy = False,
     proxy_server: Optional[str] = None,
     proxy_type: Optional[str] = None,
@@ -73,7 +73,7 @@ def getRM(
         object (str, optional): Object of interest to get position. Defaults to ''.
         timestep (int, optional): Timestep to use in s. Defaults to 60.
         out_file (str, optional): if given the data points will be written to a text file. Defaults to ''.
-        stat_pos (list, optional): list of length 3 numpy arrays, containing station_position in ITRF meters. Defaults to [PosTools.posCS002].
+        stat_positions (list, optional): list of length 3 numpy arrays, containing station_position in ITRF meters. Defaults to [PosTools.posCS002].
         use_proxy (bool, optional): Use a proxy server (see proxy_ args). Can only be used with urllib. Defaults to False.
         proxy_server (Optional[str], optional): Proxy server name. Defaults to None.
         proxy_type (Optional[str], optional): socks4 or socks5. Defaults to None.
@@ -93,7 +93,7 @@ def getRM(
     """   
 
     if MS:
-        (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
+        (timerange,timestep,pointing,stat_names,stat_positions)=PosTools.getMSinfo(MS)
     
     if use_mean is not None:
         stat_pos_mean = False
@@ -108,7 +108,7 @@ def getRM(
         raise ValueError("start_time and end_time must be given together")
 
     if not stat_names:
-        stat_names =['st%d'%(i+1) for i in range(len(stat_pos))]
+        stat_names =['st%d'%(i+1) for i in range(len(stat_positions))]
       
     if timerange != 0:
         start_time = timerange[0]
@@ -154,7 +154,7 @@ def getRM(
             log.write ('Using measurement set %s\n' % MS)
         if use_azel:
             log.write ('observing at a fixed azimuth and elevation \n')
-        log.write ('station_positions %s \n' % stat_pos)
+        log.write ('station_positions %s \n' % stat_positions)
         log.write ('\n')
 
     for st in stat_names:
@@ -189,11 +189,11 @@ def getRM(
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
             if not stat_pos_mean:
-                stn_mean = stat_pos.mean(0)
-                stat_pos = []
-                stat_pos.append(stn_mean)
+                stn_mean = stat_positions.mean(0)
+                stat_positions = []
+                stat_positions.append(stn_mean)
                 stat_pos_mean = True
-        for station,position in  zip(stat_names,stat_pos):
+        for station,position in  zip(stat_names,stat_positions):
             for time in time_array:
                 result =  PosTools.obtain_observation_year_month_day_fraction(time)
                 part_of_day= result[3] * 24
@@ -268,7 +268,7 @@ def getRM(
     big_dict['times']=timegrid
     big_dict['timestep']=timestep
     big_dict['station_names'] = stat_names
-    big_dict['stat_pos'] = stat_pos
+    big_dict['stat_positions'] = stat_positions
     big_dict['flags'] = flags
     big_dict['reference_time'] = reference_time 
     # finish writing computed data to report
@@ -285,9 +285,9 @@ def getRM(
         for key in big_dict['station_names']:
             seq_no = 0
             if use_mean:
-                log.write ('data for station mean position at %s\n' % (stat_pos[k]))
+                log.write ('data for station mean position at %s\n' % (stat_positions[k]))
             else:
-                log.write ('data for station %s  at position %s\n' % (key, stat_pos[k]))
+                log.write ('data for station %s  at position %s\n' % (key, stat_positions[k]))
             log.write ('seq  rel_time time_width El         Az         STEC           RM (rad/m2)   VTEC factor  \n')
             for i in range (timegrid.shape[0]):
                 el = big_dict['elev'][key][i]
