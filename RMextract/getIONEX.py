@@ -13,7 +13,7 @@ import ftplib
 import logging
 import os
 import socket
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import numpy as np
 import scipy.ndimage.filters as myfilter
@@ -635,7 +635,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
                     outpath='./',
                     overwrite=False,
                     backupserver="http://ftp.aiub.unibe.ch/CODE/",
-                    formatter: Optional[Callable]=None,
+                    formatter: Optional[Union[Callable, str]]=None,
                     proxy_server=None,
                     proxy_type=None,
                     proxy_port=None,
@@ -654,7 +654,9 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         prefix (string) : prefix of the IONEX files (case insensitive)
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
-        formatter (Optional, Callable): function to format the url to download the files
+        formatter (Optional, Callable | str): 
+                    If a string is given, it will be used as as an index in KNOWN_FORMATTERS
+                    If a callable is given, it will be used to construct the filenames.
                     Must have the following signature:
                         formatter(server,prefix,year,dayofyear,yy) -> str
                     If not given, the function will try to guess the formatter based on the server
@@ -731,6 +733,11 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
     # else:
     #     url = server + "%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
     
+    if isinstance(formatter, str):
+        try:
+            formatter = KNOWN_FORMATTERS[formatter]
+        except KeyError:
+            raise ValueError(f"Unknown formatter {formatter} - please provide a callable")
     if not formatter:
         # Check known servers
         for known_server in KNOWN_FORMATTERS.keys():
