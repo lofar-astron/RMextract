@@ -44,7 +44,7 @@ KNOWN_FORMATTERS = {
 
 
 def setup_logging():
-    ctrl = os.environ.get('RMEXT_LOGLEVEL', "ERROR")
+    ctrl = os.environ.get('RMEXT_LOGLEVEL', "INFO")
     notunderstand = False
     if ctrl == "ERROR":
         level = logging.ERROR
@@ -716,22 +716,23 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         s.set_proxy(ProxyType, proxy_server, proxy_port, rdns=True, username=proxy_user, password=proxy_pass)
 
    
-    #try primary url
-    try:
-        primary = request.urlopen(server,timeout=30)
-        serverfound = True
-    except:
-            try:
-                secondary = request.urlopen(backupserver,timeout=30)
-                backupfound = True
-                server=backupserver
-                logging.warning(f"Primary IONEX host '{server}' resolution "
-                                            f"failure. Trying backup at '{backupserver}'")
-            except:
-                logging.error('Primary and Backup Server not responding') #enable in lover environment
+    # Don't do connection tests for local files
+    if "file://" not in server:
+        #try primary url
+        try:
+            primary = request.urlopen(server,timeout=30)
+            serverfound = True
+        except Exception as e:
+                logging.error(f"{e}")
+                try:
+                    secondary = request.urlopen(backupserver,timeout=30)
+                    backupfound = True
+                    server=backupserver
+                    logging.warning(f"Primary IONEX host '{server}' resolution "
+                                                f"failure. Trying backup at '{backupserver}'")
+                except Exception as e:
+                    logging.error(f"Primary and Backup Server not responding: {e}") #enable in lover environment
     
-    # else:
-    #     url = server + "%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
     
     if isinstance(formatter, str):
         try:
@@ -766,8 +767,9 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         logging.info(f"Downloading to {fname=}.")
         try:
             site = request.urlopen(url,timeout=30)
-        except:
-            logging.info("No files found on %s for %s",server,fname)
+        except Exception as e:
+            logging.error("No files found on %s for %s",server,fname)
+            logging.error(e)
             return -1
 
         output=open(fname,'wb')
