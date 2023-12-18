@@ -1,6 +1,5 @@
 #iriplas.pyf generated with :
-f2py -m iriplas -h iriplas.pyf only: iri_plas_main : iriplas_main.for Iris2017.for irif2019.for indx2017.for igrf-12.for 
+f2py -m iriplas -h iriplas.pyf only: iri_plas_main : iriplas_main.for Iris2020.for irif2020.for indx2020.for igrf-13.for
 # remove all unnecessary declaration and add intent(out) for outf
 # compile standalone with
-f2py -c -m iriplas  iriplas.pyf iriplas_main.for Iris2017.for irif2019.for indx2017.for igrf-12.for  > output 2>&1
-
+f2py -c -m iriplas  iriplas.pyf iriplas_main.for Iris2020.for irif2020.for indx2020.for igrf-13.for>  output 2>&1

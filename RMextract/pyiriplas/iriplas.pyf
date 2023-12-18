@@ -2,8 +2,8 @@
 ! Note: the context of this file is case sensitive.
 
 python module _iriplas ! in 
-    interface  ! in :_iriplas
-        subroutine iri_plas_main(path,alati,along,jmag,iyyyy,mmdd,hours,outf) ! in :iri:iriplas_main.for
+    interface  ! in :iriplas
+        subroutine iri_plas_main(path,alati,along,jmag,iyyyy,mmdd,hours,outf) ! in :iriplas:iriplas_main_new.for
             character*200 :: path
             real :: alati
             real :: along
@@ -11,10 +11,11 @@ python module _iriplas ! in
             integer :: iyyyy
             integer :: mmdd
             real :: hours
-            real dimension(12,121), intent(out)  :: outf
+            real dimension(12,121), intent(out) :: outf
         end subroutine iri_plas_main
     end interface 
 end python module _iriplas
 
-! This file was auto-generated with f2py (version:2).
-! See http://cens.ioc.ee/projects/f2py2e/
+! This file was auto-generated with f2py (version:1.26.2).
+! See:
+! https://web.archive.org/web/20140822061353/http://cens.ioc.ee/projects/f2py2e

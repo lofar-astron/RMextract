@@ -57,11 +57,11 @@ ext_modules.append(
             os.path.join("RMextract", "pyiriplas", f)
             for f in (
                 "iriplas.pyf",
-                "igrf.for",
-                "irif2019.for",
+                "igrf-13.for",
+                "irif2020.for",
                 "iriplas_main.for",
-                "Iris2017.for",
-                "indx2017.for",
+                "Iris2020.for",
+                "indx2020.for",
             )
         ],
         include_dirs=[numpy.get_include()],

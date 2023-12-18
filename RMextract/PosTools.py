@@ -315,7 +315,7 @@ def getPP(h=ION_HEIGHT,mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
 
     a = dx*dx + dy*dy + dz*dz;
     b = x*dx + y*dy  + z*dz;
-    alpha = (-b + sqrt(b*b - a*c))/a;
+    alpha = (-b + np.sqrt(b*b - a*c))/a;
     pp_x = stationX + alpha*direction[0];
     pp_y = stationY + alpha*direction[1]
     pp_z = stationZ + alpha*direction[2];
@@ -324,7 +324,7 @@ def getPP(h=ION_HEIGHT,mPosition=[0.,0.,0.],direction=[0.,0.,0.]):
     normal_y = pp_y * ion_ellipsoid_a2_inv;
     normal_z = pp_z * ion_ellipsoid_b2_inv;
     norm_normal2 = normal_x*normal_x + normal_y*normal_y + normal_z*normal_z;
-    norm_normal = sqrt(norm_normal2);
+    norm_normal = np.sqrt(norm_normal2);
     sin_lat2 = normal_z*normal_z / norm_normal2;
 
  
@@ -567,7 +567,7 @@ def getProfile(source_pos, stat_pos, time, h = np.arange(60,20200,10)*u.km):
   Rpp = fRloc(hdist)
   #am = 1./((R_earthkm**2-hdist**2-(R_earthkm+h.to(u.km).value)**2)/(-2.*hdist*(R_earthkm+h.to(u.km).value)))
   am = 1./((R_local**2-hdist**2-Rpp**2)/(-2.*hdist*Rpp))
-  return latpp, lonpp, latdir, londir, am
+  return latpp, lonpp, latdir, londir, am, azel
   
   
 
