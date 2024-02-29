@@ -30,7 +30,7 @@ from RMextract import PosTools
 # where DOY is the day of the year, padded with 
 # leading zero if <100, and YY is the last two digits of year.
 
-KNOWN_FORMATTERS = {
+KNOWN_FORMATTERS = { 
     "ftp.aiub.unibe.ch": 
         lambda server, year, dayofyear, prefix, yy:
             f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}{'I' if year < 2023 else 'N'}.Z",
