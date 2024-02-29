@@ -32,8 +32,8 @@ from RMextract import PosTools
 
 KNOWN_FORMATTERS = {
     "ftp.aiub.unibe.ch": 
-        lambda server, year, dayofyear, prefix, yy: 
-            f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}I.Z",
+        lambda server, year, dayofyear, prefix, yy:
+            f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}{'I' if year < 2023 else 'N'}.Z",
     "cddis.gsfc.nasa.gov": 
         lambda server, year, dayofyear, prefix, yy: 
             f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix}{dayofyear:03d}0.{yy:02d}i.Z",
