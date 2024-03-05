@@ -36,7 +36,7 @@ KNOWN_FORMATTERS = {
             f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}I.Z",
     "cddis.gsfc.nasa.gov": 
         lambda server, year, dayofyear, prefix, yy: 
-            f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix}{dayofyear:03d}0.{yy:02d}i.Z",
+            f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix.lower()}{dayofyear:03d}0.{yy:02d}i.Z",
     "igsiono.uwm.edu.pl":
         lambda server, year, dayofyear, prefix, yy: 
             f"{server}/data/ilt/{year:4d}/igrg{dayofyear:03d}0.{yy:02d}i",
@@ -79,11 +79,11 @@ def _read_ionex_header(filep):
         stripped = line.strip()
         if stripped.endswith("EPOCH OF FIRST MAP"):
             starttime = datetime.datetime(
-                *(int(i) for i in
+                *(int(float(i)) for i in
                   stripped.replace("EPOCH OF FIRST MAP","").split()))
         if stripped.endswith("EPOCH OF LAST MAP"):
             endtime = datetime.datetime(
-                *(int(i) for i in
+                *(int(float(i)) for i in
                   stripped.replace("EPOCH OF LAST MAP","").split()))
         if stripped.endswith("INTERVAL"):
             timestep = float(stripped.split()[0]) / 3600.
