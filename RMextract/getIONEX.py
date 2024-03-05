@@ -597,8 +597,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     logging.info(" ".join(filenames))
     #assert len(filenames) > 0, "No files found on %s for %s" % (server,prefix)
     if len(filenames) <=0:
-        logging.info("No files found on %s for %s",server,prefix)
-        return -1
+        raise FileNotFoundError(f"No files found on {server} for {prefix}")
         
     if prefix.lower() == "robr" and len(filenames) > 1:
         filenames = sorted(filenames)
@@ -768,9 +767,8 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         try:
             site = request.urlopen(url,timeout=30)
         except Exception as e:
-            logging.error("No files found on %s for %s",server,fname)
-            logging.error(e)
-            return -1
+            logging.error(f"No files found on {server} for {fname}")
+            raise e
 
         output=open(fname,'wb')
         output.write(site.read())
@@ -784,7 +782,7 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
             command = "gunzip -dc %s > %s" % (fname, out_fname)
             retcode = os.system(command)
             if retcode:
-                raise RuntimeError("Could not run '%s'" % command)
+                raise RuntimeError(f"Could not run '{command}'")
             else:
                 os.remove(fname)
             
