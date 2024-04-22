@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import logging
 import os
 from datetime import date
 from typing import Callable, List, Literal, Optional, Tuple, Union
@@ -9,11 +8,10 @@ import numpy as np
 from RMextract import PosTools
 from RMextract import getIONEX as ionex
 from RMextract.EMM import EMM as EMM
+from RMextract.logging import logger
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
-
-ionex.setup_logging()
 
 def getRM(
     MS: Optional[str]=None,
@@ -99,7 +97,7 @@ def getRM(
         stat_pos_mean = False
 
     if radec:
-        logging.info("Using radec instead of pointing")
+        logger.info("Using radec instead of pointing")
         pointing = radec    
 
     if start_time and end_time:
