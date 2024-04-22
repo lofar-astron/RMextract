@@ -1,8 +1,10 @@
-import RMextract.PosTools
-import RMextract.getIONEX as ionex
 import os
-import numpy as np
 from math import *
+
+import numpy as np
+
+import RMextract.getIONEX as ionex
+import RMextract.PosTools
 
 ION_HEIGHT=450.e3
 

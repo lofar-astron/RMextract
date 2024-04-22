@@ -1,17 +1,13 @@
+import astropy.units as u
+import numpy as np
+from astropy.coordinates import AltAz, Angle, EarthLocation, Latitude, SkyCoord
+from astropy.time import Time
+from lofarantpos import db, geo
+
 import RMextract.EMM.EMM as EMM
 import RMextract.getIONEX as ionex
 import RMextract.PosTools as pt
-import numpy as np
-from astropy.coordinates import SkyCoord
-from astropy.coordinates import EarthLocation
-from astropy.coordinates import AltAz
-from astropy.coordinates import Angle
-from astropy.coordinates import Latitude
-from astropy.time import Time
-import astropy.units as u  
 import RMextract.pyiriplas.pyiriplas as pyiriplas
-from lofarantpos import db
-from lofarantpos import geo
 
 mydb=db.LofarAntennaDatabase()
 nenufarcentre_geo = (np.deg2rad(2.192400), np.deg2rad(47.376511), 150)

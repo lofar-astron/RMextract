@@ -1,8 +1,10 @@
-import RMextract.getRM as gt
-import lofar.parmdb as parmdb
-import pyrap.tables as tab
-import numpy as np
 import argparse
+
+import lofar.parmdb as parmdb
+import numpy as np
+import pyrap.tables as tab
+
+import RMextract.getRM as gt
 
 
 def createRMParmdb(MS,parmdbname,create=True,patchname='',

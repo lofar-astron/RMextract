@@ -7,16 +7,17 @@ Created on Tue Aug 7 11:46:57 2018
 
 Changes for prefactor included by Alexander Drabent (02 June 2021)
 """
-from losoto.h5parm import h5parm
-from RMextract import getRM
-from RMextract import PosTools
-import RMextract.getIONEX as ionex
-import pyrap.tables as pt
-import os
-import numpy as np
-import sys
-import logging
 import argparse
+import logging
+import os
+import sys
+
+import numpy as np
+import pyrap.tables as pt
+from losoto.h5parm import h5parm
+
+import RMextract.getIONEX as ionex
+from RMextract import PosTools, getRM
 
 
 def makesolset(MS, data, solset_name):

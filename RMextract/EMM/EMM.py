@@ -1,9 +1,13 @@
 from __future__ import absolute_import
-import RMextract.EMM.EMM_Model as emm
+
+import os
 from math import *
+
 import numpy as np
 from pkg_resources import resource_filename
-import os
+
+import RMextract.EMM.EMM_Model as emm
+
 
 class WMM:
     def __init__(self,cof=resource_filename(__name__,'WMM.COF'),date=2010.,lon=0.,lat=0.,h=0.):

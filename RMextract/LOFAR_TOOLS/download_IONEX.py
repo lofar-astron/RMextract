@@ -1,9 +1,11 @@
+import argparse
+import logging
 import sys
+
+import numpy as np
+
 import RMextract.getIONEX as ionex
 from RMextract import PosTools
-import numpy as np
-import logging
-import argparse
 
 
 def main():

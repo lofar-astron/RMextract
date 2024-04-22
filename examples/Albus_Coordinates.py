@@ -12,20 +12,11 @@
 ################################################################################
 # miscellaneous stuff
 import copy
+import math
 # import optparse, os, sys
 #import re, string
 #import inspect
 import warnings
-import math
-
-
-
-
-
-
-
-
-
 
 ################################################################################
 # Global variables

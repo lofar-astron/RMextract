@@ -1,9 +1,12 @@
-from RMextract.EMM import EMM as EMM
-import RMextract.PosTools as PosTools
-import numpy as np
-import RMextract.getIONEX as ionex
-import RMextract.pyiri.pyiri as pyiri
 from datetime import date
+
+import numpy as np
+
+import RMextract.getIONEX as ionex
+import RMextract.PosTools as PosTools
+import RMextract.pyiri.pyiri as pyiri
+from RMextract.EMM import EMM as EMM
+
 
 def getPParray(pointing,time,position,height_array):
     az,el = PosTools.getAzEl(pointing,time,position)

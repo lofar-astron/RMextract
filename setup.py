@@ -1,9 +1,10 @@
 import os
 import sys
 import warnings
-from setuptools import find_packages
+
 import numpy
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import Extension, setup
+from setuptools import find_packages
 
 
 def read(rel_path):

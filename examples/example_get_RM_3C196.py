@@ -1,6 +1,7 @@
-import RMextract.getRM as gt
 import pyrap.tables as tab
 from pylab import *
+
+import RMextract.getRM as gt
 
 rc("lines",lw=3)
 rc('font', family='serif', size=16)
