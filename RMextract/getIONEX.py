@@ -14,7 +14,7 @@ import logging
 import os
 import socket
 from pathlib import Path
-from typing import Callable, List, Optional, TypeVar, Union
+from typing import List, Optional, TypeVar, Union
 from urllib import request
 from urllib.parse import urlparse
 
@@ -24,32 +24,9 @@ import socks
 
 from RMextract import PosTools
 from RMextract.logging import logger
+from RMextract.formatters import KNOWN_FORMATTERS, Formatter
 
 PathLike = TypeVar("PathLike", str, Path)
-
-# Url of the primary server has the syntax 
-# "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" 
-# where DOY is the day of the year, padded with 
-# leading zero if <100, and YY is the last two digits of year.
-
-# Url of the backup server has the syntax 
-# "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/YYYY/DOY/codgDOY.YYi.Z"
-# where DOY is the day of the year, padded with 
-# leading zero if <100, and YY is the last two digits of year.
-
-KNOWN_FORMATTERS = { 
-    "ftp.aiub.unibe.ch": 
-        lambda server, year, dayofyear, prefix, yy:
-            f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{yy:02d}I.Z",
-    "cddis.gsfc.nasa.gov": 
-        lambda server, year, dayofyear, prefix, yy: 
-            f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix.lower()}{dayofyear:03d}0.{yy:02d}i.Z",
-    "igsiono.uwm.edu.pl":
-        lambda server, year, dayofyear, prefix, yy: 
-            f"{server}/data/ilt/{year:4d}/igrg{dayofyear:03d}0.{yy:02d}i",
-}
-
-
 
 
 def _read_ionex_header(filep):
@@ -459,24 +436,6 @@ def _store_files(
             nfilenames.append(myf.as_posix())
     return nfilenames
 
-
-def _prepare_IONEX_filename(time="2012/03/23/02:20:10.01",
-                    server="ftp://ftp.aiub.unibe.ch/CODE/",
-                    prefix="codg"):
-    """Get IONEX filename using new naming scheme with prefix from server for a given day
-    Broken , because there seem to be inconsitencies in the filenames
-    Args:
-        time (string or list) : date of the observation
-        server (string) : ftp server + path to the ionex directories
-        prefix (string) : prefix of the IONEX files (case insensitive)
-    """   
-    PPP = ['MGX','OPS','R01','RNN','TGA']
-    TTT = ['FIN','NRT','RAP','RTS','SNX','ULT']
-    CNT = ['ION','GIM']
-    FMT = ['IOX','ION']
-    
-    
-
 def _get_IONEX_file(
         time="2012/03/23/02:20:10.01",
         server="ftp://gssc.esa.int/gnss/products/ionex/",
@@ -635,7 +594,7 @@ def get_urllib_IONEXfile(
         outpath=Path("./"),
         overwrite=False,
         backupserver="http://ftp.aiub.unibe.ch/CODE/",
-        formatter: Optional[Union[Callable, str]]=None,
+        formatter: Optional[Union[Formatter, str]]=None,
         proxy_server=None,
         proxy_type=None,
         proxy_port=None,
@@ -655,11 +614,11 @@ def get_urllib_IONEXfile(
         prefix (string) : prefix of the IONEX files (case insensitive)
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
-        formatter (Optional, Callable | str): 
+        formatter (Optional, Formatter | str): 
                     If a string is given, it will be used as as an index in KNOWN_FORMATTERS
-                    If a callable is given, it will be used to construct the filenames.
+                    If a Formatter is given, it will be used to construct the filenames.
                     Must have the following signature:
-                        formatter(server,prefix,year,dayofyear,yy) -> str
+                        formatter(server,prefix,year,dayofyear) -> str
                     If not given, the function will try to guess the formatter based on the server
         proxy_server (string): address of proxyserver, either url or ip address
         proxy_type (string): socks4 or socks5
@@ -728,23 +687,23 @@ def get_urllib_IONEXfile(
             formatter = KNOWN_FORMATTERS[formatter]
         except KeyError:
             raise ValueError(f"Unknown formatter {formatter} - please provide a callable")
-    if not formatter:
+    if formatter is None:
         # Check known servers
         for known_server in KNOWN_FORMATTERS.keys():
             if known_server in server:
                 formatter = KNOWN_FORMATTERS.get(known_server)
                 break
-        if not formatter:
+        if formatter is None:
             raise ValueError(f"Unknown server {server} - please provide a formatter")
     
-    url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear, yy=yy)
+    url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear)
 
     logger.info(f"Constructed {url=}.")
 
 
     # Download IONEX file, make sure it is always uppercase
     fname = outpath / Path(url).name.upper()
-    out_fname = fname.with_suffix("") if fname.suffix == '.Z' else fname    
+    out_fname = fname.with_suffix("") if fname.suffix == ".Z" else fname    
     
     # First, if the final file already exists, simply return
     if not overwrite and out_fname.exists():
