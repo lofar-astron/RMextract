@@ -9,6 +9,7 @@ from RMextract import PosTools
 from RMextract import getIONEX as ionex
 from RMextract.EMM import EMM as EMM
 from RMextract.logging import logger
+from RMextract.formatters import Formatter
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################
@@ -28,7 +29,7 @@ def getRM(
     ha_limit=-1000,
     use_filter: Optional[Union[float, List[float]]] = None,
     use_urlib = False,
-    formatter: Optional[Callable]=None,
+    formatter: Optional[Formatter]=None,
     use_mean: Optional[bool] = None,
     stat_names=[],
     useEMM=False,
@@ -61,9 +62,9 @@ def getRM(
         ha_limit (int, optional): _description_. Defaults to -1000.
         use_filter (Optional[Union[float, List[float]]], optional): standard deviation,or list of standard deviations (time,long, lat) to gaussian filter TEC data. Defaults to None.
         use_urlib (bool, optional): if True use urllib to download IONEX files (will also occur if 'http' is in server), otherwise use ftplib. Defaults to False.
-        formatter (Optional[Callable], optional): Callable, function to format the url to download the files
+        formatter (Optional[Callable], optional): Function to format the url to download the files
                 Must have the following signature:
-                    formatter(server,prefix,year,dayofyear,yy) -> str
+                    formatter(server,prefix,year,dayofyear) -> str
                  If not given, the function will try to guess the formatter based on the server. Defaults to None.
         use_mean (Optional[bool], optional): True if you only want report for mean of station positions. Defaults to None.
         stat_names (list, optional): list of strings per station. Defaults to [].
@@ -182,8 +183,6 @@ def getRM(
         else:
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
 
-        assert (ionexf!=-1),"error getting ionex data"
-           
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
             if not stat_pos_mean:
