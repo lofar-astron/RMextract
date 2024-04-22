@@ -175,7 +175,7 @@ def read_tec(filename, _use_filter=None):
             elif rmsdata:
                 rmsarray[timeidx, latidx, lonidx:lonidx + data.shape[0]] = data
             lonidx += data.shape[0]
-    if not _use_filter is None:
+    if _use_filter is not None:
         tecarray = myfilter.gaussian_filter(
             tecarray, _use_filter, mode='nearest')
     return tecarray, rmsarray, lonarray, latarray, timearray

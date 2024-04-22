@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-import os
-from math import *
-
 import numpy as np
 
 import RMextract.getIONEX as ionex

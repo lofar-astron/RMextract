@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import os
-from math import *
+from math import radians, sin, cos
 
 import numpy as np
 from pkg_resources import resource_filename
