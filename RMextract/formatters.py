@@ -13,7 +13,7 @@ Formatters for the different IONEX servers
 # where DOY is the day of the year, padded with 
 # leading zero if <100, and YY is the last two digits of year.
 
-from typing import Dict, Callable
+from typing import Callable, Dict
 
 Formatter = Callable[[str, int, int, str], str]
 

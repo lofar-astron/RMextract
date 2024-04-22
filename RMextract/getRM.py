@@ -8,8 +8,8 @@ import numpy as np
 from RMextract import PosTools
 from RMextract import getIONEX as ionex
 from RMextract.EMM import EMM as EMM
-from RMextract.logging import logger
 from RMextract.formatters import Formatter
+from RMextract.logging import logger
 
 ION_HEIGHT=PosTools.ION_HEIGHT
 #####################  main processing function #####################

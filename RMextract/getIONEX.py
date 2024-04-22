@@ -10,7 +10,6 @@ Created on Tue Apr 24 11:46:57 2018
 """
 import datetime
 import ftplib
-import logging
 import os
 import socket
 from pathlib import Path
@@ -23,8 +22,8 @@ import scipy.ndimage.filters as myfilter
 import socks
 
 from RMextract import PosTools
-from RMextract.logging import logger
 from RMextract.formatters import KNOWN_FORMATTERS, Formatter
+from RMextract.logging import logger
 
 PathLike = TypeVar("PathLike", str, Path)
 
