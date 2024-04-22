@@ -33,9 +33,8 @@ def getTEC(MS=None,
     # ensure that the calculated range of data exceeds the time range actually
     # observed - I have used the same value in ALBUS - Tony
     TIME_OFFSET = 0
-    if not (MS is None):
-
-        (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
+    if MS is not None:
+        timerange,timestep,pointing,stat_names,stat_pos = PosTools.getMSinfo(MS)
     useAzel=False
     for key in kwargs.keys():
         if not useAzel and (key=='radec' or key=='pointing'):
