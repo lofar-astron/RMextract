@@ -103,7 +103,7 @@ setup(
     ],
     ext_modules=ext_modules,
     packages=packages,
-    install_requires=["numpy", "scipy", "astropy", "python-casacore"],
+    install_requires=["numpy", "scipy", "astropy", "python-casacore", "PySocks"],
     extras_require={
         # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
         # Since these have never been published on PyPI, we cannot specify this dependency.
