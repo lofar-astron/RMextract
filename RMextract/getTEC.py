@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 import os
 from math import *
 
 import numpy as np
 
 import RMextract.getIONEX as ionex
-import RMextract.PosTools
+from RMextract import PosTools
 
 ION_HEIGHT=450.e3
 
@@ -34,7 +35,7 @@ def getTEC(MS=None,
     TIME_OFFSET = 0
     if not (MS is None):
 
-        (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS);
+        (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
     useAzel=False
     for key in kwargs.keys():
         if not useAzel and (key=='radec' or key=='pointing'):
@@ -76,8 +77,8 @@ def getTEC(MS=None,
     times,timerange=PosTools.getIONEXtimerange(timerange,timestep)
     #times.append(np.arange(timerange[0],timerange[1]+timestep,timestep)) #add one extra step to make sure you have a value for all times in the MS in case timestep hase been changed
     timegrid=np.array([])
-    TECs={};
-    ams={};
+    TECs={}
+    ams={}
     flags={}
     for st in stat_names:
         TECs[st]=[]
@@ -85,7 +86,7 @@ def getTEC(MS=None,
         flags[st]=[]
     for time_array in times:
         #get RM per timeslot
-        starttime=time_array[0];
+        starttime=time_array[0]
         date_parms =  PosTools.obtain_observation_year_month_day_fraction(starttime)
         #get relevant ionex file
         ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath)
@@ -123,7 +124,7 @@ def getTEC(MS=None,
 
             TECs[station].append(vTEC)  #sTEC value
             ams[station].append(am1)
-        timegrid=np.concatenate((timegrid,time_array));
+        timegrid=np.concatenate((timegrid,time_array))
     
     for st in stat_names:
             TECs[st]=np.array(TECs[st])

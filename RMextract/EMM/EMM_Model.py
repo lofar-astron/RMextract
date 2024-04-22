@@ -75,7 +75,7 @@ class WMM_Model(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, WMM_Model, name)
     __repr__ = _swig_repr
     __swig_destroy__ = _EMM_Model.delete_WMM_Model
-    __del__ = lambda self : None;
+    __del__ = lambda self : None
     def __init__(self, *args): 
         this = _EMM_Model.new_WMM_Model(*args)
         try: self.this.append(this)
@@ -141,7 +141,7 @@ class EMM_Model(WMM_Model):
         except: self.this = this
     def setEM(self): return _EMM_Model.EMM_Model_setEM(self)
     __swig_destroy__ = _EMM_Model.delete_EMM_Model
-    __del__ = lambda self : None;
+    __del__ = lambda self : None
 EMM_Model_swigregister = _EMM_Model.EMM_Model_swigregister
 EMM_Model_swigregister(EMM_Model)
 

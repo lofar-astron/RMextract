@@ -58,14 +58,14 @@ def main():
     parser = argparse.ArgumentParser(description=descriptiontext)
    
     parser.add_argument('MS',help='Measurement-Set for which the parmDB is to be created.')
-    parser.add_argument('-o','--out', help='name of the parmdb',dest="parmdbName",default='RMParmdb');
+    parser.add_argument('-o','--out', help='name of the parmdb',dest="parmdbName",default='RMParmdb')
     parser.add_argument('-p','--patch',dest="patch",default="",type=str,
                         help='If given: create parameter-names that include a patch-name as needed for BBS. '
                         'The default is to create parameter-names without a patch-name as they are needed for '
                         'the "rotationmeasure" correction in NDPPP ApplyCal.')
     #parser.add_argument('-s','--sky', help='name of the skymodel, if no source/patch name is given first will be selected. If you do not set the skymodel, the phasecenter of the MS will be assumed as your direction. If option --use_phase_center is used the direction in the sky model are ignored. However, it could still be useful to automatically select a patch name, which is needed for direction dependent parmareters.',dest="sky")
-    #parser.add_argument('-f','--use_phase_center', help='force using of phase center of MS, even if skymodel is supplied',action='store_true',dest="usePhaseCenter");
-    parser.add_argument('--IONprefix', help='prefix of IONEX files, either CODG or ROBR',dest="prefix",default='codg');
+    #parser.add_argument('-f','--use_phase_center', help='force using of phase center of MS, even if skymodel is supplied',action='store_true',dest="usePhaseCenter")
+    parser.add_argument('--IONprefix', help='prefix of IONEX files, either CODG or ROBR',dest="prefix",default='codg')
     parser.add_argument('--IONserver', help='server of IONEX files',dest="server",default='ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/')
     parser.add_argument('--IONpath', help='location of IONEX files',dest="ionexPath",default='./')
     parser.add_argument('--all','-a', help='calculate RM per station (default calculates only for CS002LBA)',action='store_true',dest="allStations")
