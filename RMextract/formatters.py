@@ -24,9 +24,15 @@ def ftp_aiub_unibe_ch(server: str, year: int, dayofyear: int, prefix: str) -> st
     return f"{server}/CODE/{year:4d}/{prefix.upper()}{dayofyear:03d}0.{year%100:02d}I.Z"
 
 def cddis_gsfc_nasa_gov(server: str, year: int, dayofyear: int, prefix: str) -> str:
+    """
+    Format the URL for the cddis.gsfc.nasa.gov server
+    """
     return f"{server}/gnss/products/ionex/{year:4d}/{dayofyear:03d}/{prefix.lower()}{dayofyear:03d}0.{year%100:02d}i.Z"
 
 def igsiono_uwm_edu_pl(server: str, year: int, dayofyear: int, prefix: str) -> str:
+    """
+    Format the URL for the igsiono.uwm.edu.pl server
+    """
     return f"{server}/data/ilt/{year:4d}/igrg{dayofyear:03d}0.{year%100:02d}i"
 
 
