@@ -71,7 +71,7 @@ def _read_ionex_header(filep):
     latarray = np.arange(start_lat, end_lat + step_lat, step_lat)
     dtime = endtime - starttime
     dtimef = dtime.days * 24. + dtime.seconds / 3600.
-    logging.debug("timerange %f hours. step = %f ", dtimef, timestep)
+    logger.debug("timerange %f hours. step = %f ", dtimef, timestep)
     timearray = np.arange(0,
                           dtimef + timestep,
                           timestep)
@@ -295,12 +295,12 @@ def compute_tec_interpol(times, lats, lons, tecinfo, apply_earth_rotation=0):
                                                 - rot2
                                                 - lons + 180., 360.)
                                    - 180.) / lonstep
-    logging.debug("inidces time %d %d indices lat %d %d indices \
+    logger.debug("inidces time %d %d indices lat %d %d indices \
                   lon %d %d %d %d", timeidx1[0], timeidx2[0],
                   latidx1[0], latidx2[0],
                   lonidx11[0], lonidx12[0],
                   lonidx21[0], lonidx22[0])
-    logging.debug("weights time %f lat %f lon %f %f",
+    logger.debug("weights time %f lat %f lon %f %f",
                   time_weights[0],
                   lat_weights[0],
                   lon_weights1[0],
