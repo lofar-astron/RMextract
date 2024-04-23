@@ -184,7 +184,8 @@ def getRM(
         else:
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=Path(ionexPath),proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
 
-        tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
+        logger.info(f"Using IONEX file: {ionexf}")
+        tecinfo=ionex.read_tec(ionexf,_use_filter=use_filter)
         if use_mean:
             if not stat_pos_mean:
                 stn_mean = stat_positions.mean(0)
@@ -312,9 +313,9 @@ def getRM(
                 break
             log.write (' \n')
         log.close()
-        print ('****** finished ionosphere predictions report: ', out_file)
+        logger.info(f'****** finished ionosphere predictions report: {out_file}')
     else:
-        print ('*********** finished ionosphere predictions ***************')
+        logger.info('*********** finished ionosphere predictions ***************')
 
 
     return big_dict
