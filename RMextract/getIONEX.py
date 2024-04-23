@@ -470,7 +470,7 @@ def _get_IONEX_file(
         year = int(time[:4])
         month = int(time[5:7])
         day = int(time[8:10])
-    except IndexError:
+    except (IndexError, TypeError):
         year = time[0]
         yy = year - 2000
         month = time[1]
@@ -638,7 +638,7 @@ def get_urllib_IONEXfile(
         year = int(time[:4])
         month = int(time[5:7])
         day = int(time[8:10])
-    except IndexError:
+    except (IndexError, TypeError):
         year = time[0]
         yy = year - 2000
         month = time[1]
