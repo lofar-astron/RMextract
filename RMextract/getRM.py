@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from datetime import date
+from pathlib import Path
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
@@ -176,12 +177,12 @@ def getRM(
         #get relevant ionex file
         if not use_proxy:
             if use_urlib or "http" in server:
-                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite, formatter=formatter)
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=Path(ionexPath),overwrite = overwrite, formatter=formatter)
             else: #ftp server use ftplib
-                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,overwrite = overwrite)
+                ionexf=ionex.getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=Path(ionexPath),overwrite = overwrite)
 
         else:
-                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=ionexPath,proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
+                ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=Path(ionexPath),proxy_server=proxy_server,proxy_type=proxy_type,proxy_port=proxy_port,proxy_user=proxy_user,proxy_pass=proxy_pass,overwrite = overwrite, formatter=formatter)
 
         tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
         if use_mean:
