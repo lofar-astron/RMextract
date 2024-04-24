@@ -697,7 +697,7 @@ def get_urllib_IONEXfile(
     
     url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear)
 
-    logger.info(f"Constructed {url=}.")
+    logger.debug(f"Constructed {url=}.")
 
 
     # Download IONEX file, make sure it is always uppercase
