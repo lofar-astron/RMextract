@@ -485,7 +485,7 @@ def _get_IONEX_file(
     ):
         if not overwrite and _test_path.exists():
             logger.info(f"FILE exists: {_test_path}")
-            return _test_path
+            return _test_path.as_posix()
     
     tried_backup=False
     serverfound=False
