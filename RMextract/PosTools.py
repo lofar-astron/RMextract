@@ -20,7 +20,7 @@ try:
     logger.debug('casacore will be used to compute positions')
 except ImportError:
     logger.debug('We will need PyEphem to perform calculations!')
-    logger.debug('the accuracy of results might decease a bit')
+    logger.debug('the accuracy of results might decrease a bit')
     HAS_PYRAP = False
 
 HAS_EPHEM = True
