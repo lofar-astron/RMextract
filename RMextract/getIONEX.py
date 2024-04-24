@@ -454,7 +454,7 @@ def _get_IONEX_file(
         time (string or list) : date of the observation
         server (string) : ftp server + path to the ionex directories
         prefix (string) : prefix of the IONEX files (case insensitive)
-        outpath (Pathh) : path where the data is stored
+        outpath (Path) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
     """
     prefix=prefix.upper()
