@@ -1,6 +1,8 @@
-import RMextract.getTEC as gt
 import pyrap.tables as tab
 from pylab import *
+
+import RMextract.getTEC as gt
+
 a=tab.taql('calc MJD("2015/08/14/00:00:00")')[0]*3600*24
 b=tab.taql('calc MJD("2015/08/15/23:50:00")')[0]*3600*24
 

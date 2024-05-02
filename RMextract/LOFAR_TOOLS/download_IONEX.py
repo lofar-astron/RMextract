@@ -1,9 +1,11 @@
+import argparse
+import logging
 import sys
+
+import numpy as np
+
 import RMextract.getIONEX as ionex
 from RMextract import PosTools
-import numpy as np
-import logging
-import argparse
 
 
 def main():
@@ -42,12 +44,12 @@ def main():
             ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=args.ionexpath)
         if ionexf==-1:
             if not "igsiono.uwm.edu.pl" in server:
-                logging.info("cannot get IONEX data, try fast product server instead")
+                logger.info("cannot get IONEX data, try fast product server instead")
                 server="https://igsiono.uwm.edu.pl"
                 prefix="igrg"
                 ionexf=ionex.get_urllib_IONEXfile(time=date_parms,server=server,prefix=prefix,outpath=args.ionexpath)
             if ionexf==-1:
-                logging.error("IONEX data not available, even not from fast product server")
+                logger.error("IONEX data not available, even not from fast product server")
                 return False
         
     return True

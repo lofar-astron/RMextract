@@ -1,7 +1,9 @@
-from RMextract.getRM import getRM
-import RMextract.PosTools as PosTools
-import numpy as np
 import os
+
+import numpy as np
+
+import RMextract.PosTools as PosTools
+from RMextract.getRM import getRM
 
 OBJECT="EoR0"
 START_TIME="2013/11/28 00:00:00"

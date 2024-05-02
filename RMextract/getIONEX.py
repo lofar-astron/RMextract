@@ -8,30 +8,25 @@ Created on Tue Apr 24 11:46:57 2018
 
 @author: mevius
 """
-import numpy as np
 import datetime
-import scipy.ndimage.filters as myfilter
-import logging
-import os
 import ftplib
+import os
 import socket
+from pathlib import Path
+from typing import List, Optional, TypeVar, Union
+from urllib import request
+from urllib.parse import urlparse
 
-def setup_logging():
-    ctrl = os.environ.get('RMEXT_LOGLEVEL', "ERROR")
-    notunderstand = False
-    if ctrl == "ERROR":
-        level = logging.ERROR
-    elif ctrl == "WARNING":
-        level = logging.WARNING
-    elif ctrl == "INFO":
-        level = logging.INFO
-    else:
-        notunderstand = True
-        level = logging.ERROR
-    logging.basicConfig(level=level)
-    if notunderstand:
-        logging.error(f"Logging level {ctrl} not understood. Can be 'ERROR', 'WARNING', 'INFO'")
-setup_logging()
+import numpy as np
+import scipy.ndimage.filters as myfilter
+import socks
+
+from RMextract import PosTools
+from RMextract.formatters import KNOWN_FORMATTERS, Formatter
+from RMextract.logging import logger
+
+PathLike = TypeVar("PathLike", str, Path)
+
 
 def _read_ionex_header(filep):
     """reads header from ionex file. returns data shape and position of first
@@ -52,11 +47,11 @@ def _read_ionex_header(filep):
         stripped = line.strip()
         if stripped.endswith("EPOCH OF FIRST MAP"):
             starttime = datetime.datetime(
-                *(int(i) for i in
+                *(int(float(i)) for i in
                   stripped.replace("EPOCH OF FIRST MAP","").split()))
         if stripped.endswith("EPOCH OF LAST MAP"):
             endtime = datetime.datetime(
-                *(int(i) for i in
+                *(int(float(i)) for i in
                   stripped.replace("EPOCH OF LAST MAP","").split()))
         if stripped.endswith("INTERVAL"):
             timestep = float(stripped.split()[0]) / 3600.
@@ -75,7 +70,7 @@ def _read_ionex_header(filep):
     latarray = np.arange(start_lat, end_lat + step_lat, step_lat)
     dtime = endtime - starttime
     dtimef = dtime.days * 24. + dtime.seconds / 3600.
-    logging.debug("timerange %f hours. step = %f ", dtimef, timestep)
+    logger.debug("timerange %f hours. step = %f ", dtimef, timestep)
     timearray = np.arange(0,
                           dtimef + timestep,
                           timestep)
@@ -111,7 +106,7 @@ def read_tec(filename, _use_filter=None):
     """
     ionex_file = open(filename, "r")
     exponent, lonarray, latarray, timearray = _read_ionex_header(ionex_file)
-    logging.info("reading data with shapes %d  x %d x %d",
+    logger.info("reading data with shapes %d  x %d x %d",
                  timearray.shape[0],
                  latarray.shape[0],
                  lonarray.shape[0])
@@ -156,7 +151,7 @@ def read_tec(filename, _use_filter=None):
             elif rmsdata:
                 rmsarray[timeidx, latidx, lonidx:lonidx + data.shape[0]] = data
             lonidx += data.shape[0]
-    if not _use_filter is None:
+    if _use_filter is not None:
         tecarray = myfilter.gaussian_filter(
             tecarray, _use_filter, mode='nearest')
     return tecarray, rmsarray, lonarray, latarray, timearray
@@ -165,7 +160,7 @@ def read_tec(filename, _use_filter=None):
 def readTEC(filename, use_filter=None):
     """oldfunction name for compatibility. Use read_tec."""
 
-    logging.warning("function readTEC obsolete, use read_tec instead")
+    logger.warning("function readTEC obsolete, use read_tec instead")
     return read_tec(filename, _use_filter=use_filter)
 
 
@@ -299,12 +294,12 @@ def compute_tec_interpol(times, lats, lons, tecinfo, apply_earth_rotation=0):
                                                 - rot2
                                                 - lons + 180., 360.)
                                    - 180.) / lonstep
-    logging.debug("inidces time %d %d indices lat %d %d indices \
+    logger.debug("inidces time %d %d indices lat %d %d indices \
                   lon %d %d %d %d", timeidx1[0], timeidx2[0],
                   latidx1[0], latidx2[0],
                   lonidx11[0], lonidx12[0],
                   lonidx21[0], lonidx22[0])
-    logging.debug("weights time %f lat %f lon %f %f",
+    logger.debug("weights time %f lat %f lon %f %f",
                   time_weights[0],
                   lat_weights[0],
                   lon_weights1[0],
@@ -331,7 +326,7 @@ def getTECinterpol(time, lat, lon, tecinfo, apply_earth_rotation=0):
     """old function name for compatibility. Use compute_tec_interpol
     instead"""
 
-    #logging.warning("obsolete, use compute_tec_interpol instead")
+    #logger.warning("obsolete, use compute_tec_interpol instead")
     if np.isscalar(time):
         time = [time]
         lat = [lat]
@@ -346,7 +341,7 @@ def _combine_ionex(outpath, filenames, newfilename, overwrite = False):
     (needed for 15min ROBR data)"""
 
     if not overwrite and os.path.isfile(outpath + newfilename):
-        logging.info("FILE exists: " + outpath + newfilename)
+        logger.info("FILE exists: " + outpath + newfilename)
         return outpath + newfilename
     newf = open(outpath + newfilename, 'w')
     filenames = sorted(filenames)
@@ -390,10 +385,11 @@ def _combine_ionex(outpath, filenames, newfilename, overwrite = False):
     return os.path.join(outpath, newfilename)
     # ignore RMS map for now, since it is filled with zeros anyway
 
-
-def _gunzip_some_file(compressed_file,
-                      uncompressed_file,
-                      delete_file=1):
+def _gunzip_some_file(
+        compressed_file: PathLike,
+        uncompressed_file: PathLike,
+        delete_file:bool=True
+    ):
     command = "gunzip -dc %s > %s" % (compressed_file, uncompressed_file)
     retcode = os.system(command)
     if retcode:
@@ -403,61 +399,50 @@ def _gunzip_some_file(compressed_file,
     return uncompressed_file
 
 
-def _store_files(ftp, filenames, outpath, overwrite=False):
+def _store_files(
+        ftp: ftplib.FTP, 
+        filenames: List[str], 
+        outpath: Path, 
+        overwrite=False
+    ) -> List[str]:
     """helper function to store files from ftp server to outpath"""
 
-    nfilenames = []
+    npaths: List[Path] = []
     for myf in filenames:
         #make sure filename is always stored uppercase
-        mypath = os.path.join(outpath, myf.upper())
-        if not overwrite and os.path.isfile(mypath):
-            nfilenames.append(mypath)
-            logging.info("file %s exists", mypath)
-        elif not overwrite and\
-        os.path.isfile(mypath.replace(".Z","")):
-            nfilenames.append(mypath.replace(".Z",""))
-            logging.info("file %s exists",
-                         mypath.replace(".Z",""))
+        mypath = outpath / myf.upper()
+        if not overwrite and mypath.exists():
+            npaths.append(mypath)
+            logger.info("file %s exists", mypath)
+        elif not overwrite and mypath.with_suffix("").exists():
+            npaths.append(mypath.with_suffix(""))
+            logger.info("file %s exists", mypath.with_suffix(""))
         else:
-            myp = open(mypath, "wb")
-            ftp.retrbinary("RETR " + myf, myp.write)
-            myp.close()
-            nfilenames.append(mypath)
-    nfilenames_copy = nfilenames[:]
-    nfilenames = []
-    for myf in nfilenames_copy:
-        if myf.endswith(".Z"):
-            nfilenames.append(_gunzip_some_file(
-                myf,
-                myf.replace(".Z","")))
+            with open(mypath, "wb") as myp:
+                ftp.retrbinary(f"RETR {myf}", myp.write)
+            npaths.append(mypath)
+
+    nfilenames: List[str] = []
+    for myf in npaths:
+        if myf.suffix == ".Z":
+            nfilenames.append(
+                _gunzip_some_file(
+                    myf,
+                    myf.with_suffix("")
+                ).as_posix()
+            )
         else:
-            nfilenames.append(myf)
+            nfilenames.append(myf.as_posix())
     return nfilenames
 
-
-def _prepare_IONEX_filename(time="2012/03/23/02:20:10.01",
-                    server="ftp://ftp.aiub.unibe.ch/CODE/",
-                    prefix="codg"):
-    """Get IONEX filename using new naming scheme with prefix from server for a given day
-    Broken , because there seem to be inconsitencies in the filenames
-    Args:
-        time (string or list) : date of the observation
-        server (string) : ftp server + path to the ionex directories
-        prefix (string) : prefix of the IONEX files (case insensitive)
-    """   
-    PPP = ['MGX','OPS','R01','RNN','TGA']
-    TTT = ['FIN','NRT','RAP','RTS','SNX','ULT']
-    CNT = ['ION','GIM']
-    FMT = ['IOX','ION']
-    
-    
-
-def _get_IONEX_file(time="2012/03/23/02:20:10.01",
-                    server="ftp://gssc.esa.int/gnss/products/ionex/",
-                    prefix="UQRG",
-                    outpath='./',
-                    overwrite=False,
-                    backupserver="ftp://ftp.aiub.unibe.ch/CODE/"):
+def _get_IONEX_file(
+        time="2012/03/23/02:20:10.01",
+        server="ftp://gssc.esa.int/gnss/products/ionex/",
+        prefix="UQRG",
+        outpath=Path("./"),
+        overwrite=False,
+        backupserver="ftp://ftp.aiub.unibe.ch/CODE/"
+    ) -> str:
     """Get IONEX file with prefix from server for a given day
 
     Downloads files with given prefix from the ftp server, unzips and stores
@@ -469,45 +454,45 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         time (string or list) : date of the observation
         server (string) : ftp server + path to the ionex directories
         prefix (string) : prefix of the IONEX files (case insensitive)
-        outpath (string) : path where the data is stored
+        outpath (Path) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
     """
     prefix=prefix.upper()
-    if outpath[-1] != "/":
-        outpath += "/"
-    if not os.path.isdir(outpath):
+    if not outpath.exists():
         try:
-            os.makedirs(outpath)
-        except:
-            logging.error("cannot create output dir for IONEXdata: %s",
-                          outpath)
+            outpath.mkdir(parents=True)
+        except Exception as e:
+            logger.error(f"cannot create output dir for IONEXdata: {outpath}")
+            raise e
 
     try:
         yy = time[2:4]
         year = int(time[:4])
         month = int(time[5:7])
         day = int(time[8:10])
-    except:
+    except (IndexError, TypeError):
         year = time[0]
         yy = year - 2000
         month = time[1]
         day = time[2]
+
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    #if file exists just return filename
-    if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
-        logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
-        return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
-    #check if IGRG (fast files) exist, use those instead (UGLY!!)
-    if not overwrite and os.path.isfile("%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)):
-        logging.info("fast FILE exists: %sIGRG%03d0.%02dI",outpath,dayofyear,yy)
-        return "%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)
-   
+    # If file exists just return filename
+    for _test_path in (
+        outpath / f"{prefix}{dayofyear:03d}0.{yy:02d}I",
+        outpath / f"IGRG{dayofyear:03d}0.{yy:02d}I", # IGRG (fast files) (UGLY!!)
+    ):
+        if not overwrite and _test_path.exists():
+            logger.info(f"FILE exists: {_test_path}")
+            return _test_path.as_posix()
+    
     tried_backup=False
     serverfound=False
-    while not serverfound: 
-        ftpserver = server.replace("ftp:","").strip("/").split("/")[0]
-        ftppath = "/".join(server.replace("ftp:","").strip("/").split("/")[1:])
+    while not serverfound:
+        url = urlparse(server)
+        ftpserver = url.netloc
+        ftppath = url.path
         nr_tries = 0
         try_again = True
         while try_again and nr_tries<10:
@@ -530,7 +515,7 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
                         else:
                             server=backupserver
                             tried_backup=True
-                            logging.warning(f"Primary IONEX host '{server}' resolution "
+                            logger.warning(f"Primary IONEX host '{server}' resolution "
                                             f"failure. Trying backup at '{backupserver}'")
             except socket.gaierror:
                 try_again=True
@@ -541,15 +526,15 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
                     else:
                         server=backupserver
                         tried_backup=True
-                        logging.warning(f"Primary IONEX host '{server}' resolution "
+                        logger.warning(f"Primary IONEX host '{server}' resolution "
                                             f"failure. Trying backup at '{backupserver}'")
     if serverfound:
-        logging.info(f"Successfully contacted IONEX host '{server}'")
+        logger.info(f"Successfully contacted IONEX host '{server}'")
     ftp.cwd(ftppath)
     totpath = ftppath
     myl = []
     ftp.retrlines("NLST", myl.append)
-    logging.info("Retrieving data for %d or %02d%03d", year, yy, dayofyear)
+    logger.info("Retrieving data for %d or %02d%03d", year, yy, dayofyear)
     if str(year) in myl:
         ftp.cwd(str(year))
         totpath += "/%d" % (year)
@@ -561,17 +546,16 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
     if "%03d"%dayofyear in myl:
         ftp.cwd("%03d"%dayofyear)
         totpath += "/%03d" % (dayofyear)
-    logging.info("Retrieving data from %s", totpath)
+    logger.info("Retrieving data from %s", totpath)
     myl = []
     ftp.retrlines("NLST", myl.append)
     filenames = [i for i in myl if (prefix.lower() in i.lower()) and 
                  ("%03d"%dayofyear in i.lower()) and
                  (i.lower().endswith("i.z") or i.lower().endswith("i"))]
-    logging.info(" ".join(filenames))
+    logger.info(" ".join(filenames))
     #assert len(filenames) > 0, "No files found on %s for %s" % (server,prefix)
     if len(filenames) <=0:
-        logging.info("No files found on %s for %s",server,prefix)
-        return -1
+        raise FileNotFoundError(f"No files found on {server} for {prefix}")
         
     if prefix.lower() == "robr" and len(filenames) > 1:
         filenames = sorted(filenames)
@@ -602,17 +586,20 @@ def _get_IONEX_file(time="2012/03/23/02:20:10.01",
         ftp.quit()
         return nfilenames[0]
 
-def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
-                    server="http://ftp.aiub.unibe.ch/CODE/",
-                    prefix="codg",
-                    outpath='./',
-                    overwrite=False,
-                    backupserver="http://ftp.aiub.unibe.ch/CODE/",
-                    proxy_server=None,
-                    proxy_type=None,
-                    proxy_port=None,
-                    proxy_user=None,
-                    proxy_pass=None):
+def get_urllib_IONEXfile(
+        time="2012/03/23/02:20:10.01",
+        server="http://ftp.aiub.unibe.ch/CODE/",
+        prefix="codg",
+        outpath=Path("./"),
+        overwrite=False,
+        backupserver="http://ftp.aiub.unibe.ch/CODE/",
+        formatter: Optional[Union[Formatter, str]]=None,
+        proxy_server=None,
+        proxy_type=None,
+        proxy_port=None,
+        proxy_user=None,
+        proxy_pass=None
+    ) -> str:
     """Get IONEX file with prefix from server for a given day
 
     Downloads files with given prefix from the ftp server, unzips and stores
@@ -626,6 +613,12 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         prefix (string) : prefix of the IONEX files (case insensitive)
         outpath (string) : path where the data is stored
         overwrite (bool) : Do (not) overwrite existing data
+        formatter (Optional, Formatter | str): 
+                    If a string is given, it will be used as as an index in KNOWN_FORMATTERS
+                    If a Formatter is given, it will be used to construct the filenames.
+                    Must have the following signature:
+                        formatter(server,prefix,year,dayofyear) -> str
+                    If not given, the function will try to guess the formatter based on the server
         proxy_server (string): address of proxyserver, either url or ip address
         proxy_type (string): socks4 or socks5
         proxy_port (int): port of proxy server
@@ -633,46 +626,38 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
         proxy_pass (string): password for proxyserver
     """
     prefix=prefix.upper()
-    if outpath[-1] != "/":
-        outpath += "/"
-    if not os.path.isdir(outpath):
+    if not outpath.exists():
         try:
-            os.makedirs(outpath)
-        except:
-            print("cannot create output dir for IONEXdata: %s",
-                          outpath)
+            outpath.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.error(f"cannot create output dir for IONEXdata: {outpath}")
+            raise e
 
     try:
         yy = int(time[2:4])
         year = int(time[:4])
         month = int(time[5:7])
         day = int(time[8:10])
-    except:
+    except (IndexError, TypeError):
         year = time[0]
         yy = year - 2000
         month = time[1]
         day = time[2]
+
     mydate = datetime.date(year, month, day)
     dayofyear = mydate.timetuple().tm_yday
-    if not overwrite and os.path.isfile("%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)):
-        logging.info("FILE exists: %s%s%03d0.%02dI",outpath,prefix,dayofyear,yy)
-        return "%s%s%03d0.%02dI"%(outpath,prefix,dayofyear,yy)
-    #check if IGRG (fast files) exist, use those instead (UGLY!!)
-    if not overwrite and os.path.isfile("%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)):
-        logging.info("fast FILE exists: %sIGRG%03d0.%02dI",outpath,dayofyear,yy)
-        return "%sIGRG%03d0.%02dI"%(outpath,dayofyear,yy)
-   
-    tried_backup=False
-    serverfound=False
-    backupfound=False    
+    # If file exists just return filename
+    for _test_path in (
+        outpath / f"{prefix}{dayofyear:03d}0.{yy:02d}I",
+        outpath / f"IGRG{dayofyear:03d}0.{yy:02d}I", # IGRG (fast files) (UGLY!!)
+    ):
+        if not overwrite and _test_path.exists():
+            logger.info(f"FILE exists: {_test_path}")
+            return _test_path
+
+
     #If proxy url is given, enable proxy using pysocks
-    try:
-        from urllib import request
-    except ImportError:
-        import urllib2 as request
     if proxy_server and ("None" not in proxy_server):
-        import socket
-        import socks
         s = socks.socksocket()
         if proxy_type=="socks4":
             ProxyType = socks.SOCKS4
@@ -680,51 +665,68 @@ def get_urllib_IONEXfile(time="2012/03/23/02:20:10.01",
             ProxyType = socks.SOCKS5
         s.set_proxy(ProxyType, proxy_server, proxy_port, rdns=True, username=proxy_user, password=proxy_pass)
 
-    # Url of the primary server has the syntax "ftp://ftp.aiub.unibe.ch/CODE/YYYY/CODGDOY0.YYI.Z" where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
-    # Url of the backup server has the syntax "ftp://cddis.gsfc.nasa.gov/gnss/products/ionex/YYYY/DOY/codgDOY.YYi.Z where DOY is the day of the year, padded with leading zero if <100, and YY is the last two digits of year.
-    #try primary url
+    # Don't do connection tests for local files
+    if "file://" not in server:
+        #try primary url
+        try:
+            _ = request.urlopen(server,timeout=30)
+        except Exception as e:
+                logger.error(f"{e}")
+                try:
+                    _ = request.urlopen(backupserver,timeout=30)
+                    server=backupserver
+                    logger.warning(f"Primary IONEX host '{server}' resolution "
+                                                f"failure. Trying backup at '{backupserver}'")
+                except Exception as e:
+                    logger.error(f"Primary and Backup Server not responding: {e}") #enable in lover environment
+    
+    
+    if isinstance(formatter, str):
+        try:
+            formatter = KNOWN_FORMATTERS[formatter]
+        except KeyError:
+            raise ValueError(f"Unknown formatter {formatter} - please provide a callable")
+    if formatter is None:
+        # Check known servers
+        for known_server in KNOWN_FORMATTERS.keys():
+            if known_server in server:
+                formatter = KNOWN_FORMATTERS.get(known_server)
+                break
+        if formatter is None:
+            raise ValueError(f"Unknown server {server} - please provide a formatter")
+    
+    url = formatter(server=server, prefix=prefix, year=year, dayofyear=dayofyear)
 
-    try:
-        primary = request.urlopen(server,timeout=30)
-        serverfound = True
-    except:
-            try:
-                secondary = request.urlopen(backupserver,timeout=30)
-                backupfound = True
-                server=backupserver
-                logging.warning(f"Primary IONEX host '{server}' resolution "
-                                            f"failure. Trying backup at '{backupserver}'")
-            except:
-                logging.error('Primary and Backup Server not responding') #enable in lover environment
-    if "http://ftp.aiub.unibe.ch" in server:
-        url = "http://ftp.aiub.unibe.ch/CODE/%4d/%s%03d0.%02dI.Z"%(year,prefix.upper(),dayofyear,yy)
-    elif "http://cddis.gsfc.nasa.gov" in server:
-        url = "http://cddis.gsfc.nasa.gov/gnss/products/ionex/%4d/%03d/%s%03d0.%02di.Z"%(year,dayofyear,prefix,dayofyear,yy)
-    elif "igsiono.uwm.edu.pl" in server:
-        url = "https://igsiono.uwm.edu.pl/data/ilt/%4d/igrg%03d0.%02di"%(year,dayofyear,yy)
+    logger.debug(f"Constructed {url=}.")
+
 
     # Download IONEX file, make sure it is always uppercase
-    fname = outpath+'/'+(url.split('/')[-1]).upper()
-    try:
-        site = request.urlopen(url,timeout=30)
-    except:
-        logging.info("No files found on %s for %s",server,fname)
-        return -1
+    fname = outpath / Path(url).name.upper()
+    out_fname = fname.with_suffix("") if fname.suffix == ".Z" else fname    
+    
+    # First, if the final file already exists, simply return
+    if not overwrite and out_fname.exists():
+        return out_fname.as_posix()
 
-    output=open(fname,'wb')
-    output.write(site.read())
-    output.close()
-    ###### gunzip files
-    if fname[-2:].upper()==".Z":
-        command = "gunzip -dc %s > %s" % (fname, fname[:-2])
-        retcode = os.system(command)
-        if retcode:
-            raise RuntimeError("Could not run '%s'" % command)
-        else:
-            os.remove(fname)
-        fname=fname[:-2]
-    #returns filename of uncompressed file
-    return fname
+    # Here we actually download the file. Lets make sure though that this
+    # file is not downloaded by another task first
+    if not fname.exists():
+        logger.info(f"Downloading to {fname=}.")
+        try:
+            site = request.urlopen(url,timeout=30)
+        except Exception as e:
+            logger.error(f"No files found on {server} for {fname}")
+            raise e
+
+        with open(fname,'wb') as output:
+            output.write(site.read())
+        ###### gunzip files
+        # Now if the fname and out_fname are different we need to extract. 
+        # Make sure that the out_fname does not already exist. 
+        if fname != out_fname and not out_fname.exists():
+            _gunzip_some_file(fname, out_fname)
+            
+    return out_fname.as_posix()
 
 def getIONEXfile(time="2012/03/23/02:20:10.01",
                  server="ftp://ftp.aiub.unibe.ch/CODE/",
@@ -753,8 +755,8 @@ def get_TEC_data(times, lonlatpp, server, prefix, outpath, use_filter=None,earth
     '''
     
     date_parms = PosTools.obtain_observation_year_month_day_fraction(times[0])
-    ionexf=get_IONEX_file(time=date_parms,server=server,prefix=prefix,outpath=outpath)
-    tecinfo=ionex.readTEC(ionexf,use_filter=use_filter)
+    ionexf=getIONEXfile(time=date_parms,server=server,prefix=prefix,outpath=outpath)
+    tecinfo=readTEC(ionexf,use_filter=use_filter)
     latpp = lonlatpp[:, 1]
     lonpp = lonlatpp[:, 0]
     if latpp.shape == times.shape:

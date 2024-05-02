@@ -1,8 +1,8 @@
-from . import _iri
 import numpy as np
 from pkg_resources import resource_filename
 from scipy.interpolate import interp1d
 
+from . import _iri
 
 
 class pyiri:

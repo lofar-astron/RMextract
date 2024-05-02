@@ -1,9 +1,11 @@
-from RMextract.getRM import getRM
-import RMextract.PosTools as PosTools
+import math
+import os
+
 import Albus_Coordinates as ac
 import numpy as np
-import os
-import math
+
+import RMextract.PosTools as PosTools
+from RMextract.getRM import getRM
 
 OBJECT="EoR0"
 OBJECT="eor_2456967_MWA_BrightLoqRM"

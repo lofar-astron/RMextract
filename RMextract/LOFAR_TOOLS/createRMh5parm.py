@@ -7,22 +7,24 @@ Created on Tue Aug 7 11:46:57 2018
 
 Changes for prefactor included by Alexander Drabent (02 June 2021)
 """
-from losoto.h5parm import h5parm
-from RMextract import getRM
-from RMextract import PosTools
-import RMextract.getIONEX as ionex
-import pyrap.tables as pt
-import os
-import numpy as np
-import sys
-import logging
 import argparse
+import logging
+import os
+import sys
+
+import numpy as np
+import pyrap.tables as pt
+from losoto.h5parm import h5parm
+
+import RMextract.getIONEX as ionex
+from RMextract import PosTools, getRM
+from RMextract.logging import logger
 
 
 def makesolset(MS, data, solset_name):
     solset = data.makeSolset(solset_name)    
 
-    logging.info('Collecting information from the ANTENNA table.')
+    logger.info('Collecting information from the ANTENNA table.')
     antennaTable = pt.table(MS + "::ANTENNA", ack=False)
     antennaNames = antennaTable.getcol('NAME')
     antennaPositions = antennaTable.getcol('POSITION')
@@ -30,7 +32,7 @@ def makesolset(MS, data, solset_name):
     antennaTable = solset.obj._f_get_child('antenna')
     antennaTable.append(list(zip(*(antennaNames,antennaPositions))))
     
-    logging.info('Collecting information from the FIELD table.')
+    logger.info('Collecting information from the FIELD table.')
     fieldTable = pt.table(MS + "::FIELD", ack=False)
     phaseDir = fieldTable.getcol('PHASE_DIR')
     pointing = phaseDir[0, 0, :]
@@ -79,7 +81,7 @@ def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,t
         pass
     
     if not os.path.exists(h5parmdb):
-        logging.error('Could not find h5parmdb: ' + h5parmdb)
+        logger.error('Could not find h5parmdb: ' + h5parmdb)
         return(1)
     
     data          = h5parm(h5parmdb, readonly=False)
@@ -90,7 +92,7 @@ def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,t
     station_names = sorted(solset.getAnt().keys())
 
     if 'RMextract' in [s.name for s in soltabs]:
-        logging.warning('Soltab RMextract exists already. Skipping...')
+        logger.warning('Soltab RMextract exists already. Skipping...')
         return(0)
     
     #extract the timerange information
@@ -133,7 +135,7 @@ def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,t
 
         if ionexf == -1:
             if not "igsiono.uwm.edu.pl" in ionex_server:
-                logging.info("cannot get IONEX data, try fast product server instead")
+                logger.info("cannot get IONEX data, try fast product server instead")
                 if not proxyServer:
                     ionexf = ionex.get_urllib_IONEXfile(time = date_parms,
                                                      server  = "https://igsiono.uwm.edu.pl",
@@ -150,7 +152,7 @@ def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,t
                                                   proxy_user   = proxyUser,
                                                   proxy_pass   = proxyPass)
         if ionexf == -1:
-            logging.error("IONEX data not available, even not from fast product server")
+            logger.error("IONEX data not available, even not from fast product server")
             return(-1)
     
     
@@ -182,7 +184,7 @@ def createRMh5parm(MSfiles, h5parmdb, solset_name = "sol000",all_stations=True,t
         else:
             raise ValueError("Couldn't get RM information from RMextract! (But I don't know why.)")
         
-    logging.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
+    logger.info('Adding rotation measure values to: ' + solset_name + ' of ' + h5parmdb)
     if all_stations:
         if type(list(station_names)[0]) != str:
             rm_vals = np.array([rmdict["RM"][stat.decode()].flatten() for stat in station_names])
@@ -246,7 +248,7 @@ def main():
 
     MS = args.MSfiles
     h5parmdb = args.h5parm
-    logging.info("Working on: %s %s" % (MS, h5parmdb))
+    logger.info("Working on: %s %s" % (MS, h5parmdb))
     createRMh5parm(MS, h5parmdb, ionex_server=args.server, ionex_prefix=args.prefix, 
                  ionexPath=args.ionexpath, solset_name=args.solsetName,
                  all_stations=args.allStations, timestepRM=args.timestep,
