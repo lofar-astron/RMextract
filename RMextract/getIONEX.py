@@ -458,6 +458,9 @@ def _get_IONEX_file(
         overwrite (bool) : Do (not) overwrite existing data
     """
     prefix=prefix.upper()
+
+    if not isinstance(outpath, Path):
+        outpath = Path(outpath) # for backward compatibility
     if not outpath.exists():
         try:
             outpath.mkdir(parents=True)
@@ -626,6 +629,8 @@ def get_urllib_IONEXfile(
         proxy_pass (string): password for proxyserver
     """
     prefix=prefix.upper()
+    if not isinstance(outpath, Path):
+        outpath = Path(outpath) # for backward compatibility
     if not outpath.exists():
         try:
             outpath.mkdir(parents=True, exist_ok=True)
