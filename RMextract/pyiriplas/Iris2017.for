@@ -21,8 +21,8 @@ C*****************************************************************
 C**************** ALL-IN-ONE SUBROUTINE  *************************
 C*****************************************************************
 C includes IRIS2017.FOR (computes parameters for specified
-C altitude range, for specified altitude, latitude, longitude, 
-C year, month, day,day of year, or hour range) 
+C altitude range, for specified altitude, latitude, longitude,
+C year, month, day,day of year, or hour range)
 C IRI2001 STORM-MODEL INCLUDED from IRI2001 (D.Bilitza, June 2001)
 C
 C IRI2001 functions B0_98 (instead of B0_TAB), xe3_1, xe4_1 included
@@ -31,26 +31,26 @@ C
 C SMI: HPL,XNEPL,NE(H) AND TECPL FOR 1336 KM : 20000 KM INCLUDED
 C Changed Feb. 2008 : SMI extension at [h05top : hpl]. hpl<=20000 km !!!
 C
-C SUBROUTINE GKPM PRODUCING KP AND KPM INDICES INCLUDED 
+C SUBROUTINE GKPM PRODUCING KP AND KPM INDICES INCLUDED
 C (T.Gulyaeva, Sep. 2001)
 C*****************************************************************
 C
 C*05/05/2017 Solar activity smoothed proxy index specified by jind:
-C*  jind =1 ssn1_12.dat  DEFAULT: SSN1  =>  rz(3); F10.7  =>  sf(3) 
+C*  jind =1 ssn1_12.dat  DEFAULT: SSN1  =>  rz(3); F10.7  =>  sf(3)
 C*  jind =2 ssn2_12.dat  SSN2 converted to SSN1  =>  rz(3); F10.7  => sf(3)
-C*  jind =3 f107_12.dat  F10.7    =>  sf(3) converted to SSN1  =>  rz(3) 
+C*  jind =3 f107_12.dat  F10.7    =>  sf(3) converted to SSN1  =>  rz(3)
 C*  jind =4 geci_12.dat  GEC => rz(3); F10.7  => sf(3)
 C*  jind =5 teci_12.dat  TEC => rz(3); F10.7  => sf(3)
 C*  jind =6 igin_12.dat  IG  => rz(3); F10.7  => sf(3)
 C*  jind =7 mgii_12.dat  MgII => rz(3); F10.7  => sf(3)
 C*  Jind =8 lyma_12.dat  Lyman-alpha => rz(3); F10.7  => sf(3)
 C* Ref. T.L.Gulyaeva et al., 2017. TEC proxy index of solar activity for the
-C*      International Reference Ionosphere IRI and its extension to 
+C*      International Reference Ionosphere IRI and its extension to
 C*      Plasmasphere IRI-PLAS model. Int. J. Sci. Eng. Applied Sci., 3, 5, 144-150,
 C*      http://ijseas.com/index.php/issue-archive-2/volume3/issue-5/
 C
-      SUBROUTINE IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,DHOUR,    
-     &    HEIBEG,HEIEND,NUMHEI,OUTF,JIND)                          
+      SUBROUTINE IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,DHOUR,
+     &    HEIBEG,HEIEND,NUMHEI,OUTF,JIND)
 C-----------------------------------------------------------------
 C
 C     INPUT: ALATI,ALONG  LATITUDE NORTH AND LONGITUDE EAST IN DEGREES
@@ -91,9 +91,9 @@ C          jf(21) =.true.      OARR(41)=user input for daily F10.7 index
 C          jf(23) =.false.     OARR(41)=user input for daily F10.7 index
 C          optional for jf(21:24); default is F10.7D=COV
 C          jf(25) =.false.     OARR(41)=user input for daily F10.7 index
-C          if oarr(41).le.0 then 12-month running mean is 
+C          if oarr(41).le.0 then 12-month running mean is
 C          taken from internal file]
-C*         jf(27) =.false.     OARR(39)=user input for selected solar proxy 
+C*         jf(27) =.false.     OARR(39)=user input for selected solar proxy
 C+++++++++++++++++++++vvvv
 C
 C     JF(1:11)=.TRUE. GENERATES THE STANDARD IRI-90 PARAMETERS.
@@ -121,7 +121,7 @@ C        OUTF(6,*)  H+ ION DENSITY/M-3
 C        OUTF(7,*)  HE+ ION DENSITY/M-3
 C        OUTF(8,*)  O2+ ION DENSITY/M-3
 C        OUTF(9,*)  NO+ ION DENSITY/M-3
-C        OUTF(10,*)  PLASMA FREQUENCY/MHz 
+C        OUTF(10,*)  PLASMA FREQUENCY/MHz
 C        OUTF(11,*)  LOG NE(M-3) // TECeff in step of 200 km
 C !!! MODIFIED FOR OUTPUT RESULTS  OUTF(10,*) & OUTF(11,*) !!!
 C =============================================================
@@ -148,8 +148,8 @@ C     OARR(33) = RZS (SUNSPOT INPUT)
 C     OARR(35) = B1             OARR(36) = M(3000)F2
 C     OARR(37) = LATI  OARR(38) = LONGI
 C     OARR(39) = gind  OARR(40) = MLONG
-C     OARR(41)=f107d   OARR(42) = MLAT  
-C     OARR(43)=daynr   OARR(44) = gmlt  
+C     OARR(41)=f107d   OARR(42) = MLAT
+C     OARR(43)=daynr   OARR(44) = gmlt
 C     OARR(45)=stormcor OARR(46)= Hscale_top
 C-------------------------------------------------------------------
 C******************************************************************
@@ -163,7 +163,7 @@ C*********            INTERNALLY                    **************
 C*********       ALL ANGLES ARE IN DEGREE           **************
 C*********       ALL DENSITIES ARE IN M-3           **************
 C*********       ALL ALTITUDES ARE IN KM            **************
-C*********     ELECTRON CONTENT*1E-16 IN M-2        ************** 
+C*********     ELECTRON CONTENT*1E-16 IN M-2        **************
 C*********     ALL TEMPERATURES ARE IN KELVIN       **************
 C*********     ALL TIMES ARE IN DECIMAL HOURS       **************
 C*****************************************************************
@@ -172,25 +172,25 @@ C*****************************************************************
       INTEGER           DAYNR,DDO,DO2,SEASON,SEADAY,NUMHEI
       REAL              LATI,MO2,MO,MODIP,NMF2,MAGBR
       REAL              NMF1,NME,NMD,MM,MLAT,MLONG,NOBO2,NEI,RZS,COV
-      real:: tetitn(3)                         
+      real:: tetitn(3)
       CHARACTER FILNAM*12
-      CHARACTER*4 xxpr,yypr                 
+      CHARACTER*4 xxpr,yypr
       DIMENSION  F(3),RIF(4),E(4),XDELS(4),DNDS(4)
       DIMENSION  FF0(988),XM0(441),F2(13,76,2),FM3(9,49,2)
       DIMENSION  FF0N(988),XM0N(441),F2N(13,76,2),FM3N(9,49,2)
-      DIMENSION  AMP(4),HXL(4),SCL(4)                  
+      DIMENSION  AMP(4),HXL(4),SCL(4)
       DIMENSION  XSM(4),MM(5),DTI(4)
       DIMENSION  AHH(7),STTE(6),DTE(5),ATE(7),TEA(6),XNAR(3)
       DIMENSION  PG1O(80),PG2O(32),PG3O(80),PF1O(12),PF2O(4),PF3O(12)
       DIMENSION  HO(4),MO(5),DDO(4),HO2(2),MO2(3),DO2(2),DION(7)
-      DIMENSION  OUTF(0:11,0:120),OARR(50),ARIG(3),RZAR(3)   
+      DIMENSION  OUTF(0:11,0:120),OARR(50),ARIG(3),RZAR(3)
       DIMENSION  INDAP(13),AKP(13),icurkp(0:7),iprekp(0:7)
       LOGICAL           EXT,SCHALT,NIGHT,TECON(3),sam_mon,sam_yea,sam_ut
       LOGICAL           F1REG,FOF2IN,HMF2IN,URSIF2,LAYVER,DY,GULB0
       LOGICAL           NODEN,NOTEM,NOION,TENEOP,sam_doy,TECIN
       LOGICAL           OLD79,JF(30),URSIFO,RZIN,INKP,F1_OCPRO,F1_L_COND
       LOGICAL           FOF1IN,HMF1IN,FOEIN,HMEIN,DREG,sam_jind
-     &,IGIN,igino,rzino             
+     &,IGIN,igino,rzino
      &,sam_date
       COMMON    /BLOCK1/HMF2,NMF2,HMF1,F1REG           /CONST/UMR,PI
      &          /BLOCK2/B0,B1,C1      /BLOCK3/HZ,T,HST,STR
@@ -206,7 +206,7 @@ C*****************************************************************
      &/dem/W,ylongi,hour,daynr,cn1000,alon,blon,enre,HSC
       common /temod/month
       COMMON /FIKP/icurkp,iprekp,iyear_cur,imn_cur,idy_cur
-      COMMON /BXY/xxpr,yypr                     
+      COMMON /BXY/xxpr,yypr
       EXTERNAL          XE1,XE2,XE3,XE3_1,XE4,XE5,XE6,XXE6,TEDER,ABLON
       DATA     XNAR       /3*0.0/,
      &      XDELS   /3*5.,10./,      DNDS   /.016,.01,2*.016/,
@@ -287,7 +287,7 @@ c
       if(F1_OCPRO) F1_L_COND=(.not.jf(20))
       DREG=jf(24)
 C
-      IF (XKP.GE.0.0) THEN 
+      IF (XKP.GE.0.0) THEN
         INKP=.TRUE.
       ELSE
         INKP=.FALSE.
@@ -305,7 +305,7 @@ c
           ENDIF
       IGIN=(.not.jf(27))       ! Add
       IF(IGIN) THEN         !
-          AIGIN=OARR(39)        !      
+          AIGIN=OARR(39)        !
                else
           oarr(39)=-1.
                ENDIF              !
@@ -388,7 +388,7 @@ C
 8154          IF(XNAR(JXNAR).GT.0.) TECON(JXNAR)=.TRUE.
       else
                oarr(15)=-1.  !
-              oarr(16)=-1.  !  
+              oarr(16)=-1.  !
 C!      oarr(3)=-1.
 C!      oarr(4)=-1.
 C!      oarr(5)=-1.
@@ -404,16 +404,16 @@ c         if(LAYVER) write(*,*) 'Ne, E-F: The LAY-Version is ',
 c     &      'prelimenary. Erroneous profile features can occur.'
 c         if(GULB0) write(*,*) 'Ne, B0: Bottomside thickness is ',
 c     &      'obtained with Gulyaeva-1987 model.'
-      if(tecin) then 
+      if(tecin) then
       write(*,*) 'TEC: input values are used.'
-      write(*,*) '    hmF2: CCIR model is fitted to TEC.' 
+      write(*,*) '    hmF2: CCIR model is fitted to TEC.'
       write(*,*) 'Ne, foF2: CCIR model is fitted to TEC.'
       goto 8201
       endif
          if(OLD79) write(*,*) 'Ne: Using IRI-79. Correction',
      &      ' of equatorial topside is not included.'
       if (.not.(HMF2IN)) THEN
-      write(*,*) '    hmF2: CCIR model is used.' 
+      write(*,*) '    hmF2: CCIR model is used.'
        goto 700
                       ELSE
       if(hmf2.GT.0.) then
@@ -443,7 +443,7 @@ c     &      'obtained with Gulyaeva-1987 model.'
      &    write(*,*) 'Te: Temperature-density correlation is used.'
 8201    continue
 C
-C****  
+C****
 C CALCULATION OF DAY OF YEAR AND SUN DECLINATION......................
 C CALCULATION OF UT/LT AND RELATED YEAR, MONTH, DAYNRs ...............
 C CALCULATION OF (UT-)SEASON (SUMMER=2, WINTER=4).....................
@@ -495,7 +495,7 @@ cc
 C
 C_ADD
       call igrf_dip(lati,ylongi,ryear,300.0,dec,dip,magbr,modip) ! NEW IGRF2015
-        IF (MAGBR.GT.9998.) THEN          
+        IF (MAGBR.GT.9998.) THEN
         CALL FIELDG(LATI,LONGI,300.0,XMA,YMA,ZMA,BET,DIP,DEC,MODIP) !OLD POGO-75
         MAGBR=ATAN(0.5*TAN(DIP*UMR))/UMR
         ENDIF
@@ -538,13 +538,13 @@ C
                 if(idtmp.ne.daynr) then
                         iyear=iytmp
                         daynr=idtmp
-      idayinp=iday           ! input day 
+      idayinp=iday           ! input day
                         call MODA(1,iyear,MONTH,IDAY,DAYNR,nrdaym)
-C 
+C
       if (iday.ne.idayinp) mmdd=month*100+iday  ! corrected day according to UT
                         endif
 c
-c zmonth is decimal month (Jan 1 = 1.0 and Dec 31 = 12.97) 
+c zmonth is decimal month (Jan 1 = 1.0 and Dec 31 = 12.97)
 c
 2629  zmonth = lmonth + (lday*1.)/lnrday
       RUT=UT
@@ -568,7 +568,7 @@ C+ TLG Day-of-year reduced to 360.=> sday=season_day
       IF(LATI.GT.0.0) GOTO 5592
         SEASON=SEASON-2
         IF(SEASON.LT.1) SEASON=SEASON+4
-      seamon=zmonth+6.              
+      seamon=zmonth+6.
          if(seamon.ge.13) seamon=seamon-12.
          seaday=daynr+idayy/2.                     !
          if(seaday.gt.idayy) seaday=seaday-idayy     !
@@ -579,9 +579,9 @@ C
 C MEAN F10.7CM SOLAR RADIO FLUX (COV), GLOBAL IONOSPHERIC INDEX
 C (GIND)
 C
-C 12-month running mean sunspot number (rssn) and Ionospheric Global 
-C index (gind), daily F10.7 cm solar radio flux (f107d) and monthly 
-C F10.7 (cov) index   
+C 12-month running mean sunspot number (rssn) and Ionospheric Global
+C index (gind), daily F10.7 cm solar radio flux (f107d) and monthly
+C F10.7 (cov) index
 C
 5592    sam_mon=(month.eq.montho)
       sam_yea=(iyear.eq.iyearo)
@@ -591,16 +591,16 @@ C
         sam_ut=(ut.eq.ut0)         !
         if(sam_date.and..not.rzino.and..not.rzin.       !
      &                   and..not.igin.and..not.igino) goto 2910  !
-C     if you want to use the ig_rz.dat version of the coefficients, please use 
-C the statements commented                                   <! ig_rz.dat> 
+C     if you want to use the ig_rz.dat version of the coefficients, please use
+C the statements commented                                   <! ig_rz.dat>
 C      call tcon(iyear,month,iday,daynr,rzar,arig,ttt,nmonth) !  ig_rz.dat
 C
 C NEW TLG: the following statements commented <! gec_rz.dat> are using gec_rz.dat file:
-      IF (jind.eq.0) THEN                    
+      IF (jind.eq.0) THEN
       call tcongec(iyear,month,iday,daynr,rzar,arig,ttt,nmonth)   ! gec_rz.dat
-                     ELSE                     
-C* NEW TLG May 2017: the following statement for different solar proxies input 
-C* R12 proxy - rsar(3), F10.7 proxy - arig(3); jind - option for proxy input: 
+                     ELSE
+C* NEW TLG May 2017: the following statement for different solar proxies input
+C* R12 proxy - rsar(3), F10.7 proxy - arig(3); jind - option for proxy input:
       call tconind(iyear,month,iday,daynr,rzar,arig,ttt,nmonth,jind)
                      ENDIF
 C
@@ -611,21 +611,21 @@ C
                   rzar(2) = rrr
                   rzar(3) = rrr
 C                 zi=-12.349154+(1.4683266-2.67690893e-03*rrr)*rrr  ! ig_rz.dat
-         IF (jind.eq.0) THEN                                     
-                  zi=((0.0194*rrr+1.0906)-1.0)*50.0              
+         IF (jind.eq.0) THEN
+                  zi=((0.0194*rrr+1.0906)-1.0)*50.0
                   if(zi.gt.174.0) zi=174.0
                   if(zi.lt.0.) zi=10.      ! check low limit of IG-index
                   arig(1) = zi
                   arig(2) = zi
-                  arig(3) = zi                      
+                  arig(3) = zi
          ELSE
                   cov=62.6645+rzar(3)*0.9066             !* F10.7 proxy
-                  arig(1) = cov                     
+                  arig(1) = cov
                   arig(2) = cov                       !*
                   arig(3) = cov                       !*
                gind= 0.97236*rzar(3)+0.18836          !*
          ENDIF                                           !*
-      endif                   ! 
+      endif                   !
 C
 C!++++++
 C        if(IGIN) then           ! ig_rz.dat
@@ -636,7 +636,7 @@ C           arig(3) = zi            ! ig_rz.dat
 C           endif                ! ig_rz.dat
         rssn=rzar(3)
       IF (jind.eq.0) THEN   !*
-      gind=arig(3)      
+      gind=arig(3)
       cov=63.75+RSSN*(0.728+RSSN*0.00089)
       ELSE                 !*
         cov=arig(3)
@@ -644,17 +644,17 @@ C           endif                ! ig_rz.dat
       COVSAT=cov
         if(covsat.gt.188.) covsat=188.
          f107d=cov
-         if(.not.jf(25)) then       !* 
-           f107d=oarr(41)           !* 
+         if(.not.jf(25)) then       !*
+           f107d=oarr(41)           !*
 C*           RSSN=1.076*f107d-65.7817  !*
-         endif                      !* 
+         endif                      !*
 C
 C CALCULATION OF SOLAR ZENITH ANGLE (XHI/DEG).........................
 C NOON VALUE (XHINON).................................................
 C
 2910  continue
-      if(.not.rzin) RZS=rssn     ! 
-         rg=rzs               ! 
+      if(.not.rzin) RZS=rssn     !
+         rg=rzs               !
         CALL SOCO(ldaynr,HOUR,LATI,YLONGI,SUNDEC,XHI,SAX,SUX)
         CALL SOCO(ldaynr,12.0,LATI,YLONGI,SUNDE1,XHINON,SAXNON,SUXNON)
 C New: call APF for COV81, RZ81
@@ -662,11 +662,11 @@ C New: call APF for COV81, RZ81
       nmono=month
 C New: call GKPM for calculation of kp_indices and Kpm_index
 C
-      IF (INKP) THEN 
+      IF (INKP) THEN
         GOTO 4
-      ELSE 
+      ELSE
         CALL GKPM(indap,akp,xkp)
-      ENDIF 
+      ENDIF
    4  CONTINUE
 C
 C
@@ -690,7 +690,7 @@ C
       DELA=4.32
       IF(ABSMDP.GE.18.) DELA=1.0+EXP(-(ABSMDP-30.0)/10.0)
       DELL=1+EXP(-(ABSLAT-20.)/10.)
-C     
+C
 C E peak critical frequency (foE), density (NmE), and peak height (hmE)
 c
         IF(FOEIN) THEN
@@ -808,7 +808,7 @@ C
       IF (JIND.eq.0) THEN      !*TEST
       RR2=ARIG(1)/100.
         RR2N=ARIG(2)/100.
-                      ELSE      !*TEST                           
+                      ELSE      !*TEST
            RR2=RZAR(1)/100.     !*TEST
             RR2N=RZAR(2)/100.   !*TEST
                       ENDIF     !*TEST
@@ -840,8 +840,8 @@ C
         else
                 yfof2 = zfof2 + ttt * (fof2n-zfof2)
       xm3000 = zm3000+ ttt * (xm300n-zm3000)
-      endif                                       
-501   ratfc=1.  
+      endif
+501   ratfc=1.
       IF(FOF2IN) THEN
            FOF2=AFOF2
         ELSE
@@ -866,23 +866,23 @@ CREM      FOF2=FOF2*stormcor
       endif
 C ****************************************************
 C
-C *** SMI PLASMAPASUE ALTITUDE 
+C *** SMI PLASMAPASUE ALTITUDE
          W=RSSN
       EH=20200.
       hprr=cos(mlat*umr)
       HHH=((5.7*hprr*hprr-1.)*6370.+500.)*(1.-0.0825*XKP)    ! for hpl(kp)
-      HPL=20200.  !  for GPS-TEC 
+      HPL=20200.  !  for GPS-TEC
       heiend=hpl
 C
 C F2 REGION PEAK HEIGHT
 C
       IF (HMF2IN) then
-        IF(AHMF2.LT.50.0) THEN 
+        IF(AHMF2.LT.50.0) THEN
          XM3000=AHMF2
 COLD    HMF2=HMF2EDS(RZS,FOF2/FOE,XM3000,HOUR,DAYNR,ABSMLT) ! SMI hmF2
       HMF2=PEAKH(FOE,FOF2,XM3000)
         ENDIF
-      ELSE  
+      ELSE
 cIRI    HMF2=HMF2ED(MAGBR,RSSN,FOF2/FOE,XM3000)
       IF (DH2.GT.9998.) then
 COLD      HMF2=HMF2EDS(RZS,FOF2/FOE,XM3000,HOUR,DAYNR,ABSMLT) ! SMI
@@ -949,7 +949,7 @@ C# NEXT CALCULATION OF XNE05 IS REQUIRED TO ESTIMATE QF-FACTOR
       xnetop=XE(H05TOP)
 C NEW: find topside scale height hsc=hsip(nmf2/e)-hmf2
       call topscale1(hsip,scalh,xsc)
-c     
+c
 CADD+
       scalh0=scalh
 C NEW++++++++++++ 1st call to obtain xnepl:
@@ -965,7 +965,7 @@ C
 c
 c F layer - bottomside thickness parameter B0 and shape parameters B1
 c
-C        B1=3.0           ! Former B1=const with BO_GUL option 
+C        B1=3.0           ! Former B1=const with BO_GUL option
       B1=hpol(HOUR,1.9,2.6,SAX,SUX,1.,1.) ! NEW ! Diurnal B1 Formula: 1.9<B1<2.6
 C New coefficient BCOEF is introduced for B0_GUL option
 C deduced from 3nd order approximation to coefficients x05bot=(hmF2-h05bot/B0) => replace former B0B1 array:
@@ -1036,8 +1036,8 @@ c
       X=HME-HDX
       XKK=-DXDX*X/(XDX*ALOG(XDX/NME))
 c
-c if exponent xkk is larger than xkkmax, then xkk will be set to 
-c xkkmax and d1 will be determined such that the point hdx/xdx is 
+c if exponent xkk is larger than xkkmax, then xkk will be set to
+c xkkmax and d1 will be determined such that the point hdx/xdx is
 c reached; derivative is no longer continuous.
 c
         xkkmax=5.
@@ -1062,7 +1062,7 @@ c omit F1 feature if nmf1*0.9 is smaller than nme
             hef=hef-1.
             if(hef.le.hme) goto 9427
             goto 9245
-            endif      
+            endif
          CALL REGFA1(HEF,HMF2,XE2H,NMF2,0.001,NMF1,XE2,SCHALT,HMF1)
         IF(.not.SCHALT) GOTO 3801
  9427 continue
@@ -1403,7 +1403,7 @@ c-      call iri_tec(heibeg,h05top,1,tec,tect,tecb)
              TEC=TEC/1.0E+16
           TCB=TEC*TECB/100.0
        TCT=TEC*TECT/100.0      ! TCT of IRI-ISO in [hmF2, h05top]
-      IF (jf(30)) goto 149   ! None TECI input 
+      IF (jf(30)) goto 149   ! None TECI input
 C
 C NEW!!! Fitting h05top to TECI input: REPLACED by change of foF2:
 C
@@ -1433,7 +1433,7 @@ C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C Search h05top new in the plasmasphere model
        xnm_pre=NMF2
       NMF2=1.24E10*FOF2*FOF2
-       xnetop=0.5*NMF2  ! 0.5 NmF2  
+       xnetop=0.5*NMF2  ! 0.5 NmF2
       if (fof2IN) goto 1504
       if (hmf2IN) goto 1504
 C
@@ -1454,7 +1454,7 @@ C
 C ADD Return to main PROGRAM with updated foF2 and hmF2
       OARR(1)=NMF2
       OARR(2)=HMF2
-      IF (TECIN)  RETURN 
+      IF (TECIN)  RETURN
 C *********************************************************
 C
 C CHANGE bottomsode HHALF according new hmF2
@@ -1534,7 +1534,7 @@ c   tih=teh-outf(4,kk-1)+outf(3,kk-1)
       tih=-tih
       kkti=kk+1
       endif
-C     
+C
         OUTF(2,kk)=TNH
         OUTF(3,kk)=TIH
         OUTF(4,kk)=TEH
@@ -1603,14 +1603,14 @@ C Check Ti(h<400km) for interpolation:
       kkti=kk-2
       outf(3,kkti)=outf(3,kk400)-100.
       endif
-      if (outf(0,kkti).gt.200.) kkti=kk200   
+      if (outf(0,kkti).gt.200.) kkti=kk200
 C   Fit Ti-profile at [200km:400km] to Ti(kkti):
       do i=kk400+1,kk
       if ((i.lt.kkti).and.(i.gt.kk400)) then
        outf(3,i)=outf(3,kkti)+(outf(3,kk400)-outf(3,kkti))/
      &(outf(0,kk400)-outf(0,kkti))*(outf(0,i)-outf(0,kkti))
             endif
-      if (outf(2,i).gt.outf(3,i)) then 
+      if (outf(2,i).gt.outf(3,i)) then
        outf(2,i)=outf(3,i)/outf(3,i-1)*outf(2,i-1)  ! correct: Tn < Ti
        endif
       enddo
@@ -1667,7 +1667,7 @@ C
       OARR(46)=scalh    !
       OARR(47)=xsc      !
 CADD+
-      OARR(48)=scalh0    ! 
+      OARR(48)=scalh0    !
       OARR(49)=DTEC0      !
       OARR(50)=fof2rem          !
 3330  CONTINUE

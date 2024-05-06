@@ -5,11 +5,11 @@ C This file contains the D-region models of Friedrich and Torkar (2001)
 C (subroutine F00 and block data statement).
 C The subroutine DRegion of Danilov et al. (1995) was moved to IRIFUN,
 C because of consistent problems of some Fortran compilers wit the long
-C BLOCK DATA statement. 
+C BLOCK DATA statement.
 C
-C !!!USER NOTE!!! If your compiler has problems with this subroutine you 
-C can compile IRI without this file. But you first have to comment out  
-C the following two line in IRISUB: 
+C !!!USER NOTE!!! If your compiler has problems with this subroutine you
+C can compile IRI without this file. But you first have to comment out
+C the following two line in IRISUB:
 C            call F00(HEIGHT,LATI,DAYNR,XHI,F107D,EDENS,IERROR)
 C            if(ierror.eq.0.or.ierror.eq.2) outf(1,kk)=edens
 c

@@ -97,14 +97,14 @@ COLUMNS   FMT   DESCRIPTION
 
 66-70     F5.1  OTTAWA 10.7-CM SOLAR RADIO FLUX ADJUSTED TO 1 AU--measured at
                   1700 UT daily and expressed in units of 10 to the -22 Watts/
-                  meter sq/hertz.  Observations began on February 14, 1947. 
+                  meter sq/hertz.  Observations began on February 14, 1947.
                   From that date through December 31, 1973, the fluxes given
-                  here don't reflect the revisions Ottawa made in 1966. NOTE: 
+                  here don't reflect the revisions Ottawa made in 1966. NOTE:
                   If a solar radio burst is in progress during the observation
                   the pre-noon or afternoon value is used (as indicated by a
                   flux qualifier value of 1 in column 71.
 
-71-71     I1    FLUX QUALIFIER.  "0" indicates flux required no adjustment; 
+71-71     I1    FLUX QUALIFIER.  "0" indicates flux required no adjustment;
                   "1" indicates flux required adjustment for burst in progress
                   at time of measurement; "2" indicates a flux approximated by
                   either interpolation or extrapolation; and "3" indicates no

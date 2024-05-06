@@ -87,7 +87,7 @@ setup(
     author="Maaijke Mevius",
     author_email="mevius@astron.nl",
     description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
-                "and WMM data for radio interferometry observations",
+    "and WMM data for radio interferometry observations",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     maintainer="Marcel Loose",

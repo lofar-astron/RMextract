@@ -3,6 +3,7 @@
 """
 Set up logging for RMextract
 """
+
 import logging
 import os
 
@@ -18,11 +19,12 @@ def setup_logging():
 
     logger = logging.getLogger("RMextract")
     logger.setLevel(level)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     ch.setLevel(level)
     logger.addHandler(ch)
     return logger
+
 
 logger = setup_logging()

@@ -9,31 +9,31 @@ WMM_Model::~WMM_Model(){
     MAG_FreeMagneticModelMemory(TimedMagneticModel);
     TimedMagneticModel=NULL;
   }
-  for(int i = 0; i < epochs + 1; i++) 
+  for(int i = 0; i < epochs + 1; i++)
     if (MagneticModels[i]){
       MAG_FreeMagneticModelMemory(MagneticModels[i]);
       MagneticModels[i]=NULL;
     }
 };
 
-WMM_Model::WMM_Model(){  
+WMM_Model::WMM_Model(){
   TimedMagneticModel=NULL;
-  
-  for(int i = 0; i < epochs + 1; i++) 
+
+  for(int i = 0; i < epochs + 1; i++)
       MagneticModels[i]=NULL;
 };
 
 WMM_Model::WMM_Model(const char CoeffFile[256], const float date,const float lon,const float lat,const float h){
   TimedMagneticModel=NULL;
-  
-  for(int i = 0; i < epochs + 1; i++) 
+
+  for(int i = 0; i < epochs + 1; i++)
       MagneticModels[i]=NULL;
-    
+
   char filename[256];
   char filenameSV[256];
-  
+
   sprintf(filename, "%s.COF", CoeffFile);
-  
+
   FILE * filename_valid=fopen (filename, "r");
   assert(filename_valid);
   fclose(filename_valid);
@@ -65,13 +65,13 @@ void WMM_Model::setEM()
 
 void WMM_Model::setDate(const float date){
     UserDate.DecimalYear=date; //decimal year
-    
+
 }
 
 void WMM_Model::setLonLat(const float lon,const float lat){
   CoordGeodetic.phi=lat;//lattitude in degrees
   CoordGeodetic.lambda=lon; //longitude in degrees
-    
+
 }
 void WMM_Model::setHeight(const float h){
     CoordGeodetic.HeightAboveEllipsoid=h; //Height above WGS-84 elipsoid
@@ -93,16 +93,16 @@ float WMM_Model::getZ(){
 
 EMM_Model::EMM_Model(const char CoeffFile[256], const float date,const float lon,const float lat,const float h){
   TimedMagneticModel=NULL;
-  
-  for(int i = 0; i < epochs + 1; i++) 
+
+  for(int i = 0; i < epochs + 1; i++)
       MagneticModels[i]=NULL;
   char filename[256];
   char filenameSV[256];
-  
+
   sprintf(filename, "%s%d.COF", CoeffFile,2010);
   sprintf(filenameSV, "%s%dSV.COF",CoeffFile,2010);
   //check if filename exists
-  
+
   FILE * filename_valid=fopen (filename, "r");
   assert(filename_valid);
   fclose(filename_valid);
@@ -133,7 +133,7 @@ EMM_Model::EMM_Model(const char CoeffFile[256], const float date,const float lon
   nMax = MagneticModels[epochs]->nMax;
   NumTerms = ((nMax + 1) * (nMax + 2) / 2);
   TimedMagneticModel = MAG_AllocateModelMemory(NumTerms); /* For storing the time modified WMM Model parameters */
-  for(int i = 0; i < epochs; i++) 
+  for(int i = 0; i < epochs; i++)
     if(MagneticModels[i] == NULL || TimedMagneticModel == NULL)
       {
 	MAG_Error(2);

@@ -1,7 +1,7 @@
 To install:
 python setup.py build
 and
-python setup.py install 
+python setup.py install
 
 To also install the optional LOFAR features (requires lofar.parmdb + pyrap):
 
