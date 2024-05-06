@@ -107,7 +107,8 @@ setup(
     extras_require={
         # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
         # Since these have never been published on PyPI, we cannot specify this dependency.
-        "lofar-utils": ["losoto"]
+        "lofar-utils": ["losoto"],
+        "dev": ["pytest", "pytest-cov", "ruff", "pre-commit"],
     },
     entry_points={
         "console_scripts": [
