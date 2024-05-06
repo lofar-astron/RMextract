@@ -1,7 +1,7 @@
 !    -*- f90 -*-
 ! Note: the context of this file is case sensitive.
 
-python module _iri ! in 
+python module _iri ! in
     interface  ! in :_iri
         subroutine iri_get_sub(path,jf,jmag,alati,along,iyyyy,mmdd,dhour,heibeg,heiend,heistp,outf,oarr) ! in :_iri:iriget.for
             character*200 :: path
@@ -33,7 +33,7 @@ python module _iri ! in
             real intent(out) :: tecb
             real intent(out) :: tect
         end subroutine iri_get_tec
-    end interface 
+    end interface
 end python module _iri
 
 ! This file was auto-generated with f2py (version:2).

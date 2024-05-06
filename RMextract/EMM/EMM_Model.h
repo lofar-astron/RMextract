@@ -15,7 +15,7 @@ extern "C"{
 /* The Geomagnetism Library is used to make a command prompt program. The program prompts
 the user to enter a location, performs the computations and prints the results to the
 standard output. The program expects the files GeomagnetismLibrary.c, GeomagnetismHeader.h,
-EMM2010.COF, EMM2010SV.COF and EGM9615.h to be in the same directory. 
+EMM2010.COF, EMM2010SV.COF and EGM9615.h to be in the same directory.
 
 Manoj.C.Nair
 Nov 23, 2009

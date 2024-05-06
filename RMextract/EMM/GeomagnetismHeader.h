@@ -109,12 +109,12 @@ typedef struct {
     double DecimalYear; /* decimal years */
 } MAGtype_Date;
 
-/*typedef struct { 
+/*typedef struct {
     int MAG_Mercator;
     int MAG_LambertConformalConic;
     int MAG_PolarStereographic;
     int MAG_TransverseMercator;
-} MAGtype_MapProjectionCode; 
+} MAGtype_MapProjectionCode;
  Deprecated, Will be removed in the next revision.*/
 
 typedef struct {

@@ -14,24 +14,24 @@ CC    T.L. Gulyaeva     Iriplas1                             Dec. 2011
 CC
 CC    T.L. Gulyaeva     Isomain7                             June 2009
 CC
-CC                          ISO_IRI MAIN PROGRAM 
+CC                          ISO_IRI MAIN PROGRAM
 CC
 CC              EARTH'S MODEL OF IONOSPHERE AND PLASMASPHERE
 CC
 CC                INCLUDING IRI/SMI/ISOMAIN3 SUBROUTINES
 CC
 CC
-CC     PRODUCTS: ELECTRON DENSITY PROFILES 
+CC     PRODUCTS: ELECTRON DENSITY PROFILES
 CC                           AND TOTAL ELECTRON CONTENT
 CC     AT ALTITUDES OF 65 TO 35000 KM AT ANY LOCATION OF THE EARTH
 CC
-CC     INPUT: YEAR, MONTH, DAY, HOUR, LOCATION, SUNSPOT NUMBER, 
+CC     INPUT: YEAR, MONTH, DAY, HOUR, LOCATION, SUNSPOT NUMBER,
 CC     MAGNETIC AP/KP-INDEX, SOLAR RADIO FLUX AND SOLAR PROXY INDEX (8 options)
 CC     OPTIONAL: foF2 AND/OR hmF2/OR M3000F2 (IF ZERO, CCIR MAPS ARE USED
 CC     INCLUDING IRI_STORM MODEL)
 CC     NEW OPTION: TEC INPUT (IF TEC=0, IRI-Plas TEC CALCULATION)
-CC                
-CC     OUTPUT: ELECTRON DENSITY PROFILES AND 
+CC
+CC     OUTPUT: ELECTRON DENSITY PROFILES AND
 CC             ELECTRON CONTENT AT SELECTED
 CC            ALTITUDES FROM 80km TO THE PLASMAPAUSE (hpl < 35000km).
 CC            STANDARD SET OF PARAMETERS / Ne(h),fN(h) profiles /
@@ -43,11 +43,11 @@ C Temodel-2006 subroutine (by J. Titheridge) is included for Te, Ti, Tn above 40
 C
 C Changes of ISOMAIN3.FOR___________________________Feb. 2005
 C
-C Dependence of foF2 and M3000F2 on sunspot number Rz is used 
+C Dependence of foF2 and M3000F2 on sunspot number Rz is used
 C replacing interpolation of CCIR maps versus ionospheric IG-index used by IRI-2000/1995
 C
 C Chebishev polinomial approximation is introduced (SUBROUTINE CHEBISH) for
-C topside ratio of half-width to F2 layer peak height depending 
+C topside ratio of half-width to F2 layer peak height depending
 C on geomagnetic latitude and local time
 C
 C Changes from ISOMAIN2.FOR_________________________July 2003
@@ -59,21 +59,21 @@ C ISIS and IK19 topside electron density profiles
 C
 C contains IRIT13, IONCORR, IRI_TEC----D.Bilitza-- Oct 20, 1995
 C INTEGR, CIRA-86 , STORM, APF ______________________ IRI-2001
-C SMI-source: CORDM, new: GKPM using results of APF 
+C SMI-source: CORDM, new: GKPM using results of APF
 C ___________________________________T.L.Gulyaeva___Sep. 2001
 C
 C ----------------------------------------------------------------
 C
-C 
+C
       SUBROUTINE IRI_PLAS_MAIN(path,ALATI,ALONG,JMAG,IYYYY,MMDD,HOURS,
      & OUTF)
 
 c     change code such that it takes input from array of booleans (if necessary) + above values
-c     write output to array instead of file. use irisub as example code      
-      
+c     write output to array instead of file. use irisub as example code
+
 C-----------------------------------------------------------------
 c     Program for numerical integration of IRI profiles from h=100km
-C     to h=alth. 
+C     to h=alth.
 C     h=hpl IS ALLOWED WITH SMI XXE6(H) AMENDMENT
 C     INPUT:  ALATI,ALONG  LATITUDE NORTH AND LONGITUDE EAST IN DEGREES
 C     jmag     =0 geographic  =1 geomagnetic coordinates
@@ -84,19 +84,19 @@ C*    jinp =1(SSN1); 2(SSN2); 3(F10.7); 4(GEC); 5(TEC); 6(IG); 7(MgII); 8 (Lym-a
 C*    jinp =0  previous version using input of gec_rz.dat file
 C     jout = 0 NO OUTPUT Ne(h)& fN(h) PROFILES
 C     jout = 1 OUTPUT Ne(h)& fN(h) PROFILES
-C     jstr = 0 no foF2 STORM model 
-C     Jstr = 1 foF2 STORM model included 
+C     jstr = 0 no foF2 STORM model
+C     Jstr = 1 foF2 STORM model included
 C     juc  = 0 input foF2>0 and/or hmF2>0 (or M3000F2*100.+1000.)
 C     juc  = 1 option of CCIR maps of foF2 and M3000F2
-C     juc  = 2 option of URSI foF2 map 
+C     juc  = 2 option of URSI foF2 map
 C     hbeg,hend   upper and lower integration IRI limits in km
 C     RZS   sunspot number (option of 81-days average input)
 C     RZS=-1 : sunspot number from aprz.dat file used
 C     XKP geomagnetic  Kp-index (option of input)
 C     XKP=-1 : accumulated Kpm produced by GKPM subroutine from aprz.dat
 C     input: foF2>0 and/or hmF2>0 and/or TEC>0 [TEC*1E-16, m-2]
-C     OUTPUT: 
-C     XHI solar zenith angle 
+C     OUTPUT:
+C     XHI solar zenith angle
 C     COV solar radio flux averaged for 81 days preceeding given day
 C     Kpm geomagnetic index driving plasmasphere model
 C     Api geomagnetic index driving foF2 storm model
@@ -120,8 +120,8 @@ C------------------------------------------------------------------
       logical     jf(30),F1REG
       REAL        RZS,COV
       integer daynr,numhei
-      character*4  xxpr,yypr   
-      COMMON /BXY/xxpr,yypr    
+      character*4  xxpr,yypr
+      COMMON /BXY/xxpr,yypr
       common   /block1/hmf2,xnmf2,hmf1,F1REG
      &/PLAS/HPL,XNEPL,XKP,ICALLS,RUT,RLT,OARR,TECI,TCB,TCT,TCPL,TEC
       COMMON   /CONST/UMR,PI/ARGEXP/ARGMAX
@@ -156,7 +156,7 @@ c
       if (OUTPUT) THEN
          WRITE(*,*) 'PC Date: Year,Month,Day = ',DD,'Time = ',TT
       ENDIF
-C     
+C
        XYEAR=DD(1:4)
        XMN=DD(5:6)
        XDY=DD(7:8)
@@ -213,10 +213,10 @@ C New:
       gind=0.                     !new
       if (rzs.ge.0.) then
            if (rzs.gt.999.) then
-           cov=rzs-1000.        ! Input cov+1000. 
-           RZS=1.076*COV-65.7817    !* 
+           cov=rzs-1000.        ! Input cov+1000.
+           RZS=1.076*COV-65.7817    !*
                     else
-      COV=0.9066*RZS+62.6645         !*   
+      COV=0.9066*RZS+62.6645         !*
          endif
 C
       if (jinp.eq.0) then               !*
@@ -225,7 +225,7 @@ C
       endif                             !*
 C
       oarr(41)=cov
-      jf(25)=.false. 
+      jf(25)=.false.
       jf(27)=.false.                    !new
            endif
       oarr(33)=rzs
@@ -281,14 +281,14 @@ C      aend=hend
      &      'obtained with Gulyaeva-1987 model.'
       endif
       ENDIF
-      call IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,HOURS,   
-     &   abeg,aend,numhei,OUTF,JINP)                        
+      call IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,HOURS,
+     &   abeg,aend,numhei,OUTF,JINP)
 C
 C Add:
       if (JF(30)) GOTO 123  ! No TECI input
 C
 C Add: 2nd call IRIS2015c: replace TEC input with 'input' of updated foF2, hmF2:
-      jf(30)=.TRUE. ! 
+      jf(30)=.TRUE. !
       TECI=0.
       JF(8)=.FALSE.
       JF(9)=.FALSE.
@@ -297,11 +297,11 @@ C Add: 2nd call IRIS2015c: replace TEC input with 'input' of updated foF2, hmF2:
       tecb= -111.
       TCPL= -111.
       icalls=icalls-1
-      call IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,HOURS,   
-     &   abeg,aend,numhei,OUTF,JINP)                      
+      call IRIS2017(JF,JMAG,ALATI,ALONG,IYYYY,MMDD,HOURS,
+     &   abeg,aend,numhei,OUTF,JINP)
 C End Add commands
 C
-      
+
   123    IF(JF(8)) FOF2=OARR(1)
       IF(JF(9)) HMF2=OARR(2)
       IF(JF(17))  RZS=OARR(33)
@@ -312,11 +312,11 @@ C
 CCC
 CC ENRE=OARR(32)
       GLATI=OARR(37)
-      GLONG=OARR(38)                  
+      GLONG=OARR(38)
       XMLAT=OARR(42)
       XMLON=OARR(40)
       GMLT=OARR(44)
-      HTOP=OARR(46) 
+      HTOP=OARR(46)
       EN1000=CN1000/1.0E+06
       TOT=TCB+TCT+TCPL
       TAU=(TOT/XNMF2)*1.0E+13
@@ -326,7 +326,7 @@ CC ENRE=OARR(32)
 c>>      XNEPL=XNEPL/1.0E+06
 C TWO OPTIONS OF OUTPUT: <7> ONLY KEY PARAMETERS; <8> FULL PROFILE
       if (OUTPUT) THEN
-      IF (JOUT.EQ.0) THEN 
+      IF (JOUT.EQ.0) THEN
          GOTO 7
       ELSE
          GOTO 8
@@ -355,7 +355,7 @@ C*********TEST
    14 FORMAT (1X,F8.0,F8.0,1X,F6.3,F8.3,4F7.2,F7.1,2(F6.1),F7.1)
       WRITE(*,15)
    15   FORMAT(4X,'H',9X,'NE',9X,'FN',6X,'Te',7X,'Ti',7X,'Tn')
-C 
+C
       DO 16 I=0,NUMHEI
       if ((I.EQ.0).AND.(ABS(outf(0,0)-outf(0,1)).LT.1.)) goto 16
       WRITE(*,17) OUTF(0,I),OUTF(1,I),OUTF(10,I)

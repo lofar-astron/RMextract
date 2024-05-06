@@ -113,7 +113,7 @@
  * does everything necessary to compute the geomagnetic elements from a given
  * geodetic point in space and magnetic model adjusted for the appropriate
  * date. These functions are the external functions necessary to create a
- * program that uses or calculates the magnetic field.  
+ * program that uses or calculates the magnetic field.
  ******************************************************************************
  ******************************************************************************/
 
@@ -149,7 +149,7 @@ CALLS:  	MAG_AllocateLegendreFunctionMemory(NumTerms);  ( For storing the ALF fu
     int NumTerms;
     MAGtype_MagneticResults MagneticResultsSph, MagneticResultsGeo, MagneticResultsSphVar, MagneticResultsGeoVar;
 
-    NumTerms = ((TimedMagneticModel->nMax + 1) * (TimedMagneticModel->nMax + 2) / 2); 
+    NumTerms = ((TimedMagneticModel->nMax + 1) * (TimedMagneticModel->nMax + 2) / 2);
     LegendreFunction = MAG_AllocateLegendreFunctionMemory(NumTerms); /* For storing the ALF functions */
     SphVariables = MAG_AllocateSphVarMemory(TimedMagneticModel->nMax);
     MAG_ComputeSphericalHarmonicVariables(Ellip, CoordSpherical, TimedMagneticModel->nMax, SphVariables); /* Compute Spherical Harmonic variables  */
@@ -499,8 +499,8 @@ int MAG_robustReadMagModels(char *filename, MAGtype_MagneticModel *(*magneticmod
 
 /******************************************************************************
  ********************************User Interface********************************
- * This grouping consists of functions which interact with the directly with 
- * the user and are generally specific to the XXX_point.c, XXX_grid.c, and    
+ * This grouping consists of functions which interact with the directly with
+ * the user and are generally specific to the XXX_point.c, XXX_grid.c, and
  * XXX_file.c programs. They deal with input from and output to the user.
  ******************************************************************************/
 
@@ -1473,8 +1473,8 @@ CALLS : none
 
 /******************************************************************************
  ********************************Memory and File Processing********************
- * This grouping consists of functions that read coefficient files into the 
- * memory, allocate memory, free memory or print models into coefficient files.  
+ * This grouping consists of functions that read coefficient files into the
+ * memory, allocate memory, free memory or print models into coefficient files.
  ******************************************************************************/
 
 
@@ -2271,8 +2271,8 @@ char *MAG_Trim(char *str)
 /******************************************************************************
  *************Conversions, Transformations, and other Calculations**************
  * This grouping consists of functions that perform unit conversions, coordinate
- * transformations and other simple or straightforward calculations that are 
- * usually easily replicable with a typical scientific calculator. 
+ * transformations and other simple or straightforward calculations that are
+ * usually easily replicable with a typical scientific calculator.
  ******************************************************************************/
 
 //
@@ -2775,10 +2775,10 @@ void MAG_SphericalToCartesian(MAGtype_CoordSpherical CoordSpherical, double *x, 
 {
     double radphi;
     double radlambda;
-    
+
     radphi = CoordSpherical.phig * (M_PI / 180);
     radlambda = CoordSpherical.lambda * (M_PI / 180);
-    
+
     *x = CoordSpherical.r * cos(radphi) * cos(radlambda);
     *y = CoordSpherical.r * cos(radphi) * sin(radlambda);
     *z = CoordSpherical.r * sin(radphi);
@@ -3051,8 +3051,8 @@ CALLS : none
 
 /******************************************************************************
  ********************************Spherical Harmonics***************************
- * This grouping consists of functions that together take gauss coefficients 
- * and return a magnetic vector for an input location in spherical coordinates 
+ * This grouping consists of functions that together take gauss coefficients
+ * and return a magnetic vector for an input location in spherical coordinates
  ******************************************************************************/
 
 int MAG_AssociatedLegendreFunction(MAGtype_CoordSpherical CoordSpherical, int nMax, MAGtype_LegendreFunction *LegendreFunction)
@@ -3763,7 +3763,7 @@ CALLS : none
             {
                 TimedMagneticModel->Main_Field_Coeff_H[index] = MagneticModel->Main_Field_Coeff_H[index] + (UserDate.DecimalYear - MagneticModel->epoch) * MagneticModel->Secular_Var_Coeff_H[index];
                 TimedMagneticModel->Main_Field_Coeff_G[index] = MagneticModel->Main_Field_Coeff_G[index] + (UserDate.DecimalYear - MagneticModel->epoch) * MagneticModel->Secular_Var_Coeff_G[index];
-                TimedMagneticModel->Secular_Var_Coeff_H[index] = MagneticModel->Secular_Var_Coeff_H[index]; // We need a copy of the secular var coef to calculate secular change 
+                TimedMagneticModel->Secular_Var_Coeff_H[index] = MagneticModel->Secular_Var_Coeff_H[index]; // We need a copy of the secular var coef to calculate secular change
                 TimedMagneticModel->Secular_Var_Coeff_G[index] = MagneticModel->Secular_Var_Coeff_G[index];
             } else
             {
@@ -3780,8 +3780,8 @@ CALLS : none
 
 /******************************************************************************
  *************************************Geoid************************************
- * This grouping consists of functions that make calculations to adjust 
- * ellipsoid height to height above the geoid (Height above MSL). 
+ * This grouping consists of functions that make calculations to adjust
+ * ellipsoid height to height above the geoid (Height above MSL).
  ******************************************************************************
  ******************************************************************************/
 

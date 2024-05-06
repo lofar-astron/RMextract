@@ -25,4 +25,3 @@ same for readapf107()...?
 
 Compile:
 f2py -c -m iri iri.pyf iritest.for irisub.for irifun.for iritec.for iridreg.for igrf.for cira.for iriflip.for
-

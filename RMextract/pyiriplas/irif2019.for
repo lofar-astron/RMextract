@@ -1,6 +1,6 @@
 C IRIF2019.FOR________________________May 2019 (T.L.Gulyaeva)
 C
-C 05.05.2019 subroutine tcongec corrected for dimension of 
+C 05.05.2019 subroutine tcongec corrected for dimension of
 C       real ionoindx(890),indrz(890)
 C
 C IRIF2017.FOR________________________May 2017 (T.L.Gulyaeva)
@@ -18,7 +18,7 @@ C
 C IRIF2011.FOR________________________Dec 2011 (T.L.Gulyaeva)
 C
 C IRIF2007.FOR________________________Mar 2008 (T.L.Gulyaeva)
-C 
+C
 C Changes of SMI plasmasphere model: one function in [h05top:hpl]
 C
 C IRIF2006.FOR________________________May 2006 (T.L.Gulyaeva)
@@ -104,7 +104,7 @@ C++
       if (y.lt.0.) y=abs(y) ! extra check ++++++++++
 C++
 C# NEW CORRECTING FACTOR QFAC:
-      IF((QF.EQ.1.).AND.(ABS(H-H05TOP).LT.1.)) then 
+      IF((QF.EQ.1.).AND.(ABS(H-H05TOP).LT.1.)) then
       if (y.gt.0.) QF=Y05/Y
       if (QF.gt.50.0) QF=50.           !++++++++++
       endif
@@ -158,7 +158,7 @@ C ELECTRON DENSITY FOR THE F1-LAYER (HZ.....HMF1).
 C
         REAL FUNCTION XE3_1(H)
 C ELECTRON DENSITY FOR THE F1-LAYER (HZ.....HMF1)
-C USING THE NEW DEFINED F1-LAYER FUNCTION (Reinisch and Huang, Advances 
+C USING THE NEW DEFINED F1-LAYER FUNCTION (Reinisch and Huang, Advances
 C in Space Research, Volume 25, Number 1, 81-88, 2000)
         COMMON   /BLOCK1/ HMF2,XNMF2,HMF1,F1REG
      &     /BLOCK2/ B0,B1,D1F1
@@ -237,7 +237,7 @@ C
 C
       REAL FUNCTION XE(H)
 C ELECTRON DENSITY BETWEEN HA(KM) AND 1336 KM
-C SUMMARIZING PROCEDURES  NE1....6; 
+C SUMMARIZING PROCEDURES  NE1....6;
 C SMI XXE6 PROCEDURE INCLUDED FOR 1336 TO 20,000 km
       DIMENSION OARR(50)
       COMMON    /BLOCK1/HMF2,XNMF2,XHMF1,f1reg
@@ -280,7 +280,7 @@ C
       RETURN
       END
 C
-C**********************************************************                     
+C**********************************************************
       FUNCTION XXE6(X)
 C==== SMI PLASMASPHERE ELECTRON DENSITY PROFILE ABOVE h05top
 C
@@ -292,7 +292,7 @@ C     HOUR:  Local Time
 C
       INTEGER  ND,DAYNR
       real N6370,L,lt
-      COMMON /DEM/W,GLON,HOUR,DAYNR,CN1000,ALON,BLON,enre,hsc 
+      COMMON /DEM/W,GLON,HOUR,DAYNR,CN1000,ALON,BLON,enre,hsc
      &   /QTOP/Y05,H05TOP,QF,XNETOP,XM3000,HHALF,TAU,HTOP,QF0
 
 c     HEITOP,ELTOP,ABSMLT
@@ -379,7 +379,7 @@ C!!!         dnb = 3.0E9*A1*A2*EXP(A3*blb)
       END
 C
       SUBROUTINE ablon(xlati,xlongi,alonn,blonn)
-C==== SMI GRID POINTS FOR XXE6(H)       
+C==== SMI GRID POINTS FOR XXE6(H)
       DIMENSION xlat(37),xlon(37),zlon(6)
       common /ab/ fimeq,zlon,nl
       DATA xlat /10.62,10.43,10.06,9.60,9.10,8.76,8.60,8.74,9.29,9.82,
@@ -917,12 +917,12 @@ C
 C
 C
       REAL FUNCTION HMF2EDS(XR,X,XM3,HOUR,DAY,ABML)
-C     D. BILITZA, F2 layer peak height (HMF2) for corrected magnetic 
+C     D. BILITZA, F2 layer peak height (HMF2) for corrected magnetic
 C     latitude (HMLAT) and sunspot number (XR) using coefficient
 C     M3000(XM3) and ratio of FOF2/FOE.
 C     [Ref. D. BILITZA ET. AL. TELECOMM.J.,46,549-553,1979]
 C     hmF2EDS = SMI option includes HOUR (LT), DAY, ABS(MLAT) input and
-C     parameters of COMMON Blocks: Solar zenith angle XHI and 
+C     parameters of COMMON Blocks: Solar zenith angle XHI and
 C     corrected magnetic latitute HMLAT
 C
       COMMON /BLO11/XHI/B6/HMLAT,H0NE,GLT,FG1,FG2
@@ -1658,7 +1658,7 @@ C
 C 01/98 corrected to include a smooth transition at the modip equator
 C       and no discontinuity at the equatorial change in season.
 C 09/98 new B0 values incl values at the magnetic equator
-C 10/98 longitude as input to determine if magnetic equator in northern 
+C 10/98 longitude as input to determine if magnetic equator in northern
 C         or southern hemisphere
 C
       REAL      NITVAL
@@ -1711,8 +1711,8 @@ C       bfd(2,2) at modip = -18,
 C       bfd(2,1) or bfd(1,1) at modip = 0,
 C       bfd(1,2) at modip = 20,
 C       bfd(1,3) at modip = 45.
-C If the Longitude is between 200 and 320 degrees than the modip 
-C equator is in the southern hemisphere and bfd(2,1) is used at the 
+C If the Longitude is between 200 and 320 degrees than the modip
+C equator is in the southern hemisphere and bfd(2,1) is used at the
 C equator, otherwise bfd(1,1) is used.
 c
         zx1=bfd(2,3)
@@ -1828,7 +1828,7 @@ C
       SRASN=3.141592654-ATAN2(COS(OBLIQ)/SOB*SC,-COS(SLP)/COSD)
       RETURN
       END
-C      
+C
 C
 C ************************ EPSTEIN FUNCTIONS **************************
 C *********************************************************************
@@ -2924,46 +2924,46 @@ c               rsn             interpolation parameter
 c               nmonth          previous or following month depending
 c                               on day
 c
-c Requires I/O UNIT=12 to read the Rz12 and IG12 indices file IG_RZ.DAT 
-c 
+c Requires I/O UNIT=12 to read the Rz12 and IG12 indices file IG_RZ.DAT
+c
 c rz(1) & ig(1) contain the indices for the month mm and rz(2) & ig(2)
 c for the previous month (if day less than 15) or for the following
 c month (otherwise). These indices are for the mid of the month. The
 c indices for the given day are obtained by linear interpolation and
 c are stored in rz(3) and ig(3).
 c
-c The indices file IG_RZ.DAT is structured as follows (values are 
-c separated by comma): 
+c The indices file IG_RZ.DAT is structured as follows (values are
+c separated by comma):
 c   day, month, year of the last update of this file,
 c   a blank line
 c   start month, start year, end month, end year,
 c   a blank line
 c   the IG index for December of start year - 1 (needed for interpolation)
-c   the 12 IG indices (13-months running mean) for start year, 
-c   the 12 IG indices for the second year 
+c   the 12 IG indices (13-months running mean) for start year,
+c   the 12 IG indices for the second year
 c       .. and so on until the end year,
 c   the IG index for January of end year + 1 (needed for interpolation)
 c   a blank line
 c   the Rz index for December of start year - 1 (needed for interpolation)
 c   the 12 Rz indices (13-months running mean) for the start year,
-c   the 12 Rz indices for the second year 
+c   the 12 Rz indices for the second year
 c       .. and so on until the end year.
 c   the Rz index for January of end year + 1 (needed for interpolation)
-c 
+c
 c A negative Rz index means that the given index is the 13-months-
-C running mean of the solar radio flux (F10.7). The close correlation 
+C running mean of the solar radio flux (F10.7). The close correlation
 C between (Rz)12 and (F10.7)12 is used to compute the (Rz)12 indices.
 c
 c An IG index of -111 indicates that no IG values are available for the
-c time period. In this case a correlation function between (IG)12 and 
+c time period. In this case a correlation function between (IG)12 and
 C (Rz)12 is used to obtain (IG)12.
 c
 c The computation of the 13-month-running mean for month M requires the
-c indices for the six months preceeding M and the six months following 
-C M (month: M-6, ..., M+6). To calculate the current running mean one 
-C therefore requires predictions of the indix for the next six months. 
-C Starting from six months before the UPDATE DATE (listed at the top of 
-c the file) and onward the indices are therefore based on indices 
+c indices for the six months preceeding M and the six months following
+C M (month: M-6, ..., M+6). To calculate the current running mean one
+C therefore requires predictions of the indix for the next six months.
+C Starting from six months before the UPDATE DATE (listed at the top of
+c the file) and onward the indices are therefore based on indices
 c predictions.
 c----------------------------------------------------------------
 
@@ -2972,14 +2972,14 @@ c----------------------------------------------------------------
            real         ionoindx(746),indrz(746)
            real         ig(3),rz(3)
            logical      mess
-           
+
            common /iounit/konsol,mess
       COMMON /path/datapath
       character datapath*200
 
            save         ionoindx,indrz,iflag,iyst,iymst,iymend,imst
 
-        if(iflag.eq.0) then      
+        if(iflag.eq.0) then
            open(unit=12,FILE=TRIM(ADJUSTL(datapath))//'ig_rz.dat',
      &      status='old')
 
@@ -3050,7 +3050,7 @@ c
                 if(imm2.gt.12) then
                         imm2=1
                         iyy2=yr+1
-                        idd2=380            
+                        idd2=380
 c               if((yr/4*4.eq.yr).and.(yr/100*100.ne.yr)) idd2=381
                         if(yr/4*4.eq.yr) idd2=381
                 else
@@ -3061,7 +3061,7 @@ c               if((yr/4*4.eq.yr).and.(yr/100*100.ne.yr)) idd2=381
                 endif
                 rz(2)=indrz(num+1)
                 ig(2)=ionoindx(num+1)
-                rsn=(idn-idd1)*1./(idd2-idd1)                
+                rsn=(idn-idd1)*1./(idd2-idd1)
                 rz(3)=rz(1)+(rz(2)-rz(1))*rsn
                 ig(3)=ig(1)+(ig(2)-ig(1))*rsn
                 goto 1927
@@ -3103,7 +3103,7 @@ c month (otherwise). These indices are for the mid of the month. The
 c indices for the given day are obtained by linear interpolation and
 c are stored in rz(3) and ig(3).
 c
-c the indices are obtained from the indices file ig_rz.dat that is 
+c the indices are obtained from the indices file ig_rz.dat that is
 c read in subroutine initialize and stored in COMMON/indices/
 c----------------------------------------------------------------
       integer      yr, mm, day, iflag, iyst, iyend,iymst
@@ -3115,36 +3115,36 @@ c----------------------------------------------------------------
       COMMON /path/datapath
       character datapath*200
 c
-C NEW TLG Aug. 2013 This Procedure is using Global Electron Content, 
+C NEW TLG Aug. 2013 This Procedure is using Global Electron Content,
 C                   GEC12c index instead of ionospheric IG12 index
 C
 c Rz12 and GEC are determined from the file GEC_RZ.DAT which has the
-c following structure: 
+c following structure:
 c day, month, year of the last update of this file,
 c start month, start year, end month, end year,
-c the 12 GEC indices (13-months running mean) for the first year, 
+c the 12 GEC indices (13-months running mean) for the first year,
 c the 12 GEC indices for the second year and so on until the end year,
 c the 12 Rz indices (13-months running mean) for the first year,
 c the 12 Rz indices for the second year and so on until the end year.
 c The inteporlation procedure also requires the IG and Rz values for
 c the month preceeding the start month and the IG and Rz values for the
-c month following the end month. These values are also included in 
+c month following the end month. These values are also included in
 c GEC_RZ.
-c 
+c
 c A negative Rz index means that the given index is the 13-months-
-C running mean of the solar radio flux (F10.7). The close correlation 
+C running mean of the solar radio flux (F10.7). The close correlation
 C between (Rz)12 and (F10.7)12 is used to derive the (Rz)12 indices.
 c
 c An GEC index of -111 indicates that no GEC values are available for the
-c time period. In this case a correlation function between (GEC)12 and 
+c time period. In this case a correlation function between (GEC)12 and
 C (Rz)12 is used to obtain (GEC)12.
 c
 c The computation of the 13-month-running mean for month M requires the
-c indices for the six months preceeding M and the six months following 
-C M (month: M-6, ..., M+6). To calculate the current running mean one 
-C therefore requires predictions of the indix for the next six months. 
-C Starting from six months before the UPDATE DATE (listed at the top of 
-c the file) and onward the indices are therefore based on indices 
+c indices for the six months preceeding M and the six months following
+C M (month: M-6, ..., M+6). To calculate the current running mean one
+C therefore requires predictions of the indix for the next six months.
+C Starting from six months before the UPDATE DATE (listed at the top of
+c the file) and onward the indices are therefore based on indices
 c predictions.
       if(iflag.eq.0) then
          open(unit=12,FILE=TRIM(ADJUSTL(datapath))//'gec_rz.dat',
@@ -3156,7 +3156,7 @@ c     *status='old')
       GOTO 20
    10 PAUSE ' CANNOT FIND THE FILE "GEC_RZ.DAT". EXECUTION TEMINATED.'
       STOP
-   20 CONTINUE  
+   20 CONTINUE
 c Read the update date, the start date and the end date (mm,yyyy), and
 c get number of data points to read.
           read(12,*) iupd,iupm,iupy
@@ -3182,7 +3182,7 @@ C      pause ' '
                         indrz(jj)=rrr
                         endif
                 if(ionoindx(jj).gt.-90.) goto 1
-                  zi=((0.0194*rrr+1.0906)-1.0)*50.0       
+                  zi=((0.0194*rrr+1.0906)-1.0)*50.0
                   if(zi.gt.274.0) zi=274.0
                   ionoindx(jj)=zi
 1               continue
@@ -3257,16 +3257,16 @@ C
       subroutine tconind(yr,mm,day,idn,rz,sf,rsn,nmonth,nind)
 c----------------------------------------------------------------
 C  TL Gulyaeva........................................................ May, 2017
-C     nind =1 <DEFAULT> ssn1_12.dat  =>  rz(3); F10.7  =>  sf(3) 
+C     nind =1 <DEFAULT> ssn1_12.dat  =>  rz(3); F10.7  =>  sf(3)
 C     nind =2 ssn2_12.dat  SSN2 converted to SSN1  =>  rz(3); F10.7  => sf(3)
-C     nind =3 f107_12.dat  F10.7    =>  sf(3) converted to SSN1  =>  rz(3) 
+C     nind =3 f107_12.dat  F10.7    =>  sf(3) converted to SSN1  =>  rz(3)
 C     nind =4 geci_12.dat  GEC => rz(3); F10.7  => sf(3)
 C     nind =5 teci_12.dat  TEC => rz(3); F10.7  => sf(3)
 C     nind =6 igin_12.dat  IG  => rz(3); F10.7  => sf(3)
 C     nind =7 mgii_12.dat  MgII => rz(3); F10.7  => sf(3)
 C     nind =8 lyma_12.dat  Lyman-alpha => rz(3); F10.7  => sf(3)
 C Ref. T.L.Gulyaeva et al., 2017. TEC proxy index of solar activity for the
-C      International Reference Ionosphere IRI and its extension to 
+C      International Reference Ionosphere IRI and its extension to
 C      Plasmasphere IRI-PLAS model.Int. J. Sci. Eng. Applied Sci.,3,5,144-150,
 C      http://ijseas.com/index.php/issue-archive-2/volume3/issue-5/
 C
@@ -3285,8 +3285,8 @@ c month (otherwise). These indices are for the mid of the month. The
 c indices for the given day are obtained by linear interpolation and
 c are stored in rz(3) and sf(3).
 c
-c the indices are obtained from the indices files according to nind  
-c 
+c the indices are obtained from the indices files according to nind
+c
 c----------------------------------------------------------------
       integer      yr, mm, day
       integer      nind
@@ -3295,33 +3295,33 @@ c----------------------------------------------------------------
       COMMON /BXY/xxpr,yypr
 c
 C
-c rz(3) is read from xxpr_12.dat file (xxpr is defined according to nind) 
-c and the sf(3) solar radio flux index is determined from yypr_12.dat file 
-c which have the following structure: 
+c rz(3) is read from xxpr_12.dat file (xxpr is defined according to nind)
+c and the sf(3) solar radio flux index is determined from yypr_12.dat file
+c which have the following structure:
 c day, month, year of the last update of this file,
 c start month, start year, end month, end year,
-c the 12 indices (13-months running mean) for the first year, 
+c the 12 indices (13-months running mean) for the first year,
 c the 12 indices for the second year and so on until the end year,
 c The inteporlation procedure also requires the proxy index values for
 c the month preceeding the start month and the proxy index values for the
-c month following the end month. These values are also included in 
+c month following the end month. These values are also included in
 c xxpr_12.dat and yypr_12.dat file.
-c 
-c Input of nind=1 (default) means that the given index is the 13-months-running mean of 
-c SSN1 (former Rz12) and the solar radio flux (F10.7). The close correlation between Rz12 
+c
+c Input of nind=1 (default) means that the given index is the 13-months-running mean of
+c SSN1 (former Rz12) and the solar radio flux (F10.7). The close correlation between Rz12
 c and other solar proxies is used to derive the rz(3) and sf(3) indices.
 c
 c
 c The computation of the 13-month-running mean for month M requires the
-c indices for the six months preceeding M and the six months following 
-C M (month: M-6, ..., M+6). To calculate the current running mean one 
-C therefore requires predictions of the index for the next six months. 
-C Starting from six months before the UPDATE DATE (listed at the top of 
-c the file) and onward the indices are therefore based on indices 
+c indices for the six months preceeding M and the six months following
+C M (month: M-6, ..., M+6). To calculate the current running mean one
+C therefore requires predictions of the index for the next six months.
+C Starting from six months before the UPDATE DATE (listed at the top of
+c the file) and onward the indices are therefore based on indices
 c predictions.
 C
 C Check nind = 1,...,8::
-         if ((nind.eq.0).or.(nind.gt.8)) then 
+         if ((nind.eq.0).or.(nind.gt.8)) then
       write(*,*) ' WRONG OPTION FOR SOLAR PROXY JIND = ',nind,
      +   ' EXECUTION TEMINATED.'
       PAUSE  ' '
@@ -3361,76 +3361,76 @@ C
 C
 C
         select case (nind)
-C 
-      case (1)   
-C        
-    1 xxpr='ssn1'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (1)
+C
+    1 xxpr='ssn1'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf)  
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C 
-      case (2)  
-C        
-    2 xxpr='ssn2'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (2)
+C
+    2 xxpr='ssn2'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       rz(1)=0.7*rz(1)
       rz(2)=0.7*rz(2)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf)  
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C        
-      case (3)   
-C 
-    3 yypr='f107'      
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf) 
-      rz(1)=1.076*sf(1)-65.7817 
-      rz(2)=1.076*sf(2)-65.7817  
+C
+      case (3)
+C
+    3 yypr='f107'
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
+      rz(1)=1.076*sf(1)-65.7817
+      rz(2)=1.076*sf(2)-65.7817
        if (rz(1).lt.0.) rz(1)=0.
        if (rz(2).lt.0.) rz(2)=0.
       goto 33
-C 
-      case (4)  
-C 
-    4 xxpr='geci'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (4)
+C
+    4 xxpr='geci'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf) 
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C 
-      case (5)   
-C 
-    5 xxpr='teci'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (5)
+C
+    5 xxpr='teci'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf) 
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C 
-      case (6)  
-C 
-    6 xxpr='igin'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (6)
+C
+    6 xxpr='igin'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf)  
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C 
-      case (7)  
-C 
-    7 xxpr='mgii'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz) 
+C
+      case (7)
+C
+    7 xxpr='mgii'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf)  
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
-C 
-      case (8)   
-C 
-    8 xxpr='lyma'      
-      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)  
+C
+      case (8)
+C
+    8 xxpr='lyma'
+      call subproxy(xxpr,yr,mm,iyy2,imm2,rz)
       yypr='f107'
-      call subproxy(yypr,yr,mm,iyy2,imm2,sf) 
+      call subproxy(yypr,yr,mm,iyy2,imm2,sf)
       goto 33
 C+++++++
-      end select 
+      end select
    33 continue
         if(day.lt.midm) goto 34
       rsn=(idn-idd1)*1./(idd2-idd1)
@@ -3451,9 +3451,9 @@ C
 C
 C  TL Gulyaeva....................................................May, 2017
 C Subroutine to read 12-monthly smoothed solar proxy data
-C for given year=kyr1 and month = kmn1 
+C for given year=kyr1 and month = kmn1
 C kyr2,kmn2 denoted either preceding month or the following month
-C zz(1) results for the given month kyr1,kmn1, and zz(2) for kyr2,kmn2  
+C zz(1) results for the given month kyr1,kmn1, and zz(2) for kyr2,kmn2
 C
       CHARACTER*4 xxxx
       CHARACTER*12 infile
@@ -3473,9 +3473,9 @@ C
    10 write(*,*) ' CANNOT FIND THE FILE ',infile,' EXECUTION TEMINATED.'
       PAUSE  ' '
       STOP
-   20 CONTINUE  
+   20 CONTINUE
 c Read the update date, the start date and the end date (mm,yyyy)
-c 
+c
           read(12,*) iupd,iupm,iupy
           read(12,*) imst,iyst, imend, iyend
 c
@@ -3497,7 +3497,7 @@ c
 c
 c Read year and monthly input values
    11 read(12,*,err=15,end=15) kyyyy, (dat(i),i=1,12)
-      IF (kyr1.eq.kyr2) THEN               
+      IF (kyr1.eq.kyr2) THEN
             if (kyyyy.eq.kyr1) then
             zz(1)=dat(kmn1)
             zz(2)=dat(kmn2)
@@ -3505,7 +3505,7 @@ c Read year and monthly input values
                      else
                goto 11
             endif
-         ENDIF                        
+         ENDIF
             IF (kyr1.lt.kyr2) THEN            !+
 C kyr1 < kyr2
            IF (kyr1.eq.kyyyy) THEN          !
@@ -3523,7 +3523,7 @@ C kyr1 < kyr2
                            ELSE           !+
 C kyr2 < kyr1
              IF (kyr2.ge.iyst) THEN         !
-C  kyr2 > iyst             
+C  kyr2 > iyst
           if (kyr2.eq.kyyyy) then           !!
             zz(2)=dat(kmn2)
                 read(12,*,err=15,end=15) kyyyy,zz(1)
@@ -3538,14 +3538,14 @@ C kyr2 < iyst
          zz(2)=zz(1)
                         else           !!!
               goto 11
-                          endif           !!!                     
+                          endif           !!!
          ENDIF                         !!
                ENDIF                         !+
 C
   15  write(*,*) 'End-of-file ',infile
       pause ' '
       stop
-C  
+C
    16     close(unit=12)
             return
             end
@@ -3751,9 +3751,9 @@ c
 c
 c
         subroutine iri_tec (hstart,hend,istep,tectot,tectop,tecbot)
-c-----------------------------------------------------------------------        
+c-----------------------------------------------------------------------
 C subroutine to compute the total ionospheric content
-C INPUT:      
+C INPUT:
 C   hstart  altitude (in km) where integration should start
 C   hend    altitude (in km) where integration should end
 C   istep   =0 [fast, but higher uncertainty <5%]
@@ -3764,22 +3764,22 @@ C   tectot  total ionospheric content in tec-units (10^16 m^-2)
 C   tectop  topside content (in %)
 C   tecbot  bottomside content (in %)
 C
-C The different stepsizes for the numerical integration are 
-c defined as follows (h1=100km, h2=hmF2-10km, h3=hmF2+10km, 
+C The different stepsizes for the numerical integration are
+c defined as follows (h1=100km, h2=hmF2-10km, h3=hmF2+10km,
 c h4=hmF2+150km, h5=hmF2+250km):
 C       istep   h1-h2   h2-h3   h3-h4   h4-h5   h5-hend
 C       0       2.0km   1.0km   2.5km   exponential approximation
 C       1       2.0km   1.0km   2.5km   10.0km  30.0km
-C       2       1.0km   0.5km   1.0km   1.0km   1.0km   
+C       2       1.0km   0.5km   1.0km   1.0km   1.0km
 C
-c-----------------------------------------------------------------------        
+c-----------------------------------------------------------------------
 
         logical         expo
         dimension       step(5),hr(6)
         common  /block1/hmf2,xnmf2,hmf1,f1reg
         logical     f1reg
 
-ctest   
+ctest
         save
 
         expo = .false.
@@ -3792,10 +3792,10 @@ ctest
         hr(4) = hmf2+150.
         hr(5) = hmf2+250.
         hr(6) = hend
-        do 2918 i=2,6 
+        do 2918 i=2,6
 2918            if (hr(i).gt.hend) hr(i)=hend
 
-        if (istep.eq.0) then 
+        if (istep.eq.0) then
                 step(1)=2.0
                 step(2)=1.0
                 step(3)=2.5
@@ -3874,7 +3874,7 @@ cc                YNE = XE_1(hx)
         zzz = sumtop + sumbot
         tectop = sumtop / zzz * 100.
         tecbot = sumbot / zzz * 100.
-        tectot = zzz * xnmf2    
+        tectot = zzz * xnmf2
         return
 
 5       num_step = 3
@@ -3886,7 +3886,7 @@ cc        xntop = xe_1(hei_end)/xnmf2
         xntop = xe(hei_end)/xnmf2
 
         if(xntop.gt.0.9999) then
-                ss_t = top_end  
+                ss_t = top_end
                 goto 2345
                 endif
 
@@ -3899,7 +3899,7 @@ cc        xntop = xe_1(hei_end)/xnmf2
 C       hss = 360.
         xkk = exp ( - top_end / hss ) - 1.
         x_2 = hei_2
-        x_3 =hei_top-hss*alog(xkk*(hei_3 - hei_top)/top_end + 1.) 
+        x_3 =hei_top-hss*alog(xkk*(hei_3 - hei_top)/top_end + 1.)
         x_4 =hei_top-hss*alog(xkk*(hei_4 - hei_top)/top_end + 1.)
         x_5 = hei_end
 
@@ -3929,10 +3929,10 @@ cc        ed_4 = xe_1(x_4)/xnmf2
          ss_4=( ed_5 - ed_4 ) * ( x_5 - x_4 ) / alog ( ed_5 / ed_4 )
         endif
 
-        ss_t = ss_2 + ss_3 + ss_4 
+        ss_t = ss_2 + ss_3 + ss_4
 
 2345    sumtop = sumtop + ss_t * 1000.
-        
+
         zzz = sumtop + sumbot
         tectop = sumtop / zzz * 100.
         tecbot = sumbot / zzz * 100.
@@ -4004,17 +4004,17 @@ C   modified for use in IRI --------- D. Bilitza -------- March 1991
 C
 C   CHANGES:
 C     11/09/99 always calculated Legendre; 'if glat' and 'if stl' taken out;
-C     11/09/99 use UMR, dumr and humr from COMMON 
+C     11/09/99 use UMR, dumr and humr from COMMON
 C
 C     INPUT:
-C        IDAY - DAY OF YEAR 
+C        IDAY - DAY OF YEAR
 C        SEC - UT(SEC)
 C        GLAT - GEODETIC LATITUDE(DEG)
 C        GLONG - GEODETIC LONGITUDE(DEG)
 C        STL - LOCAL APPARENT SOLAR TIME(HRS)
 C        F107A - 3 MONTH AVERAGE OF F10.7 FLUX
 C
-C     OUTPUT: 
+C     OUTPUT:
 C        TINF - EXOSPHERIC TEMPERATURE (K)
 C        TLB - TEMPERATURE AT LOWER BOUNDARY (K)
 C        SIGMA - SHAPE PARAMETER FOR TEMPERATURE PROFILE
@@ -4060,7 +4060,7 @@ C
       PLG(5,3) = 7.5*(7.*C2 -1.)*S2
       PLG(6,3) = 3.*C*PLG(5,3)-2.*PLG(4,3)
       PLG(4,4) = 15.*S2*S
-      PLG(5,4) = 105.*S2*S*C 
+      PLG(5,4) = 105.*S2*S*C
       PLG(6,4)=(9.*C*PLG(5,4)-7.*PLG(4,4))/2.
       PLG(7,4)=(11.*C*PLG(6,4)-8.*PLG(5,4))/3.
       XL=GLAT
@@ -4081,7 +4081,7 @@ C EXOSPHERIC TEMPERATURE
 C
 C         F10.7 EFFECT
       T1 =  ( 3.11701E-3 - 0.64111E-5 * DFA ) * DFA
-        F1 = 1. + 0.426385E-2 * DFA 
+        F1 = 1. + 0.426385E-2 * DFA
         F2 = 1. + 0.511819E-2 * DFA
         F3 = 1. + 0.292246E-2 * DFA
 C        TIME INDEPENDENT
@@ -4109,16 +4109,16 @@ C        TERDIURNAL
       Z1 =  PLG(5,4) * CD14
       Z2 =  PLG(7,4) * CD14
       T14=(0.147284E-2*PLG(4,4)-0.173933E-3*Z1+0.365016E-4*Z2)*S3TLOC
-     2   +(0.341345E-3*PLG(4,4)-0.153218E-3*Z1+0.115102E-3*Z2)*C3TLOC 
+     2   +(0.341345E-3*PLG(4,4)-0.153218E-3*Z1+0.115102E-3*Z2)*C3TLOC
       T7814 = F2 * ( T7 + T8 + T14 )
 C        LONGITUDINAL
-      T11= F3 * (( 0.562606E-2 * PLG(3,2) + 0.594053E-2 * PLG(5,2) + 
-     $       0.109358E-2 * PLG(7,2) - 0.301801E-2 * PLG(2,2) - 
-     $       0.423564E-2 * PLG(4,2) - 0.248289E-2 * PLG(6,2) + 
+      T11= F3 * (( 0.562606E-2 * PLG(3,2) + 0.594053E-2 * PLG(5,2) +
+     $       0.109358E-2 * PLG(7,2) - 0.301801E-2 * PLG(2,2) -
+     $       0.423564E-2 * PLG(4,2) - 0.248289E-2 * PLG(6,2) +
      $      (0.189689E-2 * PLG(2,2) + 0.415654E-2 * PLG(4,2)) * CD14
      $     ) * COS(umr*GLONG) +
-     $     ( -0.11654E-1 * PLG(3,2) - 0.449173E-2 * PLG(5,2) - 
-     $       0.353189E-3 * PLG(7,2) + 0.919286E-3 * PLG(2,2) + 
+     $     ( -0.11654E-1 * PLG(3,2) - 0.449173E-2 * PLG(5,2) -
+     $       0.353189E-3 * PLG(7,2) + 0.919286E-3 * PLG(2,2) +
      $       0.216372E-2 * PLG(4,2) + 0.863968E-3 * PLG(6,2) +
      $      (0.118068E-1 * PLG(2,2) + 0.331190E-2 * PLG(4,2)) * CD14
      $     ) * SIN(umr*GLONG) )
@@ -4133,9 +4133,9 @@ C
 C TEMPERATURE DERIVATIVE AT LOWER BOUNDARY
 C
 C         F10.7 EFFECT
-      T1 =  0.252317E-2 * DFA 
+      T1 =  0.252317E-2 * DFA
 C        TIME INDEPENDENT
-      T2 = -0.467542E-1 * PLG(3,1) + 0.12026 * PLG(5,1) 
+      T2 = -0.467542E-1 * PLG(3,1) + 0.12026 * PLG(5,1)
 C        ASYMMETRICAL ANNUAL
         CD14 = COS( DR  * (IDAY+8.45398) )
       T5 = -0.13324 * PLG(2,1)  * CD14
@@ -4169,7 +4169,7 @@ C  Sigma      [Eq. A5]
 !$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       SUBROUTINE TEMODEL(Tein,  Ht, TLoc, gmLat,ggLat, aMon,  rFlx, aKp)
 ! New Te, Ti [,Tn] model, August 2004,..    8/6/06: TeModela.f90, without debug code.
-!                          For use with IRI;  see 
+!                          For use with IRI;  see
 ! Adv.Space Res Vol.38,#11, 2587-2595, 2006.
 !INPUTS:
 !    Ht   = km above the surface of the earth.
@@ -4204,14 +4204,14 @@ C  Sigma      [Eq. A5]
 !(B) To use the smoothed sunspot number Rz in place of S10.7 (the normal sFlx), call
 !       TeModel with rFlx= -Rz.  This is used to calculate sFlx from standard equns.
 !====================================================================================
-!-USED: Eqns in JGeoRes Vol103,p2261,1998;  
+!-USED: Eqns in JGeoRes Vol103,p2261,1998;
 !-------with updates from  Adv.Space Res Vol.38,#11, 2587-2595, 2006.
 !   Comments give eqn nos from JGR,1998;  except Nxx is eqn (xx) from ASR,2006 paper.
 !-ADDED: Variables polz and dayz, to ensure smooth varns over pole, equator.
 !-ALLOWS for conjugate heating, using mixing factor xh= h/heq to match Te at equator.
 !-J.E.Titheridge, March 2006.  Send comments/problems to j.titheridge@auckland.ac.nz.
 !Copyright: John Titheridge, Physics Department, University of Auckland, New Zealand.
-      real:: Tein(3), gmLat, ggLat                         
+      real:: Tein(3), gmLat, ggLat
       real:: TD(5)=(/1250., 3460.,-3140.,  0.27, -0.60 /)  !Rational fit to T vs Lat.
       real:: GD(5)=(/ 2.09, -3.00,  1.13, -1.20,  0.835/)  !Rational fit to G vs Lat.
       real:: AD(5)=(/ 0.22, 0.016, -0.23, -2.08,  1.22 /)  !xD()= Day fits, to T,G,A.
@@ -4220,12 +4220,12 @@ C  Sigma      [Eq. A5]
       real:: AN(5)=(/0.396, -0.81, 0.417, -2.17,  1.22 /)
       real,save:: TcD,TcN,GcD,GcN,AoD,AoN, TNit,TDay, FLine,Flat,dFlat  !These values
       real,save:: heq,polz,dayz, sRise,slong, Bnu, TKp=0.              !are saved for
-      real,save:: zHt,zLoc,zLat,zMon, zKp,zRise, cLat,sL2  
+      real,save:: zHt,zLoc,zLat,zMon, zKp,zRise, cLat,sL2
       real,save:: TDv(2), TNv(2), TDiur(2), TNa=0.          !conjugate, diurnal varns
       logical,save:: NewFline=.false.                       !Flags changed field line
       data zHt,zLoc,zLat,zsLat, zMon,zKp,zRise / 7*-99. /   !Save to check if changed
       parameter(Pi=3.14159265,d2r=Pi/180., ex=2./7., ee=1.e-9)
-      parameter(Re=6371.2, ho=400, Ro=1+ho/Re, Ro2=Ro**2)  
+      parameter(Re=6371.2, ho=400, Ro=1+ho/Re, Ro2=Ro**2)
       rmLat= gmLat ;  if (gmLat==0.) rmLat= ggLat          !GeoMagnetic Latitude, deg
              if (abs(rmLat)>89.8) rmLat= sign(89.8, rmlat)       !6'06 limit to 89.8d
       drLat= ggLat-rmLat   ;   if(ggLat==0.) drLat=0.      !GeoGr-GeoMag (field line)
@@ -4371,10 +4371,10 @@ C
       ht1=H05TOP
        xne1=XNETOP
 
-      ht2=float(istart)  
+      ht2=float(istart)
       do i=istart,1336
       ht2=ht2+1.0
-      xne2=xxe6(ht2) 
+      xne2=xxe6(ht2)
       if ((xxx.le.xne1).and.(xxx.gt.xne2)) then
           hsip=ht1+(ht2-ht1)/(xne2-xne1)*(xxx-xne1)
       exit
@@ -4408,15 +4408,15 @@ c-       xxx=xnmf2/2.718282   ! NmF2/e
       ht1=hmf2
        xne1=xnmf2
       step=100.
-      ht2=float(istart)  
+      ht2=float(istart)
 C
     1 ht2=ht2+step
       if (ht2.lt.1336.) then       !>>>>>>>>>>
-      xne2=xe1(ht2)   ! 
+      xne2=xe1(ht2)   !
       if (abs(xne2-xnetop).lt.0.1) then
       H05TOP=ht2
       goto 2
-      endif                      
+      endif
       if ((xnetop.ge.xne2).and.(xnetop.lt.xne1)) then  !,,,,,,,,,,,,,
       ht2=ht2-step         !
       step=step/10.
@@ -4430,7 +4430,7 @@ C
                                               else   !............
       xne1=xne2
       ht1=ht2
-      goto 1  
+      goto 1
       endif                                    !..............
                         endif !>>>>>>>>>>>>>>>>>>>>>
     2 RETURN
@@ -4443,11 +4443,11 @@ C Model of dh=dlog_hmF2, in terms of log10(NeF2/NmF2), abs(MLAT), deg., SG=Sday,
 C
 C  (1) 2 levels of solar activity: Rz= 20,  120
 C  (2) 5th order polinomial for geomagnetic latitudes (N=S):0,10,20,30,40,50,60,70,80,90.
-C  (4) 4 seasonal grids: 1 equinox(sg=90deg), 2 summer (sg=180), 
+C  (4) 4 seasonal grids: 1 equinox(sg=90deg), 2 summer (sg=180),
 C                        3 equinox (sg=270), 4 winter(sg=360)
-C Gulyaeva, T. Empirical model of ionospheric storm effects on the F2 layer peak height 
-C        associated with changes of peak electron density, J. Geophys. Res., 117, A02302, 
-C        doi:10.1029/2011JA017158, 2012. 
+C Gulyaeva, T. Empirical model of ionospheric storm effects on the F2 layer peak height
+C        associated with changes of peak electron density, J. Geophys. Res., 117, A02302,
+C        doi:10.1029/2011JA017158, 2012.
 C
       DIMENSION YY(3),XX(3)
      &,BR(6,3,2) ! 6  beta coef, 3 seasons, 2 Rz levels
@@ -4459,29 +4459,29 @@ C
 C Polinomial <alpha> coefficients A1, A2, A3, A4, A5, A6 for Rz=20:
 C Equinox:
      * 708.327,-1527.953,  1103.833, -304.492,  34.062,  -4.422
-C Summer 
+C Summer
      *,-64.5256, 254.8368, -291.2572,  97.7416,  8.4343, -3.9076
 C Winter:
      *,99.9013, -61.4048,-120.2377,  92.2898,  -4.6909, -2.9850
 C Polinomial <alpha> coefficients A1, A2, A3, A4, A5, A6 for Rz=120:
 C Equinox:
      *,271.9513,-261.3368,-200.8858, 249.5253, -47.7269,  -2.0143
-C Summer    
+C Summer
      *,-422.818,1012.842, -890.418,  347.730,  -54.262,    1.859
-C Winter:      
+C Winter:
      *,145.3128,-128.5541,-131.3022, 148.7525, -29.4966,  -1.1053/
       DATA BR/
 C Polinomial <beta> coefficients B1, B2, B3, B4, B5, B6 for Rz=20:
 C Equinox:
      * 3.0154,  -6.4793,   4.8852,  -1.3451,   0.0490,  -0.1681
-C Summer    
+C Summer
      *,-5.8795,  17.7169, -18.0480,   7.5002,  -1.1586,  -0.1527
-C Winter:      
+C Winter:
      *,24.7256, -57.3807,  45.7255, -13.6397,   0.9003,  -0.1040
-C Polinomial <beta> coefficients B1, B2, B3, B4, B5, B6 for Rz=120:        
-C Equinox:  
+C Polinomial <beta> coefficients B1, B2, B3, B4, B5, B6 for Rz=120:
+C Equinox:
      *,10.3154, -23.8605,  19.0188,  -5.5255,   0.2329,  -0.1574
-C Summer    
+C Summer
      *,-3.3154,   9.3716,  -9.1249,   3.2476,  -0.1863,  -0.2255
 C Winter:
      *,12.9551, -28.8785,  22.2281,  -6.2295,   0.1901,  -0.0897/
@@ -4522,7 +4522,7 @@ C Apply seasonal interpolation
 C
       IF (IR.eq.2) THEN
       goto 26
-                ELSE  
+                ELSE
       IR=2
       YB1=YB
       XA1=XA

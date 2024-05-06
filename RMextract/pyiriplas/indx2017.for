@@ -1,23 +1,23 @@
-C INDEX SUBROUTINES:___INDX2017.FOR___T.L.Gulyaeva___May. 2017  
+C INDEX SUBROUTINES:___INDX2017.FOR___T.L.Gulyaeva___May. 2017
 C
-C INDEX SUBROUTINES:___INDX2015c.FOR___T.L.Gulyaeva___Feb. 2016  
+C INDEX SUBROUTINES:___INDX2015c.FOR___T.L.Gulyaeva___Feb. 2016
 C
-C INDEX SUBROUTINES:___INDX2015.FOR___T.L.Gulyaeva___Dec. 2014  
+C INDEX SUBROUTINES:___INDX2015.FOR___T.L.Gulyaeva___Dec. 2014
 C
 C ==   AMENDMENTS ...................................Dec. 2014
 C STORM RELATED SUBROUTINE FROM IRI2001: = = APF == is replaced
 C by: == SUBAPF == which enters geomagnetic Kp and Ap 3-h indices
 C and solar daily Rz and F107 indices from standard = kpYEAR = file
-C for given 'YEAR' and preceding 'YEAR-1' for calculations of 81-days 
+C for given 'YEAR' and preceding 'YEAR-1' for calculations of 81-days
 C indices R81 and F81 instead of former APRZ.DAT file (cancelled input)
 C
-C INDEX SUBROUTINES:___INDX2014.FOR___T.L.Gulyaeva___Apr. 2014  
+C INDEX SUBROUTINES:___INDX2014.FOR___T.L.Gulyaeva___Apr. 2014
 C
-C INDEX SUBROUTINES:___INDX2013.FOR___T.L.Gulyaeva___Dec. 2013  
+C INDEX SUBROUTINES:___INDX2013.FOR___T.L.Gulyaeva___Dec. 2013
 C
-C INDEX SUBROUTINES:___INDX2011.FOR___T.L.Gulyaeva___Dec. 2011  
+C INDEX SUBROUTINES:___INDX2011.FOR___T.L.Gulyaeva___Dec. 2011
 C
-C INDEX SUBROUTINES:___INDX2007.FOR___T.L.Gulyaeva___June 2009  
+C INDEX SUBROUTINES:___INDX2007.FOR___T.L.Gulyaeva___June 2009
 C
 C ******************* ISO_IRI_SMI PROJECT *******************
 C
@@ -52,14 +52,14 @@ C ==  F81=COV81-subroutine produces daily F10.7 (Covington) solar
 C ==  radio flux index averaged for 81 days preceding given day
 C ==  R81=Rz81-subroutine produces daily sunspot number Rz
 C ==  averaged for 81 days preceding given day
-C**************************************************************  
-C**************************************************************  
+C**************************************************************
+C**************************************************************
 C
-C********** INTERNATIONAL REFERENCE IONOSPHERE ****************  
-C**********RUSSIAN STANDARD MODEL OF IONOSPHERE**************** 
+C********** INTERNATIONAL REFERENCE IONOSPHERE ****************
+C**********RUSSIAN STANDARD MODEL OF IONOSPHERE****************
 C****************  FUNCTIONS,SUBROUTINES  *********************
 C**************************************************************
-C** initialize: INITIALIZE (needs to be called before using 
+C** initialize: INITIALIZE (needs to be called before using
 C**                 subroutines or functions)
 C** NE:         XE1,ZERO,DXE1N,XE2,XE3_1,XE4_1,XE5,XE6,XE_1
 C** TE/TI:      ELTEIK,SPHARM_IK,TEBA,SPHARM,ELTE,TEDE,TI,TEDER,
@@ -77,9 +77,9 @@ C** LAY:        XE2TO5,XEN,VALGUL,ROGUL,LNGLSN,LSKNM,INILAY
 C** INDICES:    TCON,TCONGEC, SUBAPF,GKPM
 C** Storm:      LSTID,STORM, SUBAPF,GKPM
 C** ion drift:  vdrift
-C**************************************************************  
-C  
-C**************************************************************  
+C**************************************************************
+C
+C**************************************************************
 C***  -------------------ADDRESSES------------------------  ***
 C***  I  PROF. K. RAWER             DR. D. BILITZA       I  ***
 C***  I  HERRENSTR. 43              GSFC CODE 933        I  ***
@@ -92,24 +92,24 @@ C***  I                 TROITSK, MOSCOW                  I  ***
 C***  I                 RUSSIA                           I  ***
 C***  I                 gulyaeva@izmiran.ru              I  ***
 C***  ----------------------------------------------------  ***
-C**************************************************************  
+C**************************************************************
 C
 C
       SUBROUTINE GKPM(IAS,DKP,RKP)
-C      
+C
 C    T.L. Gulyaeva, Dec. 2013:
 C New: put real kp instead of Kpm calculation:
 C
 C    T.L. Gulyaeva, Sep. 2001:
 C ===================================================================
 C calculates geomagnetic 3h kp-index, dkp(13), and Kpm index, rkp,
-C     used by the plasmasphere model 
-C for given year, month, day and UT hour using ap-indices  
+C     used by the plasmasphere model
+C for given year, month, day and UT hour using ap-indices
 C collected by APF-subroutine in the array ias(13).
-C The ap-indices are transformed to kp-indices with conventional 
+C The ap-indices are transformed to kp-indices with conventional
 C thresholds for ap - kp .
-C Kpm presents forecast of kp-index 3h in advance based on accumulation 
-C of instantaneous kp-indices for 12 preceding hours ranked by 
+C Kpm presents forecast of kp-index 3h in advance based on accumulation
+C of instantaneous kp-indices for 12 preceding hours ranked by
 C decreasing order.
 C
 C Ref. T.L. Gulyaeva, G. De Franceschi, and L. Perrone. 'Electron
@@ -149,7 +149,7 @@ C       K1=13
         K1=8
           DO N=1,4
             NK=K1+N
-            X1(N)=DKP(NK) 
+            X1(N)=DKP(NK)
         X2(N)=0.0
           ENDDO
             MM=0
@@ -160,7 +160,7 @@ C rank 4 preceding 3h kp-indices by decreasing order
 C find naximum of 4 preceding 3h kp-indices (XM)
           XM=0.0
       DO N=1,4
-              IF (XM.LT.X1(N)) THEN 
+              IF (XM.LT.X1(N)) THEN
            XM=X1(N)
            ENDIF
       ENDDO
@@ -170,8 +170,8 @@ C find naximum of 4 preceding 3h kp-indices (XM)
 C ranking 4 preceding kp by decreasing order
       DO N=1,4
               IF (X1(N).LT.XM) GOTO 830
-            MM=MM+1 
-        X2(MM)=XM 
+            MM=MM+1
+        X2(MM)=XM
         X1(N)=0.0
 830       CONTINUE
         ENDDO
@@ -184,46 +184,46 @@ C
         RKP=RKP*0.35
  870     RETURN
       END
-C**************************************************************  
+C**************************************************************
 C
 C
         subroutine initialize
       dimension indap(13),akp(13)
-      COMMON /CONST/UMR,PI/ARGEXP/ARGMAX  
+      COMMON /CONST/UMR,PI/ARGEXP/ARGMAX
      &       /const1/humr,dumr,xfap,indap,akp,cov,rzs
         ARGMAX=88.0
         pi=atan(1.0)*4.
         UMR=pi/180.
         humr=pi/12.
         dumr = pi / 182.5
-        return 
+        return
         end
-C        
-C*************************************************************   
-CC 
+C
+C*************************************************************
+CC
       SUBROUTINE SUBAPF(IYYYY,IMN,IDY,HOUR,IAP,F81,R81)
 CC-------------------------------------------------------------------
-CC T.L. Gulyaeva........................................May. 2017 
+CC T.L. Gulyaeva........................................May. 2017
 C
-CC Source: former IRI-Plas subroutine: 
+CC Source: former IRI-Plas subroutine:
 CC        SUBROUTINE APF(IYYYY,IMN,ID,HOUR,IAP,F81,R81)
-CC Modified to produce sunspot number R81, and solar radio flux F81 
+CC Modified to produce sunspot number R81, and solar radio flux F81
 CC from two successive kpYEAR annual files
-CC Input: 
-CC       kpYEAR  (preceding year: IYYYY-1)                              
-CC       kpYEAR  (given year: IYYYY)                              
+CC Input:
+CC       kpYEAR  (preceding year: IYYYY-1)
+CC       kpYEAR  (given year: IYYYY)
 c--------------------------------------------------------------------
 c D. Bilitza .......................................... May, 2001.
 c
 c finds Ap indices for IRI-storm for given year IYYYY (yyyy), month
 c (IMN) and day (ID) and UT hour (HOUR decimal hours). The indices are
 c stored in IAP(13). IAP(13) is ap index for UT=hour. Intervals are UT:
-c (0-3),(3-6),(6-9),(9-12),(12-15),(15-18),(18-21),(21-24). 
-c 
-c T.L. Gulyaeva ......................................  Sep. 2001. 
+c (0-3),(3-6),(6-9),(9-12),(12-15),(15-18),(18-21),(21-24).
+c
+c T.L. Gulyaeva ......................................  Sep. 2001.
 c Modified for producing solar radio flux F10.7, F81, averaged for
 c 81 days preceeding given day
-C 
+C
 C------------------------------------------------------------------------
       DIMENSION iap(13),iap0(8),iap1(8),iap2(8),iapt(24),lm(12)
      &,icv(82),irz(82),icurkp(0:7),iprekp(0:7)
@@ -234,7 +234,7 @@ C------------------------------------------------------------------------
       COMMON /path/datapath
       character datapath*200
 C
-C START: 
+C START:
       ipcnt=0 ! keep cnt -82,...,-1
 
       do i=1,8
@@ -278,7 +278,7 @@ C
         ipre=1    ! Include data for preceding year
        endif
 C
-      infilekp='kpYEAR'  
+      infilekp='kpYEAR'
 C
 10    FORMAT(3I2,6X,8(I2),3X,8(I3),7X,I3,I3,1X,I1)
 
@@ -289,12 +289,12 @@ C
       if (ipre.eq.0) GOTO 203 !avoid input of preceding year file kpYEAR>>>>>
 C
 C-------------------------------------------------------------------------------
-C Include Input file 'kpYEAR' for preceding year 
+C Include Input file 'kpYEAR' for preceding year
 C
       infilekp(3:6)=YEAR_pre  !!! Tamara
 
       OPEN(13,FILE=TRIM(ADJUSTL(DATAPATH))//infilekp,STATUS='OLD',
-     & ERR=21)  
+     & ERR=21)
   201 continue
                 do jj=1,8
                         iap2(jj)=iap1(jj)
@@ -319,7 +319,7 @@ C Move data 1 line up:
       enddo
       GOTO 201
   202 close(unit=13)
-      ipcnt=81-ldaend   ! 
+      ipcnt=81-ldaend   !
 C
 C For current year:
   203 infilekp(3:6)=YEAR   !
@@ -328,8 +328,8 @@ C
 C
 C Read file kpyear for current year:
 C
-  204 continue  
-      do jj=1,8  
+  204 continue
+      do jj=1,8
               iprekp(jj-1)=icurkp(jj-1)
                         iap2(jj)=iap1(jj)
                         iap1(jj)=iap0(jj)
@@ -354,14 +354,14 @@ C
 
       if (ipcnt.lt.81) goto 204
 
-      IF ((JYR.eq.IYR).and.(JMN.eq.IMN).and.(JDY.eq.idend)) then 
+      IF ((JYR.eq.IYR).and.(JMN.eq.IMN).and.(JDY.eq.idend)) then
       goto 207
       ELSE
       ipcnt=ipcnt-1
       goto 204
       ENDIF
 
-C data for 81 preceding days are collected                       
+C data for 81 preceding days are collected
   207 F81=0.0
       R81=0.0
       icnv=0
@@ -396,7 +396,7 @@ C
      &     ' STORM model is turned off.')
         IAP(1)=-iap(1)
       goto 30
-  29  write(*,*) 'Error in input k-index file',infilekp 
+  29  write(*,*) 'Error in input k-index file',infilekp
 C      pause ' '
       stop
   30  CLOSE(unit=13)
@@ -427,7 +427,7 @@ C NEW++++++++++++++++++++
          do 1234 i=1,nmn-1
 1234    mosum=mosum+im(i)
          endif
-      ndoy=mosum+ndy 
+      ndoy=mosum+ndy
       END FUNCTION
 C -----------------------------------------------------------
       subroutine blet2(jlet,alet2)
@@ -445,17 +445,17 @@ C      integer*2 ilet
       alet2(1:1)=IN(i)
       endif
       enddo
-   7  do i=0,9 
+   7  do i=0,9
       if (j1.eq.i) then
       alet2(2:2)=IN(i)
       endif
-      enddo 
+      enddo
       return
       end
 C--------------------------------------------------------------------------------
 C
       subroutine blet3(ilet,alet3)
-c     nn=1,2,3,4 
+c     nn=1,2,3,4
 
       CHARACTER*1 IN(0:9)
       DATA IN/'0','1','2','3','4','5','6','7','8','9'/
@@ -474,17 +474,17 @@ C
       alet3(2:2)=IN(i)
       endif
       enddo
-   7  do i=0,9 
+   7  do i=0,9
       if (j1.eq.i) then
       alet3(3:3)=IN(i)
       endif
-      enddo 
+      enddo
       return
       end
 C
 C---------------------------------------------------------------
       subroutine blet4(ilet,alet4)
-c     nn=1,2,3,4 
+c     nn=1,2,3,4
       INTEGER ilet
       CHARACTER*4 alet4
       CHARACTER*1 IN(0:9)
@@ -510,19 +510,19 @@ C
       alet4(3:3)=IN(i)
       endif
       enddo
-   7  do i=0,9 
+   7  do i=0,9
       if (j1.eq.i) then
       alet4(4:4)=IN(i)
       endif
-      enddo 
+      enddo
       return
       end
 C ===============================================================
 c
       SUBROUTINE STORM(ap,rga,rgo,coor,rgma,ut,doy,cf,rap)
 C  E.A. Araujo-Pradere and T.J. Fuller-Rowell .............May, 2001
-C       
-C     Refs. 
+C
+C     Refs.
 C     (i) T.J.Fuller-Rowell, M.V.Codrescu, and E.A.Araujo-Pradere,
 C         Capturing the storm-time ionospheric response in an empirical
 C         model. AGU Geophys. Monograph, 125, 393-401, 2001.
@@ -555,7 +555,7 @@ C              to scale foF2, foF2 * cf.
 C     rap ---> integrated ap-index used for producing storm factor cf
 
 C     DIMENSIONS AND COEFFICIENTS VALUES
-cc-   COMMON   
+cc-   COMMON
 cc-     &         /CONST1/HUMR,DUMR,XFAP,INDAP,AKP,COV,RZS
       DIMENSION c4(20)
       DATA c4/0.00E+00,0.00E+00,0.00E+00,0.00E+00,0.00E+00,0.00E+00,
@@ -766,40 +766,40 @@ c     INTERPOLATION
 
 C T.L. Gulyaeva ............................................ ........ 2007
 C
-C New subroutine TOP05 to correct Topside IRI-Bent model using 
+C New subroutine TOP05 to correct Topside IRI-Bent model using
 C QF-factor obtained from h05top height at Ne=0.5*NmF2, NmF2 and hmF2  .
 C
 CREM        SUBROUTINE TOPH05(covi,AMLAT,TIME,HMAX,HT05,sg)
          SUBROUTINE TOPH05(rz,AMLAT,TIME,HMAX,HT05,sg)
 C
 C
-C//  Gulyaeva T.L. (2003) Variations in the half-width of the topside ionosphere 
+C//  Gulyaeva T.L. (2003) Variations in the half-width of the topside ionosphere
 C//     according to the observations by space ionosondes ISIS 1,ISIS 2, and IK19.
 C//     International J. of Geomagnetism and Aeronomy, 4(3), 201-207.
-C//  Gulyaeva T.L., Titheridge J.E. (2006) Advanced specification of electron density 
-C//     and temperature in the IRI ionosphere-plasmasphere model. 
+C//  Gulyaeva T.L., Titheridge J.E. (2006) Advanced specification of electron density
+C//     and temperature in the IRI ionosphere-plasmasphere model.
 C//     Adv. Space Res. 38(11), 2587-2595, doi:10.1016/j.asr.2005.08.045.
 C
 C  Implementation of empirical RAT=(h05top-hmF2)/hmF2 derived from ISIS and IK19
 C  topside electron density profiles to obtain half peak density topside height
-C  h05top  from the Chebishev polinomial coefficients given for 
-C  (1) 4 levels of solar activity: Rz= 0,  50, 100, 150 
+C  h05top  from the Chebishev polinomial coefficients given for
+C  (1) 4 levels of solar activity: Rz= 0,  50, 100, 150
 C      solar radio flux          covi=60, 106, 152, 198 (F10.7 option)
 C  (2) 10 selected grids of geomagnetic latitude (N=S):0,10,20,30,40,50,60,70,80,90
 C  (3) 5 selected grids of local time: 0, 6, 12, 18, 24.
-C  (4) 4 seasonal grids: 1 equinox(sg=90deg), 2 summer (sg=180), 
+C  (4) 4 seasonal grids: 1 equinox(sg=90deg), 2 summer (sg=180),
 C                        3 equinox (sg=270), 4 winter(sg=360)
 C
-      DIMENSION CVLEV(4)   
-      COMMON     /BLOCK1/HMF2,XNMF2,XHMF1,F1REG         
+      DIMENSION CVLEV(4)
+      COMMON     /BLOCK1/HMF2,XNMF2,XHMF1,F1REG
      &          /QTOP/Y05,H05TOP,QF,XNETOP,XM3000,HHALF,TAU,HTOP,QF0
 crem  DATA CVLEV/60.,106.,152.,198./
       DATA CVLEV/0.,50.,100.,150./      ! Rz levels
       LOGICAL F1REG
 
       ABMLAT=ABS(AMLAT)
-crem      IR=IFIX((covi-60.)/46.)+1 
-      IR=IFIX(rz/50.)+1 
+crem      IR=IFIX((covi-60.)/46.)+1
+      IR=IFIX(rz/50.)+1
       M1=IFIX(ABMLAT/10.)+1
          L1=IFIX(TIME/6.)+1
        M2=M1+1
@@ -827,12 +827,12 @@ C CHEBISHEV POLINOMIALS FOR ABMLAT(10),HOURLT(5)
 C CR((C0...C5),(LT=0,6,...24),(SG=season grids=90,180,270,360)
 C                    (COV=60,106,152,198)
 C Ref. T.L.Gulyaeva, J.E.Titheridge. Advanced specification of electron density and
-C temperature in the IRI ionosphere-plasmasphere model. Adv. Space Res., 2005. 
+C temperature in the IRI ionosphere-plasmasphere model. Adv. Space Res., 2005.
 
 c      REAL UK(0:10),CR(0:5,5,3,4),YI(5),YY(5,3)
       REAL BR(6,5,3,4),YI(5),YY(5,3)
       REAL PL1(5),PL2(5),PL3(5),CL(0:3)
-C  
+C
       DATA rad/0.01745329/
       DATA PL1/-2.,-1.,0.,1.,2./
       DATA PL2/2.,-1.,-2.,-1.,2./
@@ -845,13 +845,13 @@ C Equinox   B0MLAT:
      *,-12.8000, 35.3084,-38.0043,19.6004,-4.4974,.6975
      *,  5.8282,-13.3538,  9.1674,-0.9593,-0.8909,.6062
      *, -1.5859,  3.5789, -3.7884, 2.7094,-1.2962,.6759
-C Summer B0MLAT    
+C Summer B0MLAT
      *, -7.1103, 21.0389,-24.5539,14.1607,-3.8537,.7266
      *,  5.5333,-10.6242,  4.8751, 1.0587,-1.0821,.7527
      *,-15.4487, 42.9269,-45.0314,21.4718,-4.2116,.6026
      *, -6.6436, 16.4533,-15.5142, 6.8287,-1.2871,.4976
      *, -7.1103, 21.0389,-24.5539,14.1607,-3.8537,.7266
-C Winter   B0MLAT                                                                       
+C Winter   B0MLAT
      *, 14.9103,-35.2337, 27.3078,-6.5362,-0.6265,.7509
      *,  2.3846, -5.8840,  3.7023, 0.8525,-1.2663,.7086
      *, -9.8846, 26.6649,-27.0173,12.6959,-2.6536,.6295
@@ -864,13 +864,13 @@ C Equinox   B1MLAT
      *,-16.2744, 42.8047,-43.7009,20.7965,-4.0697,.6619
      *,-17.3038, 44.3336,-40.9249,15.9042,-2.1554,.4796
      *, -4.1218, 10.6136,-11.4922, 6.0470,-1.3620,.5563
-C Summer B1MLAT  
+C Summer B1MLAT
      *, -4.9692, 16.5753,-21.3543,12.7061,-3.1758,.6446
      *,  1.9000, -2.8167, -0.9962, 3.0687,-1.3454,.6859
      *,  7.6769,-14.8343,  6.7030, 1.5578,-1.0626,.4291
      *,  5.4833,-10.6322,  4.7571, 1.2178,-0.8223,.4615
      *, -4.9692, 16.5753,-21.3543,12.7061,-3.1758,.6446
-C Winter B1MLAT  
+C Winter B1MLAT
      *, -4.7282, 13.4491,-15.6931, 8.8388,-1.9732,.5874
      *,  5.6756,-14.8458, 11.8927,-2.2632,-0.6122,.6948
      *,-14.2872, 40.0829,-41.2716,18.1696,-2.7203,.4916
@@ -883,13 +883,13 @@ C Equinox   B2MLAT
      *, 12.0462,-27.8932, 20.6241,-4.5781, 0.0814,.3501
      *,-17.0551, 42.3258,-37.1874,13.3608,-1.4804,.4216
      *, -3.3282, 10.4296,-12.4722, 6.7623,-1.5172,.4931
-C Summer B2MLAT  
+C Summer B2MLAT
      *,  7.3077,-17.1579, 11.6872,-0.7405,-1.0298,.5754
      *, 19.2641,-45.1886, 34.3297,-8.1879,-0.1875,.6562
      *,  6.0987,-11.0903,  4.3569, 1.4001,-0.7309,.3885
      *,  5.9295,-13.9205, 10.2347,-2.2818, 0.0853,.3915
      *,  7.3077,-17.1579, 11.6872,-0.7405,-1.0298,.5754
-C Winter B2MLAT  
+C Winter B2MLAT
      *, -1.6821,  8.6010,-13.6570, 8.6307,-1.9846,.5635
      *,  5.4679,-12.3750,  7.5620, 0.5394,-1.4415,.6659
      *, -8.0821, 21.9288,-21.8597, 9.3455,-1.4644,.3599
@@ -921,18 +921,18 @@ C  DATA UL/-2.,-1.,0.,1.,2./
       cl(k)=0.
       enddo
 C
-c,,   IR=IFIX((covs-60.)/46.)+1  
-      IR=IFIX(covs/50.)+1  
+c,,   IR=IFIX((covs-60.)/46.)+1
+      IR=IFIX(covs/50.)+1
 C Given geomagnetic latitude parameter:
       xi=abmlat/100.
       DO LS=1,3
           DO LL=1,5
-      B1=BR(6,LL,LS,IR)      
-      B2=BR(5,LL,LS,IR)        
-      B3=BR(4,LL,LS,IR)       
-      B4=BR(3,LL,LS,IR)        
-      B5=BR(2,LL,LS,IR)        
-      B6=BR(1,LL,LS,IR)        
+      B1=BR(6,LL,LS,IR)
+      B2=BR(5,LL,LS,IR)
+      B3=BR(4,LL,LS,IR)
+      B4=BR(3,LL,LS,IR)
+      B5=BR(2,LL,LS,IR)
+      B6=BR(1,LL,LS,IR)
        HLT=(LL-1)*6.0
 
       YY(LL,LS)=B1+xi*(B2+xi*(B3+xi*(B4+xi*(B5+xi*B6))))
@@ -960,8 +960,8 @@ C Apply seasonal interpolation
       RATCH=ZA+ULL*(CL(1)-3.4*CL(3)+ULL*(CL(2)+ULL*CL(3)))
 
       RETURN
-      END   
-C 
+      END
+C
       real function fmlt(ut,xlat,xlong,day)
 C Calculats geomagnetic local time in hours for given
 C universal time UT(sec)
@@ -1001,7 +1001,7 @@ C
 C     This subroutine converts a geographic latitude and longitude
 C     location to a corrected geomagnetic latitude.
 C
-C     INPUT: 
+C     INPUT:
 C       geographic latitude   -90. to +90.
 C       geographic longitude  0. to 360. positive east from Greenwich.
 C
@@ -1009,7 +1009,7 @@ C     OUTPUT:
 C       corrected geomagnetic latitude -90. to +90.
 
 
-      DIMENSION CORMAG(20,91)      
+      DIMENSION CORMAG(20,91)
       DATA ((CORMAG(i,j),i=1,20),j=1,31)/
      +163.68,163.68,163.68,163.68,163.68,163.68,
      +163.68,163.68,163.68,163.68,163.68,163.68,163.68,163.68,
@@ -1246,12 +1246,12 @@ C       corrected geomagnetic latitude -90. to +90.
      +008.15,008.15,008.15,008.15,008.15,008.15,008.15,008.15,
      +008.15,008.15,008.15,008.15,008.15,008.15/
 
-C     Data Input      
+C     Data Input
       rlan = rga
-      rlo = rgo      
-      
-C     From "normal" geographic latitude 
-C     to angle from South Pole.  
+      rlo = rgo
+
+C     From "normal" geographic latitude
+C     to angle from South Pole.
       rla = rlan + 90
 
       IF (rlo .EQ. 360) THEN
@@ -1268,22 +1268,22 @@ C     coefficients of the latitudinal points
 C     coefficients of the longitudinal points
       LO1 = (INT(rlo/18)+1)
 corr      LO2 = LO1 + 1
-      LO2 = MOD(LO1,20) + 1 
+      LO2 = MOD(LO1,20) + 1
 
 C     Four points of Geomagnetic Coordinates
       gm1 = CORMAG(LO1,LA1)
-      gm2 = CORMAG(LO1,LA2) 
+      gm2 = CORMAG(LO1,LA2)
       gm3 = CORMAG(LO2,LA1)
       gm4 = CORMAG(LO2,LA2)
 
 C     latitudinal points
-      X1 = ABS(rla - (INT(rla)))                        
+      X1 = ABS(rla - (INT(rla)))
       X2 = 2. - X1
 
 C     longitudinal points
       Y1 = ABS(rlo - (INT(rlo)))
       Y2 = 18. - Y1
-      
+
 C     X AND Y VALUES
       x = X1 / (X1 + X2)
       y = Y1 / (Y1 + Y2)
@@ -1294,7 +1294,7 @@ C     INTERPOLATION
 
 C     OUTPUT OF THE PROGRAM
 C     From corrected geomagnetic latitude from North Pole
-C     to "normal"  geomagnetic latitude.       
+C     to "normal"  geomagnetic latitude.
       rgma = 90. - gmla
 
       END
@@ -1336,4 +1336,3 @@ C-----------------------------------------------------------------
       return
       end
 C-----------------------------------------------------------------
-
