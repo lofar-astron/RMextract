@@ -4,6 +4,7 @@ repos:
   rev: v0.4.1
   hooks:
     # Run the linter.
+    # To be renabled once fixes are made.
     # - id: ruff
       # args: [ --fix ]
     # Run the formatter.
