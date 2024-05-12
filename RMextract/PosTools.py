@@ -5,7 +5,9 @@ from math import atan, atan2, cos, degrees, pi, radians, sin, sqrt, tan
 
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import (FK5, ITRS, AltAz, Angle, EarthLocation,
+# from astropy.coordinates import (FK5, ITRS, AltAz, Angle, EarthLocation,
+                                #  SkyCoord)
+from astropy.coordinates import (FK5, ITRS, AltAz, EarthLocation,
                                  SkyCoord)
 from astropy.time import Time
 from scipy import interpolate
