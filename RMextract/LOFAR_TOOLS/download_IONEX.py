@@ -1,6 +1,6 @@
 import argparse
-import logging
-import sys
+from logging import logger
+# import sys
 
 import numpy as np
 
@@ -23,7 +23,8 @@ def main():
     MS=args.MSfiles
     server=args.server
     prefix=args.prefix
-    (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
+    # (timerange,timestep,pointing,stat_names,stat_pos)=PosTools.getMSinfo(MS)
+    (timerange,timestep,*_)=PosTools.getMSinfo(MS)
     
     start_time = timerange[0]
     end_time = timerange[1]
