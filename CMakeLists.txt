@@ -5,6 +5,16 @@ find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 find_package(F2PY REQUIRED)
 
+if(SKBUILD)
+    message(STATUS "The project is built using scikit-build")
+    set(PYTHON_INCLUDE_DIRS
+        ${Python_INCLUDE_DIR}
+        ${Python_NumPy_INCLUDE_DIRS}
+    )
+else()
+    set(PYTHON_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+endif()
+
 ## -- Python module: RMextract.EMM._EMM_Model -- ##
 add_library(_EMM_Model MODULE
     RMextract/EMM/EMM_Model.cc
