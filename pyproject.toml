@@ -1,6 +1,75 @@
+#########################
+# build-system settings #
+#########################
+
 [build-system]
 requires = [
-    "setuptools>=42",
+    "build",
+    "cmake>=3.18",
+    "meson",
+    "ninja",
+    "oldest-supported-numpy",
+    "scikit-build>=0.13",
+    "setuptools",
+    "setuptools_scm",
     "wheel",
-    "numpy"]
-build-backend = "setuptools.build_meta"
+]
+
+####################
+# project settings #
+####################
+
+[project]
+name = "RMextract"
+dynamic = ["version"]
+description = """\
+    Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS \
+    and WMM data for radio interferometry observations \
+"""
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    { name = "Maaijke Mevius", email = "mevius@astron.nl" },
+]
+maintainers = [
+    { name = "Marcel Loose", email = "loose@astron.nl" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = { file = "LICENSE" }
+dependencies = [
+    "astropy",
+    "numpy",
+    "PySocks",
+    "python-casacore",
+    "scipy",
+]
+
+[project.optional-dependencies]
+lofar-utils = [
+    # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
+    # Since these have never been published on PyPI, we cannot specify this dependency.
+    "losoto",
+]
+
+[project.scripts]
+createRMParmdb = "RMextract.LOFAR_TOOLS.createRMParmdb:main [lofar-utils]"
+createRMh5parm = "RMextract.LOFAR_TOOLS.createRMh5parm:main [lofar-utils]"
+download_IONEX = "RMextract.LOFAR_TOOLS.download_IONEX:main [lofar-utils]"
+
+[project.urls]
+Source = "https://github.com/lofar-astron/RMextract"
+
+
+# ###########################
+# # setuptools_scm settings #
+# ###########################
+
+[tool.setuptools_scm]
