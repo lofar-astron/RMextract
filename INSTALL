@@ -12,3 +12,9 @@ $ pip install .
 To also install the optional LOFAR features (requires lofar.parmdb + losoto):
 
 $ pip install .[lofar-utils]
+
+
+Notes:
+- When building from source, you need to have a working Fortran and C++ compiler.
+- If, for whatever reason, you need to install python-casacore from source,
+  you need to have casacore and Boost.Python installed.
