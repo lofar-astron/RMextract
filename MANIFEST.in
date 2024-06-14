@@ -1,0 +1,33 @@
+# Setuptools, when combined with setuptools_scm, puts all the files that are
+# under version control in the source distribution. We want to be a bit more
+# selective. So, start with an empty slate.
+prune *
+exclude .*
+
+# Required scikit-build files
+include CMakeLists.txt
+
+# Required package files
+include RMextract/*.py
+
+include RMextract/EMM/*.c
+include RMextract/EMM/*.cc
+include RMextract/EMM/*.h
+include RMextract/EMM/*.py
+include RMextract/EMM/*.COF
+
+include RMextract/pyiri/iri.pyf
+include RMextract/pyiri/*.for
+include RMextract/pyiri/*.py
+include RMextract/pyiri/*.asc
+include RMextract/pyiri/*.dat
+
+include RMextract/pyiriplas/iriplas.pyf
+include RMextract/pyiriplas/*.for
+include RMextract/pyiriplas/*.py
+include RMextract/pyiriplas/*.ASC
+include RMextract/pyiriplas/*.asc
+include RMextract/pyiriplas/*.dat
+include RMextract/pyiriplas/kp*
+
+include RMextract/LOFAR_TOOLS/*.py
