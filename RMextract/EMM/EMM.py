@@ -1,18 +1,22 @@
 from __future__ import absolute_import
 
 import os
+import sys
 from math import cos, radians, sin
 
 import numpy as np
-from pkg_resources import resource_filename
+
+if (sys.version_info.major, sys.version_info.minor) < (3, 9):
+    import importlib_resources as resources
+else:
+    import importlib.resources as resources
 
 import RMextract.EMM.EMM_Model as emm
 
 
 class WMM:
-    def __init__(self,cof=resource_filename(__name__,'WMM.COF'),date=2010.,lon=0.,lat=0.,h=0.):
+    def __init__(self,cof=f"{resources.files(__package__)}/",date=2010.,lon=0.,lat=0.,h=0.):
         try:
-            cof=cof.replace("WMM.COF","")
             if not os.path.isfile(cof+"WMM.COF"):
                 print ("initializing model failed. Did you specify correct location for coefficient files")
                 return
@@ -75,9 +79,8 @@ class WMM:
 
 
 class EMM(WMM):
-    def __init__(self,cof=resource_filename(__name__,'EMM2000.COF'),date=2010.,lon=0.,lat=0.,h=0.):
+    def __init__(self,cof=f"{resources.files(__package__)}/",date=2010.,lon=0.,lat=0.,h=0.):
         try:
-            cof=cof.replace("EMM2000.COF","")
             if not os.path.isfile(cof+"EMM2000.COF"):
                 print ("initializing model",cof+"EMM2000.COF","failed. Did you specify correct location for coefficient files")
                 return

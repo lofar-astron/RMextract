@@ -1,6 +1,11 @@
 import numpy as np
-from pkg_resources import resource_filename
+import sys
 from scipy.interpolate import interp1d
+
+if (sys.version_info.major, sys.version_info.minor) < (3, 9):
+    import importlib_resources as resources
+else:
+    import importlib.resources as resources
 
 from . import _iri
 
@@ -15,7 +20,7 @@ class pyiri:
         self.hour=hour
         self.flags=np.ones(50,dtype=bool)  #to do, check which flags to set
         self.jmag=0 #geographic (0) or geomagnetic (1) coordinates
-        self.datapath=resource_filename(__name__,'ig_rz.dat').replace('ig_rz.dat','')
+        self.datapath=f"{resources.files(__package__)}/"
         
 
     def get_profile(self,hstart,hend,hstep):

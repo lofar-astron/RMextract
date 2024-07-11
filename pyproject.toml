@@ -45,6 +45,7 @@ classifiers = [
 license = { file = "LICENSE" }
 dependencies = [
     "astropy",
+    "importlib-resources; python_version<'3.9'",
     "numpy",
     "PySocks",
     "scipy",
