@@ -45,6 +45,7 @@ classifiers = [
 license = { file = "LICENSE" }
 dependencies = [
     "astropy",
+    "importlib-resources; python_version<'3.9'",
     "numpy",
     "PySocks",
     "scipy",
@@ -74,11 +75,15 @@ Source = "https://github.com/lofar-astron/RMextract"
 [tool.cibuildwheel]
 build = "cp3{7,8,9,10,11,12}-manylinux_x86_64"
 build-verbosity = 1
-# Minimal test: just ensure we can import the binary extension modules
+# Minimal test: just ensure we can import the binary extension modules, that
+# we can instantiate the main classes, and call a method on these instances
 test-command = [
     "python -c 'import RMextract.EMM._EMM_Model'",
     "python -c 'import RMextract.pyiri._iri'",
     "python -c 'import RMextract.pyiriplas._iriplas'",
+    "python -c 'from RMextract.EMM.EMM import WMM, EMM; WMM().getXYZ(); EMM().getXYZ()'",
+    "python -c 'from RMextract.pyiri.pyiri import pyiri; pyiri().get_tec()'",
+    "python -c 'from RMextract.pyiriplas.pyiriplas import pyiriplas; pyiriplas().get_profile(500)'",
 ]
 
 
