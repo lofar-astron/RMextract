@@ -1,6 +1,94 @@
+#########################
+# build-system settings #
+#########################
+
 [build-system]
 requires = [
-    "setuptools>=42",
+    "cmake>=3.18",
+    "meson",
+    "ninja",
+    "numpy",
+    "scikit-build>=0.13",
+    "setuptools",
+    "setuptools_scm",
     "wheel",
-    "numpy"]
-build-backend = "setuptools.build_meta"
+]
+
+####################
+# project settings #
+####################
+
+[project]
+name = "RMextract"
+dynamic = ["version"]
+description = """\
+    Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS \
+    and WMM data for radio interferometry observations \
+"""
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    { name = "Maaijke Mevius", email = "mevius@astron.nl" },
+]
+maintainers = [
+    { name = "Marcel Loose", email = "loose@astron.nl" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = { file = "LICENSE" }
+dependencies = [
+    "astropy",
+    "importlib-resources; python_version<'3.9'",
+    "numpy",
+    "PySocks",
+    "scipy",
+]
+
+[project.optional-dependencies]
+lofar-utils = [
+    # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
+    # Since these have never been published on PyPI, we cannot specify this dependency.
+    "losoto",
+    "python-casacore",
+]
+
+[project.scripts]
+createRMParmdb = "RMextract.LOFAR_TOOLS.createRMParmdb:main [lofar-utils]"
+createRMh5parm = "RMextract.LOFAR_TOOLS.createRMh5parm:main [lofar-utils]"
+download_IONEX = "RMextract.LOFAR_TOOLS.download_IONEX:main [lofar-utils]"
+
+[project.urls]
+Source = "https://github.com/lofar-astron/RMextract"
+
+
+#########################
+# cibuildwheel settings #
+#########################
+
+[tool.cibuildwheel]
+build = "cp3{7,8,9,10,11,12}-manylinux_x86_64"
+build-verbosity = 1
+# Minimal test: just ensure we can import the binary extension modules, that
+# we can instantiate the main classes, and call a method on these instances
+test-command = [
+    "python -c 'import RMextract.EMM._EMM_Model'",
+    "python -c 'import RMextract.pyiri._iri'",
+    "python -c 'import RMextract.pyiriplas._iriplas'",
+    "python -c 'from RMextract.EMM.EMM import WMM, EMM; WMM().getXYZ(); EMM().getXYZ()'",
+    "python -c 'from RMextract.pyiri.pyiri import pyiri; pyiri().get_tec()'",
+    "python -c 'from RMextract.pyiriplas.pyiriplas import pyiriplas; pyiriplas().get_profile(500)'",
+]
+
+
+###########################
+# setuptools_scm settings #
+###########################
+
+[tool.setuptools_scm]

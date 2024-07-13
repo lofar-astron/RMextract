@@ -1,121 +1,17 @@
-import os
-import sys
-import warnings
+from skbuild import setup
 
-import numpy
-from numpy.distutils.core import Extension, setup
-from setuptools import find_packages
-
-
-def read(rel_path):
-    """Function read() was copied from setup.py in Pip package."""
-    here = os.path.abspath(os.path.dirname(__file__))
-    # intentionally *not* adding an encoding option to open, See:
-    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-    with open(os.path.join(here, rel_path), "r") as fp:
-        return fp.read()
-
-
-packages = find_packages()  # exclude=["RMextract.LOFAR_TOOLS"])
-ext_modules = []
-
-ext_modules.append(
-    Extension(
-        "RMextract.EMM._EMM_Model",
-        sources=[
-            os.path.join("RMextract", "EMM", f)
-            for f in ("EMM_Model.cc", "GeomagnetismLibrary.c", "EMM_Model_wrap.cc")
-        ],
-        extra_compile_args=["-Wno-format-security"],
-    )
-)
-
-ext_modules.append(
-    Extension(
-        "RMextract.pyiri._iri",
-        sources=[
-            os.path.join("RMextract", "pyiri", f)
-            for f in (
-                "iri.pyf",
-                "cira.for",
-                "igrf.for",
-                "iridreg.for",
-                "iriflip.for",
-                "irifun.for",
-                "irisub.for",
-                "iritec.for",
-                "iriget.for",
-            )
-        ],
-        include_dirs=[numpy.get_include()],
-    )
-)
-
-ext_modules.append(
-    Extension(
-        "RMextract.pyiriplas._iriplas",
-        sources=[
-            os.path.join("RMextract", "pyiriplas", f)
-            for f in (
-                "iriplas.pyf",
-                "igrf.for",
-                "irif2019.for",
-                "iriplas_main.for",
-                "Iris2017.for",
-                "indx2017.for",
-            )
-        ],
-        include_dirs=[numpy.get_include()],
-    )
-)
-
-# For backward compatibility for those who (still) use `python setup.py` to
-# install the optional LOFAR utilities.
-if "--add-lofar-utils" in sys.argv:
-    packages.append("RMextract.LOFAR_TOOLS")
-    sys.argv.remove("--add-lofar-utils")
-    warnings.warn(
-        "Use of 'python setup.py install --add-lofar-utils' is deprecated. "
-        "Use 'pip install RMextract[lofar-utils]' instead."
-    )
-
+# Scikit-build requires some options to be passed in the call to `setup()`.
+# Hence, these cannot be set in `pyproject.toml`. For details, please refer to
+# https://scikit-build.readthedocs.io/en/latest/usage.html#setuptools-options.
 setup(
-    name="RMextract",
-    version="0.4.4",
-    url="https://github.com/lofar-astron/RMextract",
-    project_urls={"Source": "https://github.com/lofar-astron/RMextract"},
-    author="Maaijke Mevius",
-    author_email="mevius@astron.nl",
-    description="Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS "
-                "and WMM data for radio interferometry observations",
-    long_description=read("README.md"),
-    long_description_content_type="text/markdown",
-    maintainer="Marcel Loose",
-    maintainer_email="loose@astron.nl",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python",
-        "Topic :: Scientific/Engineering :: Astronomy",
-        "Topic :: Software Development :: Libraries :: Python Modules",
+    packages=[
+        "RMextract",
+        "RMextract.EMM",
+        "RMextract.LOFAR_TOOLS",
+        "RMextract.pyiri",
+        "RMextract.pyiriplas",
     ],
-    ext_modules=ext_modules,
-    packages=packages,
-    install_requires=["numpy", "scipy", "astropy", "python-casacore", "PySocks"],
-    extras_require={
-        # Note that "lofar-utils" also depends on the python bindings to the LOFAR ParmDB.
-        # Since these have never been published on PyPI, we cannot specify this dependency.
-        "lofar-utils": ["losoto"]
-    },
-    entry_points={
-        "console_scripts": [
-            "createRMParmdb = RMextract.LOFAR_TOOLS.createRMParmdb:main [lofar-utils]",
-            "createRMh5parm.py = RMextract.LOFAR_TOOLS.createRMh5parm:main [lofar-utils]",
-            "download_IONEX.py = RMextract.LOFAR_TOOLS.download_IONEX:main [lofar-utils]",
-        ]
-    },
+    include_package_data=False,
     package_data={
         "RMextract.EMM": ["*.COF"],
         # Add *.pyf files. These files are _not_ treated as source files by Numpy's setup(),
