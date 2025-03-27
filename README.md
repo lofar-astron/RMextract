@@ -1,7 +1,9 @@
 # RMextract
-extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations 
+Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations 
 
 Please cite as: Mevius, M. (2018) RMextract, Astrophysics Source Code Library, record [ascl:1806.024]
+
+**NOTE**: RMExtract has been superseded by Spinifex, which is hosted at https://git.astron.nl/RD/spinifex. No further development or maintenance will happen on RMExtract.
 
 WMM model data: 
 NCEI Geomagnetic Modeling Team and British Geological Survey. 2019. World Magnetic Model 2020. NOAA National Centers for Environmental Information. doi: 10.25921/11v3-da71, 2020
