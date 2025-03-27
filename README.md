@@ -1,6 +1,6 @@
 # RMextract
 
--**NOTE**: RMExtract has been superseded by Spinifex, which is hosted at https://git.astron.nl/RD/spinifex. No further development or maintenance will happen on RMExtract.
+**NOTE**: RMExtract has been superseded by Spinifex, which is hosted at https://git.astron.nl/RD/spinifex. No further development or maintenance will happen on RMExtract.
 
 Extract TEC, vTEC, Earthmagnetic field and Rotation Measures from GPS and WMM data for radio interferometry observations 
 
